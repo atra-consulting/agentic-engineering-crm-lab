@@ -4,10 +4,10 @@
   </a>
 </p>
 
-<h1 align="center">AI Coding Lab — CRM Demo</h1>
+<h1 align="center">Agentic Engineering CRM Lab</h1>
 
 <p align="center">
-  <em>Eine produktionsnahe Full-Stack-Anwendung des <a href="https://atra.consulting/">atra.consulting</a> <strong>AI Coding Lab</strong> —<br>
+  <em>Eine produktionsnahe Full-Stack-Anwendung für die <a href="https://atra.consulting/ki-loesungen/agentic-engineering/"><strong>Agentic-Engineering-Trainings</strong></a> von <a href="https://atra.consulting/">atra.consulting</a> —<br>
   entstanden, um zu zeigen, wie AI-gestützte Softwareentwicklung in der Praxis funktioniert.</em>
 </p>
 
@@ -89,8 +89,8 @@ Vollständige Installationsanleitung: **[docs/SETUP.md](docs/SETUP.md)**
 Repository klonen:
 
 ```bash
-git clone https://github.com/atra-consulting/coding-with-ai-lab.git
-cd coding-with-ai-lab
+git clone https://github.com/atra-consulting/agentic-engineering-crm-lab.git
+cd agentic-engineering-crm-lab
 ```
 
 Stack starten:
