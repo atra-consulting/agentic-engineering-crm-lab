@@ -53,8 +53,8 @@ Anwendung, stoppt sie. Wer lieber die Maus nimmt: Rechtsklick ins Terminal
    `pwd` (wo bin ich?), `ls` (was liegt hier?) und `cd ~` (zurück in den
    Benutzerordner) warm. Ihr braucht die Befehle gleich wieder: Der Agent arbeitet
    in dem Ordner, in dem ihr ihn startet.
-2. Prüft die Werkzeuge mit `node --version` (mindestens 20.19, mit
-   GitHub Copilot CLI mindestens 22, empfohlen 24 LTS) und `git --version`;
+2. Prüft die Werkzeuge mit `node --version` (v22 oder neuer,
+   zum Beispiel v24 oder v26) und `git --version`;
    fehlt eine Versionsnummer, hilft `docs/SETUP.md` im Lab-Repo oder
    Handheben. Ohne passende Node.js-Version startet das CRM nicht, ohne
    Git könnt ihr nicht klonen — besser jetzt merken als mitten im Start.
@@ -62,8 +62,8 @@ Anwendung, stoppt sie. Wer lieber die Maus nimmt: Rechtsklick ins Terminal
    `git clone https://github.com/atra-consulting/coding-with-ai-lab.git`,
    `cd coding-with-ai-lab`, `./start.sh`, dann <http://localhost:7200>
    im Browser öffnen und die Kachel `admin` anklicken. **Schon in der Vorbereitung
-   geklont?** Dann `git clone` weglassen: nur `cd coding-with-ai-lab` und
-   `./start.sh`.
+   geklont?** Dann `git clone` weglassen: `cd coding-with-ai-lab`, mit
+   `git pull` den neuesten Stand holen, dann `./start.sh`.
    Klonen holt eine Kopie des Projekts auf euren Laptop. In genau diesen
    Dateien arbeitet am Nachmittag der Agent, und in eurer eigenen laufenden
    Anwendung prüft ihr sein Ergebnis.
@@ -162,9 +162,9 @@ oder den Ordner, in dem du sie gefunden hast:
 
 | Problem | Lösung |
 |---|---|
-| `destination path 'coding-with-ai-lab' already exists` | Ihr habt schon in der Vorbereitung geklont — kein Fehler. `cd coding-with-ai-lab`, dann `./start.sh`. |
+| `destination path 'coding-with-ai-lab' already exists` | Ihr habt schon in der Vorbereitung geklont — kein Fehler. `cd coding-with-ai-lab`, `git pull`, dann `./start.sh`. |
 | `port 7070 is already in use` (7070 ist der Server im Hintergrund) | `./end.sh` ausführen, dann `./start.sh` erneut. |
-| `Node.js 20.19 or later is required` | Node.js nach `docs/SETUP.md` aktualisieren — empfohlen ist 24 LTS —, Terminal neu öffnen. |
+| `Node.js 20.19 or later is required` | Node.js nach `docs/SETUP.md` aktualisieren — v22 oder neuer —, Terminal neu öffnen. |
 | Klonen bricht ab (Proxy, Zertifikat) | Firmennetz filtert — Hotspot vom Handy für den Klon, danach mit der IT klären. |
 | `./start.sh: Permission denied` | `bash start.sh` |
 | Windows: `start.sh` nicht gefunden | Ihr seid in PowerShell — Git Bash öffnen. |
