@@ -44,8 +44,9 @@ nicht verstehen; ihr seht nur nach, ob der Agent sie behoben hat.
    ihr noch alles ändern — was ihr hier durchwinkt, setzt er um.
 5. Lest nach dem Gegenlesen (Review), was bemängelt wurde — ihr müsst es
    nicht verstehen, ihr müsst sehen, ob der Agent es behoben hat.
-6. Prüft das Ergebnis im Browser und danach den Diff:
-   `git diff main --stat`. Der Browser zeigt, ob der Fix tut, was unter
+6. Prüft das Ergebnis im Browser und danach den Diff: Agenten mit `/exit`
+   beenden, mit `cd ~/coding-with-ai-lab` in den Projektordner wechseln,
+   dann `git diff main --stat`. Der Browser zeigt, ob der Fix tut, was unter
    „Erwartet“ steht. Die Dateiliste zeigt, ob der Agent nur dort geändert
    hat, wo der Plan es angekündigt hat.
 
@@ -106,8 +107,9 @@ bei „Wahrscheinlichkeit" —, und der Knopf bleibt grau, bis der Wert gültig 
 | Änderung nicht im Browser sichtbar | Seite neu laden (`Cmd/Strg+Shift+R`); die Anwendung lädt Änderungen selbst nach, der Browser zeigt manchmal noch den alten Stand. |
 | Hinweis erscheint auch bei leerem Feld | Zurück an den Agenten: „Ein leeres Feld ist erlaubt — der Hinweis nur bei negativen Zahlen." |
 | Die Chance wird mit −100 sogar gespeichert | Auch ein Fehler — schreibt das unter „Beobachtet". „Erwartet" bleibt gleich. |
-| Agent fragt, ob er Tests schreiben soll | Ja, kleine automatische Tests gern; keine Tests, die den Browser fernsteuern (dauert zu lange). |
+| Agent fragt, ob er Tests schreiben soll | Ja, kleine automatische Tests gern; keine Tests, die den Browser fernsteuern (dauert zu lange). Muss er für den Testlauf die Anwendung stoppen, lasst den Test ungelaufen. |
 | Der Agent will die laufende Anwendung beenden | Nein — die Anwendung läuft weiter, ihr braucht sie zum Prüfen. |
+| `git diff` meldet `Not a git repository` und zeigt eine lange Hilfe | Ihr seid nicht im Projektordner: erst `cd ~/coding-with-ai-lab`, dann `git diff main --stat` noch einmal. |
 | Der Agent findet die Reviewer nicht | Sagt: „Prüfe die Änderung selbst wie ein Reviewer und zeig mir die Befunde.“ |
 
 ## Diskussion
