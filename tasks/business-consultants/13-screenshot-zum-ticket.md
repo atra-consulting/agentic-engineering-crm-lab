@@ -30,15 +30,23 @@ als Text ins Ticket — genau das ist die Übung.
    euren Notizen: Steht jede handschriftliche Änderung in der Story? Hat der
    Assistent etwas dazuerfunden? Sind seine offenen Fragen berechtigt?
    Beantwortet sie oder lasst sie bewusst als offene Frage im Ticket stehen.
-4. **Ticket anlegen.** Öffnet <http://localhost:7200/admin/tickets>
-   (Kachel `admin` anklicken) und klickt **Neues Ticket**.
+4. **Gibt es das schon?** Öffnet <http://localhost:7200/admin/tickets>
+   (Kachel `admin` anklicken) und überfliegt die Titel in **allen** Spalten.
+   Öffnet jedes Ticket, das nach demselben Thema klingt, und lest es: Deckt
+   es eure Anforderung schon ab — oder entscheidet es etwas anders als ihr?
+   Bevor man ein Ticket anlegt, sucht man nach einem vorhandenen; zwei
+   Tickets zum selben Thema mit verschiedenen Antworten bringen jedes Team
+   durcheinander. Findet ihr eines, legt euer Ticket trotzdem an und
+   schreibt in die Beschreibung eine Zeile: „Verwandt: #‹Nr› — Unterschied:
+   …“. Offene Widersprüche kommen zu den offenen Fragen.
+5. **Ticket anlegen.** Klickt auf dem Board **Neues Ticket**.
    - **Typ:** `FEATURE` — oder `BUG`, wenn der Screenshot einen Fehler zeigt.
    - **Titel:** kurz und fachlich, aus Sicht des Nutzers.
    - **Beschreibung:** die geprüfte User Story mit Akzeptanzkriterien, offenen
      Fragen und einer Zeile zur Herkunft: „Vorlage: Screenshot
      ‹Dateiname› vom ‹Datum›". Der Screenshot kommt nicht mit ins
      Ticket — die Zeile sagt allen, woher die Anforderung stammt.
-5. **Ticket prüfen.** Das Ticket steht in der Spalte **Definition**, Owner
+6. **Ticket prüfen.** Das Ticket steht in der Spalte **Definition**, Owner
    (zuständig) ist der Mensch. Öffnet es und lest es so, als hättet ihr den
    Screenshot nie gesehen: Versteht man, was zu tun ist? Merkt euch die Ticketnummer — Aufgabe
    23 macht mit genau diesem Ticket weiter. Dort liest die KI euer Ticket genau so:
@@ -53,7 +61,8 @@ Aufgabe 23.
 1. Screenshot ansehen, Änderung in Stichpunkten notieren.
 2. Screenshot und Prompt an den Chat-Assistenten.
 3. Antwort gegen das Bild prüfen: nichts fehlt, nichts erfunden.
-4. Ticket im Ticket-Board anlegen — es bleibt in Definition.
+4. Auf dem Board nach einem Ticket zum selben Thema suchen.
+5. Ticket im Ticket-Board anlegen — es bleibt in Definition.
 
 ## Prompt
 
@@ -80,6 +89,8 @@ Halte dich an das, was im Bild steht. Keine zusätzlichen Features.
 - [ ] Jede handschriftliche Änderung aus dem Screenshot findet sich im Ticket
       wieder — und nichts, was nicht im Bild steht.
 - [ ] Offene Fragen sind beantwortet oder ausdrücklich als offen markiert.
+- [ ] Ihr habt nach einem Ticket zum selben Thema gesucht; gibt es eines,
+      verweist euer Ticket darauf und nennt den Unterschied.
 - [ ] Jemand, der den Screenshot nicht kennt, versteht das Ticket.
 
 ## Troubleshooting
@@ -95,5 +106,7 @@ Halte dich an das, was im Bild steht. Keine zusätzlichen Features.
 
 - Was hat der Assistent im Bild gesehen, das euch entgangen war — und umgekehrt?
 - Welche Information aus dem Screenshot ging auf dem Weg ins Ticket verloren?
+- Zwei Tickets zum selben Thema, verschieden entschieden: Welches gilt — und
+  wer entscheidet das?
 - Hätte ein Entwickler (oder ein Agent) mit dem Screenshot allein mehr oder
   weniger verstanden als mit eurem Ticket?
