@@ -109,21 +109,36 @@ kill_tree() {
   done
 }
 
-# Kill every process still listening on the given port. Used as a safety
-# net after kill_tree, in case a grandchild was missed or tsx had just
-# spawned a replacement.
+# PIDs listening on the given port whose working directory lies inside
+# this project. Processes of other checkouts on the same port are left
+# alone — otherwise stopping one copy would also stop another one.
+own_port_pids() {
+  local port="$1"
+  local root pid cwd
+  root="$(cd "${ROOT_DIR}" && pwd -P)"
+  for pid in $(lsof -ti ":${port}" 2>/dev/null || true); do
+    cwd=$(lsof -a -p "$pid" -d cwd -Fn 2>/dev/null | sed -n 's/^n//p' | head -1)
+    case "$cwd" in
+      "${root}"|"${root}"/*) echo "$pid" ;;
+    esac
+  done
+}
+
+# Kill this project's processes still listening on the given port. Used as
+# a safety net after kill_tree, in case a grandchild was missed or tsx had
+# just spawned a replacement.
 stop_port() {
   local port="$1"
 
   local pids
-  pids=$(lsof -ti ":${port}" 2>/dev/null || true)
+  pids=$(own_port_pids "${port}")
   if [ -z "$pids" ]; then
     return 0
   fi
 
   echo "$pids" | xargs kill 2>/dev/null || true
   sleep 1
-  pids=$(lsof -ti ":${port}" 2>/dev/null || true)
+  pids=$(own_port_pids "${port}")
   if [ -n "$pids" ]; then
     echo "$pids" | xargs kill -9 2>/dev/null || true
   fi
@@ -159,17 +174,43 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM EXIT
 
+# Install node modules when they are missing, incomplete or out of date.
+# "Out of date" means package-lock.json changed since the last install —
+# typically after `git pull` or switching to a branch with other
+# dependencies. Without this check the app starts with stale packages and
+# fails with confusing errors. The fingerprint of the lock file is stored in
+# node_modules after each install.
+ensure_node_modules() {
+  local label="$1"
+  local bin="$2"
+  local stamp="node_modules/.crm-lock-hash"
+  local reason=""
+
+  if [ ! -d "node_modules" ] || [ ! -f "node_modules/.bin/${bin}" ]; then
+    reason="missing or incomplete"
+  elif [ ! -f "package-lock.json" ]; then
+    return 0
+  elif [ "$(cat "${stamp}" 2>/dev/null || true)" != "$(git hash-object package-lock.json)" ]; then
+    reason="out of date (package-lock.json changed)"
+  fi
+
+  if [ -n "${reason}" ]; then
+    echo "${label} node modules ${reason}. Running npm install..."
+    npm install
+  fi
+  if [ -f "package-lock.json" ] && [ -d "node_modules" ]; then
+    git hash-object package-lock.json > "${stamp}"
+  fi
+}
+
 # --- Backend ---
 
 echo "Starting backend..."
 cd "${ROOT_DIR}/backend"
 
-# Install node modules if not present or incomplete (partial installs miss
-# binaries like tsx and make start fail with MODULE_NOT_FOUND).
-if [ ! -d "node_modules" ] || [ ! -f "node_modules/.bin/tsx" ]; then
-  echo "Backend node modules missing or incomplete. Running npm install..."
-  npm install
-fi
+# Partial installs miss binaries like tsx and make start fail with
+# MODULE_NOT_FOUND; stale installs fail in less obvious ways.
+ensure_node_modules "Backend" "tsx"
 
 
 npx tsx --watch src/index.ts &
@@ -195,11 +236,7 @@ done
 echo "Starting frontend..."
 cd "${ROOT_DIR}/frontend"
 
-# Install node modules if not present or incomplete
-if [ ! -d "node_modules" ] || [ ! -f "node_modules/.bin/ng" ]; then
-  echo "Frontend node modules missing or incomplete. Running npm install..."
-  npm install
-fi
+ensure_node_modules "Frontend" "ng"
 
 # Optional sanity check: can ng run?
 if ! npx ng version > /dev/null 2>&1; then

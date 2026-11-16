@@ -95,6 +95,7 @@ dazu. Schreibe keine Tests, die den Browser automatisieren.
 | Der Agent bekommt `401` von der API | Handheben — oder dem Agenten sagen: „Die Ticket-API antwortet mit 401. Prüfe die Einstellungen in backend/.env nach docs/SETUP.md." |
 | Der Agent bekommt `409` beim Start | Das Ticket steht nicht in Bereit oder gehört nicht der KI — auf dem Board prüfen, ggf. „Nach Bereit" klicken. |
 | Das Ticket bleibt in In Arbeit hängen | Der Agent hat `done` vergessen: „Schließe Ticket ‹Nr› mit POST /done und einem Kommentar." |
+| Der Agent läuft nicht im Terminal, sondern in Claude Desktop oder Claude in Chrome, und meldet, er erreiche `localhost` nicht oder brauche eine Ordner-Freigabe | Geht, aber mit Umwegen: Die Ticket-API ruft er dann über einen Browser-Tab auf `localhost:7200` auf, für Git braucht er die Freigabe für den Ordner `coding-with-ai-lab`. Einfacher: den Agenten mit `claude` oder `copilot` im Terminal starten. |
 | Der Agent baut mehr als verlangt | Am Plan stoppen: „Nur das, was im Ticket steht." |
 | NEU ist nach dem Neuladen nicht blau | Frontend neu gebaut? Im Terminal mit `./start.sh` nach Fehlern sehen, sonst zurück an den Agenten mit dem, was ihr seht. |
 
