@@ -44,10 +44,12 @@ describe('ApiClient', () => {
       req.flush({});
     });
 
-    it('replaces several placeholders in one path', () => {
+    it('replaces a path placeholder and keeps query params out of the path', () => {
       api.get('/firmen/{id}/personen', { path: { id: 7 }, query: { page: 0, size: 10 } }).subscribe();
 
       const req = httpMock.expectOne('/api/firmen/7/personen?page=0&size=10');
+      expect(req.request.url).toBe('/api/firmen/7/personen');
+      expect(req.request.urlWithParams).toBe('/api/firmen/7/personen?page=0&size=10');
       req.flush({});
     });
   });
