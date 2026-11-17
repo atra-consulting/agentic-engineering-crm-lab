@@ -1,5 +1,150 @@
 # Area: chancen. Source: backend/src/routes/chancen.ts, backend/src/services/chanceService.ts.
-# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
-/chancen: {}
-/chancen/all: {}
-/chancen/{id}: {}
+
+/chancen:
+  get:
+    operationId: listChancen
+    summary: List opportunities (paged)
+    description: |
+      Paged list. `search` matches `titel` (case-insensitive substring, trimmed).
+      If `search` is repeated, only the first value counts. `phase` filters by exact phase.
+    tags: [chancen]
+    security:
+      - sessionCookie: []
+    x-sort-fields: [titel, wert, phase, wahrscheinlichkeit, erwartetesDatum, createdAt, updatedAt]
+    x-default-sort: createdAt,DESC
+    parameters:
+      - $ref: '../common.yaml#/parameters/SearchQuery'
+      - name: phase
+        in: query
+        required: false
+        description: |
+          Exact-match phase filter. An unknown value answers 400 with message
+          `Ungültiger phase-Wert: <value>. Erlaubt: NEU, QUALIFIZIERT, ANGEBOT, VERHANDLUNG, GEWONNEN, VERLOREN`
+          and `fieldErrors.phase`.
+        schema:
+          $ref: '../schemas/chancen.yaml#/ChancePhase'
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+      - $ref: '../common.yaml#/parameters/SortQuery'
+    responses:
+      '200':
+        description: One page of opportunities.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/chancen.yaml#/ChancePage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+  post:
+    operationId: createChance
+    summary: Create an opportunity
+    tags: [chancen]
+    security:
+      - sessionCookie: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/chancen.yaml#/ChanceInput'
+    responses:
+      '201':
+        description: Created.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/chancen.yaml#/Chance'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/chancen/all:
+  get:
+    operationId: listAllChancen
+    summary: List all opportunities (not paged)
+    description: Every opportunity, sorted by `createdAt` descending.
+    tags: [chancen]
+    security:
+      - sessionCookie: []
+    responses:
+      '200':
+        description: All opportunities.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/chancen.yaml#/Chance'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/chancen/{id}:
+  get:
+    operationId: getChance
+    summary: Get one an opportunity
+    tags: [chancen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '200':
+        description: The an opportunity.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/chancen.yaml#/Chance'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  put:
+    operationId: updateChance
+    summary: Update an opportunity (full replace)
+    description: Overwrites every field. Optional fields left out are stored as null (or reset to their default).
+    tags: [chancen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/chancen.yaml#/ChanceInput'
+    responses:
+      '200':
+        description: Updated.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/chancen.yaml#/Chance'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  delete:
+    operationId: deleteChance
+    summary: Delete an opportunity
+    tags: [chancen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '204':
+        description: Deleted. No body.
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'

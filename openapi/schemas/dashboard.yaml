@@ -1,5 +1,82 @@
-# Area: dashboard. Source: backend/src/routes/dashboard.ts, backend/src/services/dashboardService.ts.
-# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
-DashboardData: {}
-RecentChance: {}
-RecentAktivitaet: {}
+# Area: dashboard. Source: backend/src/services/dashboardService.ts (DashboardData,
+# RecentChance, RecentAktivitaet).
+
+DashboardData:
+  type: object
+  description: Counters and the latest records for the start page.
+  additionalProperties: false
+  required:
+    - firmenCount
+    - personenCount
+    - offeneChancenCount
+    - gewonneneChancenSumme
+    - recentChancen
+    - recentAktivitaeten
+  properties:
+    firmenCount:
+      type: integer
+      description: Number of companies.
+    personenCount:
+      type: integer
+      description: Number of contacts.
+    offeneChancenCount:
+      type: integer
+      description: Number of opportunities not in phase `GEWONNEN` or `VERLOREN`.
+    gewonneneChancenSumme:
+      type: number
+      description: Sum of `wert` over all opportunities in phase `GEWONNEN`. 0 if none. Mixed currencies are added as is.
+    recentChancen:
+      type: array
+      description: The 5 newest opportunities by `createdAt`, newest first.
+      items:
+        $ref: '#/RecentChance'
+    recentAktivitaeten:
+      type: array
+      description: The 5 newest activities by `createdAt`, newest first.
+      items:
+        $ref: '#/RecentAktivitaet'
+
+RecentChance:
+  type: object
+  description: Short opportunity entry on the dashboard.
+  additionalProperties: false
+  required: [id, titel, wert, currency, phase, firmaName, createdAt]
+  properties:
+    id:
+      type: integer
+    titel:
+      type: string
+    wert:
+      type: [number, 'null']
+    currency:
+      type: string
+    phase:
+      $ref: './chancen.yaml#/ChancePhase'
+    firmaName:
+      type: string
+    createdAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+
+RecentAktivitaet:
+  type: object
+  description: Short activity entry on the dashboard.
+  additionalProperties: false
+  required: [id, typ, subject, datum, firmaName, personName, createdAt]
+  properties:
+    id:
+      type: integer
+    typ:
+      $ref: './aktivitaeten.yaml#/AktivitaetTyp'
+    subject:
+      type: string
+    datum:
+      type: string
+    firmaName:
+      type: [string, 'null']
+    personName:
+      type: [string, 'null']
+      description: '`firstName lastName` of the linked contact, null without contact.'
+    createdAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.

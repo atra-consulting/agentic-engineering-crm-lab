@@ -1,5 +1,139 @@
 # Area: aktivitaeten. Source: backend/src/routes/aktivitaeten.ts, backend/src/services/aktivitaetService.ts.
-# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
-/aktivitaeten: {}
-/aktivitaeten/all: {}
-/aktivitaeten/{id}: {}
+
+/aktivitaeten:
+  get:
+    operationId: listAktivitaeten
+    summary: List activities (paged)
+    description: |
+      Paged list. No `search` filter.
+    tags: [aktivitaeten]
+    security:
+      - sessionCookie: []
+    x-sort-fields: [datum, typ, subject, createdAt, updatedAt]
+    x-default-sort: datum,DESC
+    parameters:
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+      - $ref: '../common.yaml#/parameters/SortQuery'
+    responses:
+      '200':
+        description: One page of activities.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/aktivitaeten.yaml#/AktivitaetPage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+  post:
+    operationId: createAktivitaet
+    summary: Create an activity
+    tags: [aktivitaeten]
+    security:
+      - sessionCookie: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/aktivitaeten.yaml#/AktivitaetInput'
+    responses:
+      '201':
+        description: Created.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/aktivitaeten.yaml#/Aktivitaet'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/aktivitaeten/all:
+  get:
+    operationId: listAllAktivitaeten
+    summary: List all activities (not paged)
+    description: Every activity, sorted by `datum` descending.
+    tags: [aktivitaeten]
+    security:
+      - sessionCookie: []
+    responses:
+      '200':
+        description: All activities.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/aktivitaeten.yaml#/Aktivitaet'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/aktivitaeten/{id}:
+  get:
+    operationId: getAktivitaet
+    summary: Get one an activity
+    tags: [aktivitaeten]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '200':
+        description: The an activity.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/aktivitaeten.yaml#/Aktivitaet'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  put:
+    operationId: updateAktivitaet
+    summary: Update an activity (full replace)
+    description: Overwrites every field. Optional fields left out are stored as null (or reset to their default).
+    tags: [aktivitaeten]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/aktivitaeten.yaml#/AktivitaetInput'
+    responses:
+      '200':
+        description: Updated.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/aktivitaeten.yaml#/Aktivitaet'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  delete:
+    operationId: deleteAktivitaet
+    summary: Delete an activity
+    tags: [aktivitaeten]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '204':
+        description: Deleted. No body.
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'

@@ -1,3 +1,21 @@
 # Area: dashboard. Source: backend/src/routes/dashboard.ts, backend/src/services/dashboardService.ts.
-# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
-/dashboard: {}
+
+/dashboard:
+  get:
+    operationId: getDashboard
+    summary: Get the dashboard data
+    description: |
+      Counters plus the 5 newest opportunities and activities. The whole
+      router is guarded with `router.use(requireAuth)`.
+    tags: [dashboard]
+    security:
+      - sessionCookie: []
+    responses:
+      '200':
+        description: Dashboard data.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/dashboard.yaml#/DashboardData'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'

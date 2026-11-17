@@ -1,6 +1,126 @@
-# Area: chancen. Source: backend/src/routes/chancen.ts, backend/src/services/chanceService.ts.
-# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
-Chance: {}
-ChanceInput: {}
-ChancePage: {}
-ChancePhase: {}
+# Area: chancen. Source: backend/src/services/chanceService.ts (ChanceDTO, toDTO)
+# and backend/src/utils/validation.ts (ChanceCreateSchema).
+
+ChancePhase:
+  type: string
+  enum: [NEU, QUALIFIZIERT, ANGEBOT, VERHANDLUNG, GEWONNEN, VERLOREN]
+
+Chance:
+  type: object
+  description: A sales opportunity of a company, optionally with a contact.
+  additionalProperties: false
+  required:
+    - id
+    - titel
+    - beschreibung
+    - wert
+    - currency
+    - phase
+    - wahrscheinlichkeit
+    - erwartetesDatum
+    - firmaId
+    - firmaName
+    - kontaktPersonId
+    - kontaktPersonName
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: integer
+    titel:
+      type: string
+    beschreibung:
+      type: [string, 'null']
+    wert:
+      type: [number, 'null']
+    currency:
+      type: string
+      description: Default `EUR`.
+    phase:
+      $ref: '#/ChancePhase'
+    wahrscheinlichkeit:
+      type: [integer, 'null']
+      description: Percent, 0 to 100.
+    erwartetesDatum:
+      type: [string, 'null']
+      description: Free text as sent by the client (no format enforced).
+    firmaId:
+      type: integer
+    firmaName:
+      type: [string, 'null']
+    kontaktPersonId:
+      type: [integer, 'null']
+    kontaktPersonName:
+      type: [string, 'null']
+      description: '`firstName lastName`; only one part if the other is empty; null without contact.'
+    createdAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+    updatedAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+
+ChancePage:
+  type: object
+  description: One page of opportunities.
+  allOf:
+    - $ref: '../common.yaml#/schemas/PageMeta'
+    - type: object
+      required: [content]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/Chance'
+  unevaluatedProperties: false
+
+ChanceInput:
+  type: object
+  description: |
+    Body for create and full update. `titel` and `firmaId` are required.
+    Left out: `phase` becomes `NEU`, `currency` becomes `EUR`, other optional
+    fields are stored as null. Unknown fields are stripped.
+  required: [titel, firmaId]
+  properties:
+    titel:
+      type: string
+      minLength: 1
+      maxLength: 255
+      x-error-messages:
+        required: Titel ist erforderlich
+        type: Titel ist erforderlich
+        minLength: Titel ist erforderlich
+    beschreibung:
+      type: [string, 'null']
+    wert:
+      type: [number, 'null']
+    currency:
+      type: string
+      maxLength: 10
+      description: Optional, not nullable. Default `EUR`.
+    phase:
+      type: string
+      description: Optional, not nullable. Default `NEU`. Same values as `ChancePhase`, inline so the error texts sit next to `enum`.
+      enum: [NEU, QUALIFIZIERT, ANGEBOT, VERHANDLUNG, GEWONNEN, VERLOREN]
+      x-error-messages:
+        type: Ungültige Phase
+        enum: Ungültige Phase
+    wahrscheinlichkeit:
+      type: [integer, 'null']
+      minimum: 0
+      maximum: 100
+    erwartetesDatum:
+      type: [string, 'null']
+    firmaId:
+      type: integer
+      minimum: 1
+      x-error-messages:
+        required: Firma ist erforderlich
+        type: Firma ist erforderlich
+        minimum: Firma ist erforderlich
+    kontaktPersonId:
+      type: [integer, 'null']
+      minimum: 1
+      x-error-messages:
+        type: Ungültige ID
+        minimum: Ungültige ID
