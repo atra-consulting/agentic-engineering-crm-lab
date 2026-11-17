@@ -1,10 +1,118 @@
-# Area: agent-tasks. Source: backend/src/routes/agentTasks.ts, backend/src/services/agentTaskService.ts.
-# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
-AgentTask: {}
-AgentTaskPage: {}
-AgentTaskSummary: {}
-AgentTaskSource: {}
-AgentTaskStatus: {}
-AgentTaskRejectInput: {}
-AgentTaskDoneInput: {}
-AgentTaskResetResult: {}
+# Area: agent-tasks. Source: backend/src/routes/agentTasks.ts, backend/src/services/agentTaskService.ts,
+# backend/src/db/schema/enums.ts.
+
+AgentTaskSource:
+  type: string
+  description: Where the task came from.
+  enum: [EMAIL, GITHUB_ISSUE, APP_LOG, ERROR_REPORT]
+
+AgentTaskStatus:
+  type: string
+  description: Lifecycle `OPEN` → `IN_PROGRESS` → `DONE` or `REJECTED`.
+  enum: [OPEN, IN_PROGRESS, DONE, REJECTED]
+
+AgentTask:
+  type: object
+  additionalProperties: false
+  required:
+    - id
+    - source
+    - title
+    - body
+    - status
+    - comment
+    - metadata
+    - pickedUpAt
+    - resolvedAt
+    - createdAt
+    - updatedAt
+    - ticketId
+  properties:
+    id:
+      type: integer
+    source:
+      $ref: '#/AgentTaskSource'
+    title:
+      type: string
+    body:
+      type: string
+    status:
+      $ref: '#/AgentTaskStatus'
+    comment:
+      type: [string, 'null']
+      description: Agent comment from `done` or `reject`.
+    metadata:
+      type: [string, 'null']
+      description: Free text, usually a JSON string.
+    pickedUpAt:
+      type: [string, 'null']
+      description: ISO-8601 time of the claim or start.
+    resolvedAt:
+      type: [string, 'null']
+      description: ISO-8601 time of `done` or `reject`.
+    createdAt:
+      type: string
+      description: ISO-8601 time.
+    updatedAt:
+      type: string
+      description: ISO-8601 time.
+    ticketId:
+      type: [integer, 'null']
+      description: Id of the newest ticket that links to this task, or null.
+
+AgentTaskPage:
+  type: object
+  allOf:
+    - $ref: '../common.yaml#/schemas/PageMeta'
+    - type: object
+      required: [content]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/AgentTask'
+  unevaluatedProperties: false
+
+AgentTaskSummary:
+  type: object
+  description: Counts per source. All four sources always appear, zero-filled.
+  additionalProperties: false
+  required: [source, openCount, inProgressCount, doneCount, rejectedCount]
+  properties:
+    source:
+      $ref: '#/AgentTaskSource'
+    openCount:
+      type: integer
+    inProgressCount:
+      type: integer
+    doneCount:
+      type: integer
+    rejectedCount:
+      type: integer
+
+AgentTaskRejectInput:
+  type: object
+  required: [comment]
+  properties:
+    comment:
+      type: string
+      minLength: 1
+      x-error-messages:
+        required: Kommentar ist erforderlich
+        type: Kommentar ist erforderlich
+        minLength: Kommentar ist erforderlich
+
+AgentTaskDoneInput:
+  type: object
+  properties:
+    comment:
+      type: string
+
+AgentTaskResetResult:
+  type: object
+  additionalProperties: false
+  required: [reset]
+  properties:
+    reset:
+      type: integer
+      description: Number of rows set back to `OPEN`.
