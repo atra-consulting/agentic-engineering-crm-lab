@@ -11,7 +11,7 @@
  */
 import { test, expect, request as playwrightRequest, type APIRequestContext } from '@playwright/test';
 import { loginCtx } from './helpers.js';
-import { concretePath, getOp, operations, type Operation } from './contract-helpers.js';
+import { concretePath, deleteCronRuns, getOp, operations, type Operation } from './contract-helpers.js';
 
 const BASE_URL = 'http://localhost:7070';
 const FORWARDED = { 'X-Forwarded-For': '203.0.113.1' };
@@ -60,6 +60,7 @@ const adminOps = operations.filter(requiresAdminScope);
 let anon: APIRequestContext;
 let userCtx: APIRequestContext;
 let adminCtx: APIRequestContext;
+const createdCronRunIds: number[] = [];
 
 test.beforeAll(async () => {
   anon = await playwrightRequest.newContext({ baseURL: BASE_URL });
@@ -68,6 +69,7 @@ test.beforeAll(async () => {
 });
 
 test.afterAll(async () => {
+  await deleteCronRuns(createdCronRunIds);
   await anon.dispose();
   await userCtx.dispose();
   await adminCtx.dispose();
@@ -132,7 +134,8 @@ test.describe('contract access: bypass and fallthrough rules', () => {
     });
     expect(resp.status()).toBe(200);
     // Empty GH_DISPATCH_TOKEN: dispatch throws before any fetch -> FAILED or SKIPPED run.
-    const run = (await resp.json()) as { status: string };
+    const run = (await resp.json()) as { id: number; status: string };
+    createdCronRunIds.push(run.id);
     expect(['FAILED', 'SKIPPED']).toContain(run.status);
   });
 });

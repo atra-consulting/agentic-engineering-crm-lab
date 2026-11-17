@@ -113,3 +113,16 @@ export function concretePath(fullPath: string): string {
 export function sameSet(a: readonly string[], b: readonly string[]): boolean {
   return a.length === new Set(a).size && b.length === new Set(b).size && a.length === b.length && a.every((x) => b.includes(x));
 }
+
+/**
+ * Delete exactly the given cron_run rows from the test DB. Other specs
+ * (cron.spec.ts) assume no leftover runs. Dynamic import keeps the DB
+ * connection out of specs that do not need it.
+ */
+export async function deleteCronRuns(ids: readonly number[]): Promise<void> {
+  if (ids.length === 0) return;
+  const { client } = await import('../config/db.js');
+  for (const id of ids) {
+    await client.execute({ sql: 'DELETE FROM cron_run WHERE id = ?', args: [id] });
+  }
+}
