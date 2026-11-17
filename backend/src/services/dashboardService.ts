@@ -38,7 +38,8 @@ interface RecentAktivitaetRow {
   createdAt: string;
 }
 
-function toRecentChance(row: RecentChanceRow): RecentChance {  return {
+function toRecentChance(row: RecentChanceRow): RecentChance {
+  return {
     id: row.id,
     titel: row.titel,
     wert: row.wert,
@@ -49,7 +50,8 @@ function toRecentChance(row: RecentChanceRow): RecentChance {  return {
   };
 }
 
-function toRecentAktivitaet(row: RecentAktivitaetRow): RecentAktivitaet {  return {
+function toRecentAktivitaet(row: RecentAktivitaetRow): RecentAktivitaet {
+  return {
     id: row.id,
     typ: asEnum(AKTIVITAET_TYP, row.typ, 'aktivitaet.typ'),
     subject: row.subject,

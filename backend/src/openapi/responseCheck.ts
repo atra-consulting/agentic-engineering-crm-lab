@@ -60,9 +60,11 @@ function resolveOp(req: Request, res: Response): ContractOperation | undefined {
 
 const covered = new Set<string>();
 
-/** Wraps `res.json` to check the body against the contract; collects coverage in test mode. Never throws. */
+/** Wraps `res.json` to check the body against the contract; collects coverage in test mode. Never throws.
+ * Wraps `res.json` only: answers sent via `res.send`/`res.sendFile`/streams are not checked
+ * (docs routes use sendFile on purpose). */
 export function responseCheck(mode: ContractMode) {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return function contractResponseCheck(req: Request, res: Response, next: NextFunction): void {
     try {
       const originalJson = res.json.bind(res) as (body?: unknown) => Response;
 

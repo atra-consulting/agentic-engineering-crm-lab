@@ -26,13 +26,13 @@ const AJV_LOGGER: Logger = {
  * `z.string().url()`, i.e. whatever the WHATWG `new URL()` parses (trims
  * whitespace, accepts IDN hosts, rejects ports > 65535).
  */
-const ZOD_EMAIL_REGEX = /^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/;
+const CONTRACT_EMAIL_REGEX = /^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/;
 
-export function isZodEmail(value: string): boolean {
-  return ZOD_EMAIL_REGEX.test(value);
+export function isContractEmail(value: string): boolean {
+  return CONTRACT_EMAIL_REGEX.test(value);
 }
 
-export function isZodUrl(value: string): boolean {
+export function isContractUrl(value: string): boolean {
   try {
     new URL(value);
     return true;
@@ -80,8 +80,8 @@ export type ContractAjvKind = 'body' | 'plain';
 /** A fresh Ajv 2020 instance of the given kind, with the contract formats, without the bundle. */
 export function createAjv(kind: ContractAjvKind): Ajv2020 {
   const ajv = new Ajv2020(kind === 'body' ? { ...AJV_BASE_OPTIONS, ...AJV_BODY_OPTIONS } : { ...AJV_BASE_OPTIONS });
-  ajv.addFormat('email', { type: 'string', validate: isZodEmail });
-  ajv.addFormat('uri', { type: 'string', validate: isZodUrl });
+  ajv.addFormat('email', { type: 'string', validate: isContractEmail });
+  ajv.addFormat('uri', { type: 'string', validate: isContractUrl });
   return ajv;
 }
 
