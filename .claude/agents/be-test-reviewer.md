@@ -44,11 +44,11 @@ Your spec reading list (paths are relative to the repo root):
 
 ### Security Coverage
 - [ ] Every protected route has a 401 test (no session) AND a 403 test (insufficient permission) where applicable
-- [ ] Contract validation paths (missing field, wrong type, extra field) are exercised; German `x-error-messages` texts asserted
+- [ ] Contract validation paths (missing field, wrong type, an unknown extra body field is stripped, not rejected) are exercised; German `x-error-messages` texts asserted
 - [ ] Contract tests updated: routes, route chain, access, lists, coverage project
 - [ ] Golden-errors tests updated for changed error shapes
 - [ ] Response check in test mode turns violations into 500 with a `[contract]` log line — tests do not hide it
-- [ ] Specs importing `app.ts` use `import type`
+- [ ] Type-only names from `app.ts` and other backend modules use `import type` (or inline `type`); values like `createApp` are normal imports
 - [ ] SQL-injection-style inputs on `sort` and free-text fields do not leak through
 
 ### Structural

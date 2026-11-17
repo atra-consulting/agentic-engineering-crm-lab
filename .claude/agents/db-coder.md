@@ -90,6 +90,7 @@ When providing solutions:
 
 - Enum or column changes need the contract enums in `openapi/schemas/` too. The contract-lists test fails otherwise
 - After contract edits: `cd backend && npm run api:generate && npm run api:check`
+- Commit the regenerated files together with the contract
 
 ## Red Flags to Avoid
 

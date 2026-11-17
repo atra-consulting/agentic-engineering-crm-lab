@@ -17,6 +17,7 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-database.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-backend.md`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`. Enum or column changes need the contract enums too (contract-lists test)
 
 ## Your Core Mission
 Review database code for correctness, performance, and best practices in the CRM application.

@@ -29,7 +29,7 @@ Your spec reading list (paths are relative to the repo root):
 - [ ] Drizzle schema and `migrate.ts` CREATE TABLE stay in sync
 
 ### Security
-- [ ] Every route uses `requireAuth` plus `requireRole(...)` or `requirePermission(...)`
+- [ ] Every route uses `requireAuth` plus `requireRole(...)`
 - [ ] `specValidate` after the guards on all routes with a request body or params
 - [ ] Contract updated first, `cd backend && npm run api:generate` run, `npm run api:check` passes
 - [ ] No hand-written DTOs — types come from `backend/src/openapi/types.ts`

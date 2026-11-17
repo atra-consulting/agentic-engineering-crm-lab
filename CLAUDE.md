@@ -171,4 +171,4 @@ Each subagent in `.claude/agents/` has a `## Specifications` reading list naming
 | [`SPECS-ui.md`](docs/specs/SPECS-ui.md) | Styling, design system, AG Grid, layout & shared components | ui-designer, ui-reviewer |
 | [`SPECS-testing.md`](docs/specs/SPECS-testing.md) | Playwright backend API tests, Jasmine/Karma frontend unit tests | be-test-*, fe-test-* |
 | [`SPECS-infrastructure.md`](docs/specs/SPECS-infrastructure.md) | Build, config, DB engine, startup, project structure | admin |
-| [`openapi/`](openapi/README.md) | API contract (OpenAPI 3.1): paths, schemas, security, error texts. Wins over every Markdown spec for signatures | be-*, fe-*, be-test-*, fe-test-* |
+| [`openapi/`](openapi/README.md) | API contract (OpenAPI 3.1): paths, schemas, security, error texts. Wins over every Markdown spec for signatures | be-*, db-*, fe-*, be-test-*, fe-test-* |

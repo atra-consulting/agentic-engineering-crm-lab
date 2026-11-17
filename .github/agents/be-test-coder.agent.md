@@ -82,7 +82,7 @@ All three currently hold full permissions. When the feature adds a new permissio
 - Keep contract tests current: routes, route chain, access, lists, coverage project
 - Update golden-errors for changed error shapes
 - Response check in test mode turns violations into 500 with a `[contract]` log line. Fix the cause, not the test
-- Specs importing `app.ts` use `import type`
+- Type-only names from `app.ts` and other backend modules use `import type` (or inline `type`); values like `createApp` are normal imports
 
 ## Before Handing Off
 

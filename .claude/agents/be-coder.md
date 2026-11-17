@@ -20,7 +20,7 @@ Your spec reading list (paths are relative to the repo root):
 
 - Backend code lives in `backend/src/`
 - Layering: `routes/<entity>.ts` → `services/<entity>Service.ts` → `config/db.ts` (@libsql/client via Drizzle, async)
-- Every route file MUST enforce auth via `requireAuth` plus `requireRole(...)` or `requirePermission(...)` middleware from `middleware/auth.ts`
+- Every route file MUST enforce auth via `requireAuth` plus `requireRole(...)` middleware from `middleware/auth.ts`
 - Request validation comes from the contract: put `specValidate` (`backend/src/openapi/specValidate.ts`) after the guards; German input-error texts live in `x-error-messages` in `openapi/schemas/*.yaml`. The global error handler in `middleware/errorHandler.ts` shapes the response
 - Request and answer types come from generated types (`RequestBody<'opId'>`, `Schema<'X'>`, `JsonResponse<'opId', 200>` in `backend/src/openapi/types.ts`). No hand-written DTOs
 
@@ -37,11 +37,12 @@ Your spec reading list (paths are relative to the repo root):
 ## Route Pattern
 
 Each entity follows:
-1. Drizzle schema in `src/db/schema/schema.ts` (for typed queries) and matching `CREATE TABLE` in `src/config/migrate.ts`
-2. Update the contract first (`openapi/paths/`, `openapi/schemas/`), then `cd backend && npm run api:generate`. Add `specValidate` after the guards
-3. Service module in `src/services/<entity>Service.ts` — plain functions, no classes needed
-4. Route file in `src/routes/<entity>.ts` — `express.Router()` with per-handler auth middleware
-5. Register the router in `src/app.ts` under `/api/<plural>`
+1. Paths + schemas in `openapi/` (`operationId`, `security`, `x-error-messages`, `x-sort-fields` / `x-default-sort`)
+2. `cd backend && npm run api:generate`
+3. Drizzle schema in `src/db/schema/schema.ts` and matching `CREATE TABLE` in `src/config/migrate.ts`
+4. Service in `src/services/<entity>Service.ts` — plain functions, generated types
+5. Route in `src/routes/<entity>.ts`: guard, then `specValidate`, then handler
+6. Register the router in `src/app.ts` under `/api/<plural>`
 
 ## Code Standards
 
@@ -54,9 +55,8 @@ Each entity follows:
 
 ## Authorization Pattern
 
-- Permission-based (preferred): `router.get('/', requireAuth, requirePermission('CHANCEN'), handler)`
-- Role-based: `requireRole('ADMIN', 'USER')`
-- New permissions: add the string to `ALL_PERMISSIONS` in `config/users.ts`, grant it on the relevant user, then reference it via `requirePermission('NAME')`
+- Role-based only: `router.get('/', requireAuth, requireRole('ADMIN'), handler)`
+- The `permissions` array in `config/users.ts` is not enforced. There is no `requirePermission`
 
 ## Pagination & Sorting
 
@@ -98,5 +98,6 @@ Checklist:
 - [ ] `cd backend && npm run api:check` passes
 - [ ] `specValidate` after the guards on new routes
 - [ ] No hand-written DTOs
+- [ ] Commit the regenerated files together with the contract
 
 Hot reload is already active via `tsx --watch`, so the dev server picks up changes automatically.
