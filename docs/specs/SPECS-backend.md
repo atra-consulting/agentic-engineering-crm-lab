@@ -110,6 +110,7 @@ Sort fields are validated against a per-entity whitelist in `src/utils/paginatio
 | Feature | development | test | production |
 |---------|-------------|------|------------|
 | `POST /api/auth/test-login` | yes | yes | no |
+| `/api/docs` + `/api/openapi.json` | yes | yes | no |
 | Response check against the contract | Logs. Adds `X-Contract-Violation` header | Rewrites the answer to 500 `Antwort verletzt API-Vertrag …` | off |
 | `CONTRACT_RESPONSE_CHECK=off` | ignored | switches check off (benchmarks only) | ignored |
 

@@ -43,6 +43,8 @@ cd backend && npm run api:check                    # Lint, rules, Ajv compile, d
 
 `start.sh` and `start.bat` start the backend with `NODE_ENV=development`. Only `development` and `test` count as dev modes. Anything else, including unset, runs as production. In dev and test modes, test-login exists and the response check runs. `cd frontend && npm run api:generate` delegates to the backend command. `ng build`, `ng serve` and Karma never regenerate.
 
+Interactive API docs: http://localhost:7200/api/docs (development and test only; raw contract at /api/openapi.json). Use port 7200: direct calls to 7070 fail on CORS for non-GET requests.
+
 **Prerequisites:** Node.js 20.19+ (checked by `start.sh`).
 
 **Startup flow:** `runMigrations()` (DDL + idempotent `agent_task` seeding via `seedAgentTasks()` — INSERT OR IGNORE, fixed ids 1–23, runs on every startup) → `runDataMigration()` (loads `backend/src/seed/fixture.json` for CRM entities when DB empty, skipped if rows exist) → server listens on port 7070.
