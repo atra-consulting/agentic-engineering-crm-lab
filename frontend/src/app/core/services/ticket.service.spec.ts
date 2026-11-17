@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { TicketService } from './ticket.service';
 import { Ticket, TicketBoard, TicketListItem, TicketComment, TicketSummary } from '../models/ticket.model';
-import { makeTicketDetail } from '../testing/model-factories';
+import { makeTicketDetail, makeTicketListItem } from '../testing/model-factories';
 import { Page } from '../models/page.model';
 
 // ─── Shared test data ─────────────────────────────────────────────────────────
@@ -33,10 +33,22 @@ const MOCK_TICKET: Ticket = makeTicketDetail({
   updatedAt: '2024-06-01T07:00:00.000Z',
 });
 
-const MOCK_LIST_ITEM: TicketListItem = (() => {
-  const { comments, ...rest } = MOCK_TICKET;
-  return { ...rest, commentCount: comments.length };
-})();
+const MOCK_LIST_ITEM: TicketListItem = makeTicketListItem({
+  id: MOCK_TICKET.id,
+  owner: MOCK_TICKET.owner,
+  type: MOCK_TICKET.type,
+  title: MOCK_TICKET.title,
+  body: MOCK_TICKET.body,
+  status: MOCK_TICKET.status,
+  solution: MOCK_TICKET.solution,
+  agentTaskId: MOCK_TICKET.agentTaskId,
+  pickedUpAt: MOCK_TICKET.pickedUpAt,
+  resolvedAt: MOCK_TICKET.resolvedAt,
+  createdAt: MOCK_TICKET.createdAt,
+  updatedAt: MOCK_TICKET.updatedAt,
+  fullyReady: MOCK_TICKET.fullyReady,
+  commentCount: MOCK_TICKET.comments.length,
+});
 
 const MOCK_BOARD: TicketBoard = {
   DEFINITION: [],
