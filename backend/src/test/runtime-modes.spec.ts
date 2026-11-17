@@ -39,7 +39,7 @@ function close(server: Server | undefined): Promise<void> {
   });
 }
 
-function checkApp(mode: ContractMode): express.Express {
+function checkApp(mode: ContractMode, onHealthFinish?: () => void): express.Express {
   const app = express();
   app.use(responseCheck(mode));
   // Violates the getFirma contract on purpose: required fields are missing.
@@ -64,6 +64,8 @@ function checkApp(mode: ContractMode): express.Express {
   });
   // Valid getHealth answer.
   app.get('/api/health', (_req, res) => {
+    // Registered after responseCheck's own finish listener, so it fires after it.
+    if (onHealthFinish) res.on('finish', onHealthFinish);
     res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' });
   });
   return app;
@@ -202,9 +204,8 @@ test.describe('responseCheck per mode', () => {
 test.describe('CONTRACT_RESPONSE_CHECK switch via createApp', () => {
   // Tests the install condition in app.ts: responseCheck is mounted for
   // development, and for test unless CONTRACT_RESPONSE_CHECK=off. No real route
-  // returns a contract-breaking body, so inspect the router stack instead: the
-  // middleware is an anonymous arrow function, so compare layer counts. The
-  // check layer is the only difference between the variants.
+  // returns a contract-breaking body, so inspect the router stack for the named
+  // middleware function `contractResponseCheck`.
   let saved: string | undefined;
 
   test.beforeEach(() => {
@@ -215,29 +216,27 @@ test.describe('CONTRACT_RESPONSE_CHECK switch via createApp', () => {
     else process.env['CONTRACT_RESPONSE_CHECK'] = saved;
   });
 
-  function layerCount(mode: ContractMode, env: string | undefined): number {
+  function hasCheckLayer(mode: ContractMode, env: string | undefined): boolean {
     if (env === undefined) delete process.env['CONTRACT_RESPONSE_CHECK'];
     else process.env['CONTRACT_RESPONSE_CHECK'] = env;
-    const app = createApp(mode) as unknown as { _router: { stack: unknown[] } };
-    return app._router.stack.length;
+    const app = createApp(mode) as unknown as { _router: { stack: { name: string }[] } };
+    return app._router.stack.some((layer) => layer.name === 'contractResponseCheck');
   }
 
-  test('test + off mounts no responseCheck layer; test without off does', () => {
-    const withCheck = layerCount('test', undefined);
-    const off = layerCount('test', 'off');
-    expect(withCheck - off).toBe(1);
+  test('test without off mounts the responseCheck layer', () => {
+    expect(hasCheckLayer('test', undefined)).toBe(true);
+  });
+
+  test('test + off mounts no responseCheck layer', () => {
+    expect(hasCheckLayer('test', 'off')).toBe(false);
   });
 
   test('development + off still mounts the responseCheck layer', () => {
-    const devOff = layerCount('development', 'off');
-    const devDefault = layerCount('development', undefined);
-    expect(devOff).toBe(devDefault);
-    // Same layer count as test with the check on (both mount it).
-    expect(devOff).toBe(layerCount('test', undefined));
+    expect(hasCheckLayer('development', 'off')).toBe(true);
   });
 
   test('production mounts no responseCheck layer', () => {
-    expect(layerCount('production', undefined)).toBeLessThan(layerCount('test', undefined));
+    expect(hasCheckLayer('production', undefined)).toBe(false);
   });
 });
 
@@ -246,20 +245,19 @@ test.describe('coverage file', () => {
   let saved: string | undefined;
   const servers: Server[] = [];
 
+  /** Resolves after the response finished and the finish listeners ran. */
   async function hitHealth(mode: ContractMode): Promise<void> {
-    const started = await listen(checkApp(mode));
+    let finished!: () => void;
+    const done = new Promise<void>((r) => {
+      finished = r;
+    });
+    const started = await listen(checkApp(mode, finished));
     servers.push(started.server);
     const resp = await fetch(`${started.url}/api/health`);
     expect(resp.status).toBe(200);
     await resp.text();
-  }
-
-  async function waitForFile(file: string): Promise<boolean> {
-    for (let i = 0; i < 40; i++) {
-      if (existsSync(file)) return true;
-      await new Promise((r) => setTimeout(r, 25));
-    }
-    return false;
+    await done;
+    await new Promise<void>((r) => setImmediate(r));
   }
 
   test.beforeAll(() => {
@@ -286,7 +284,6 @@ test.describe('coverage file', () => {
     };
     try {
       await hitHealth('test');
-      await new Promise((r) => setTimeout(r, 100));
     } finally {
       console.error = original;
     }
@@ -299,7 +296,6 @@ test.describe('coverage file', () => {
     process.env['CONTRACT_COVERAGE_FILE'] = file;
     await hitHealth('development');
     await hitHealth('production');
-    await new Promise((r) => setTimeout(r, 100));
     expect(existsSync(file)).toBe(false);
   });
 
@@ -307,7 +303,7 @@ test.describe('coverage file', () => {
     const file = join(dir, 'cov.txt');
     process.env['CONTRACT_COVERAGE_FILE'] = file;
     await hitHealth('test');
-    expect(await waitForFile(file)).toBe(true);
+    expect(existsSync(file)).toBe(true);
     expect(readFileSync(file, 'utf8')).toBe('getHealth\n');
   });
 });

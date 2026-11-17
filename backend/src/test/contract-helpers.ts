@@ -4,15 +4,11 @@
  * Not a spec file: Playwright does not pick it up.
  */
 import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { BUNDLE_FILE } from '../openapi/contract.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-export const BUNDLE_PATH = resolve(__dirname, '..', 'generated', 'openapi.json');
-
-export const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const;
-export type HttpMethod = (typeof HTTP_METHODS)[number];
+// Deliberate subset of contract.ts methods: the API only uses CRUD verbs.
+export const CRUD_METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const;
+export type CrudMethod = (typeof CRUD_METHODS)[number];
 
 export interface JsonSchema {
   $ref?: string;
@@ -39,7 +35,7 @@ export interface RawOperation {
 
 export interface Bundle {
   servers: { url: string }[];
-  paths: Record<string, Partial<Record<HttpMethod, RawOperation>>>;
+  paths: Record<string, Partial<Record<CrudMethod, RawOperation>>>;
   components: {
     schemas: Record<string, JsonSchema>;
     parameters: Record<string, Parameter>;
@@ -48,7 +44,7 @@ export interface Bundle {
 
 export interface Operation {
   operationId: string;
-  method: Uppercase<HttpMethod>;
+  method: Uppercase<CrudMethod>;
   /** Contract path without server prefix, for example `/firmen/{id}`. */
   path: string;
   /** Full path with server prefix, for example `/api/firmen/{id}`. */
@@ -59,18 +55,19 @@ export interface Operation {
   raw: RawOperation;
 }
 
-export const bundle: Bundle = JSON.parse(readFileSync(BUNDLE_PATH, 'utf8')) as Bundle;
+// Raw bundle on purpose: tests need x-* extensions and unresolved $refs that the parsed `contract` hides.
+export const bundle: Bundle = JSON.parse(readFileSync(BUNDLE_FILE, 'utf8')) as Bundle;
 
 export const SERVER_PREFIX = bundle.servers[0]?.url ?? '';
 
 export const operations: Operation[] = [];
 for (const [path, item] of Object.entries(bundle.paths)) {
-  for (const method of HTTP_METHODS) {
+  for (const method of CRUD_METHODS) {
     const raw = item[method];
     if (!raw) continue;
     operations.push({
       operationId: raw.operationId,
-      method: method.toUpperCase() as Uppercase<HttpMethod>,
+      method: method.toUpperCase() as Uppercase<CrudMethod>,
       path,
       fullPath: `${SERVER_PREFIX}${path}`,
       security: raw.security ?? [],
