@@ -1,0 +1,4 @@
+# Generated from openapi/. Never edit or hand-merge. Rebuild: cd backend && npm run api:generate
+backend/src/generated/openapi.json linguist-generated=true
+backend/src/generated/api-types.ts linguist-generated=true
+frontend/src/app/core/api/api-types.ts linguist-generated=true
