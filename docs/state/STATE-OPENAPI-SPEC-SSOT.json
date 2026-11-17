@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "task_key": "OPENAPI-SPEC-SSOT",
+  "status": "in_progress",
+  "current_step": "4.5",
+  "started": "2026-11-17T07:33:39Z",
+  "updated": "2026-11-17T07:33:39Z",
+  "config": {
+    "input_mode": "freeform",
+    "user_description": "Saubere OpenAPI-Spec für die gesamte Backend-API bauen und als Single Source of Truth in Backend und Frontend einbauen (Typen/Validierung aus der Spec, kein Drift möglich).",
+    "special_instructions": null,
+    "ticket_mode": false,
+    "ticket_id": null,
+    "ticket_url": null,
+    "ticket_api_base": null,
+    "ticket_claimed": false,
+    "branch_name": "openapi-spec-ssot-spec-first-types-validation",
+    "original_branch": "main",
+    "original_head": "75de728b623fb679563baa8927a1ca70e3e65d5e",
+    "docs_folder": "docs",
+    "is_git_repo": true,
+    "workflow_scope": null,
+    "pr_prefix": null,
+    "pr_exists": false,
+    "pr_url": null
+  },
+  "discovery": {
+    "agents_available": false,
+    "planner_agents": [],
+    "writer_agents": [],
+    "coding_agents": [],
+    "review_agents": [],
+    "test_coding_agents": [],
+    "test_review_agents": [],
+    "test_runner_agents": [],
+    "tooling_coding_agents": [],
+    "tooling_review_agents": [],
+    "test_command": null
+  },
+  "artifacts": {
+    "prd_skipped": null,
+    "prd_file": null,
+    "plan_file": null
+  },
+  "delegation": {
+    "assignments": [],
+    "escalations": []
+  },
+  "completed_steps": ["1", "2", "3"]
+}
