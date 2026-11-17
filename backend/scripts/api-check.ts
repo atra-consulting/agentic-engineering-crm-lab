@@ -12,8 +12,8 @@
  * Exit 0 when every step passes, else 1 at the first failing step.
  */
 import { spawnSync } from 'node:child_process';
-import { Ajv2020, type Options } from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
+import type { Ajv2020 } from 'ajv/dist/2020.js';
+import { createContractAjvs } from '../src/openapi/ajv.js';
 import {
   CONTRACT_ROOT,
   GENERATED_DIR,
@@ -133,22 +133,6 @@ const NAME_MAPS = new Set([
   'paths', 'properties', 'patternProperties', 'dependentSchemas', '$defs', 'headers', 'content',
   'responses', 'schemas', 'parameters', 'requestBodies', 'securitySchemes', 'examples', 'links', 'callbacks',
 ]);
-
-// ─── The runtime Ajv setup (openapi/README.md, "Ajv setup") ───────────────────
-const AJV_BASE_OPTIONS: Options = {
-  strict: false,
-  allowUnionTypes: true,
-  allErrors: true,
-  verbose: true,
-};
-
-function createAjv(extra: Options = {}): Ajv2020 {
-  const ajv = new Ajv2020({ ...AJV_BASE_OPTIONS, ...extra });
-  // ajv-formats is CommonJS; under NodeNext its default import is module.exports,
-  // whose `.default` is the plugin function (types and runtime agree).
-  addFormats.default(ajv, ['email', 'uri']);
-  return ajv;
-}
 
 // ─── JSON helpers ─────────────────────────────────────────────────────────────
 function isObject(value: unknown): value is JsonObject {
@@ -400,12 +384,10 @@ interface CompileStats {
 
 function compileBundle(bundle: JsonObject, ops: Operation[]): CompileStats {
   const started = performance.now();
-  // Same two instances as the runtime: body (strip unknown fields, no coercion)
-  // and plain (path params and responses).
-  const bodyAjv = createAjv({ removeAdditional: 'all', coerceTypes: false });
-  const plainAjv = createAjv();
-  bodyAjv.addSchema(bundle, 'spec');
-  plainAjv.addSchema(bundle, 'spec');
+  // The runtime Ajv setup (src/openapi/ajv.ts, openapi/README.md "Ajv setup"):
+  // body (strip unknown fields, no coercion) and plain (path params and
+  // responses), each with the bundle registered as `spec`.
+  const { body: bodyAjv, plain: plainAjv } = createContractAjvs(bundle);
 
   const compileAt = (ajv: Ajv2020, segments: string[]): void => {
     try {
