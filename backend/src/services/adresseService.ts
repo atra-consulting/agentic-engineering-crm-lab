@@ -2,7 +2,10 @@ import { client } from '../config/db.js';
 import type { InValue } from '@libsql/client';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import type { AdresseCreateDTO } from '../utils/validation.js';
+import type { RequestBody } from '../openapi/types.js';
+
+type AdresseCreateDTO = RequestBody<'createAdresse'>;
+type AdresseUpdateDTO = RequestBody<'updateAdresse'>;
 
 export interface AdresseDTO {
   id: number;
@@ -145,7 +148,7 @@ export const adresseService = {
     return this.findById(Number(result.lastInsertRowid));
   },
 
-  async update(id: number, dto: AdresseCreateDTO): Promise<AdresseDTO> {
+  async update(id: number, dto: AdresseUpdateDTO): Promise<AdresseDTO> {
     const current = await this.findById(id);
     const now = new Date().toISOString();
     await client.execute({

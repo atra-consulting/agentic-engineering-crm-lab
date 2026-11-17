@@ -1,7 +1,10 @@
 import { client } from '../config/db.js';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import type { AktivitaetCreateDTO } from '../utils/validation.js';
+import type { RequestBody } from '../openapi/types.js';
+
+type AktivitaetCreateDTO = RequestBody<'createAktivitaet'>;
+type AktivitaetUpdateDTO = RequestBody<'updateAktivitaet'>;
 
 export interface AktivitaetDTO {
   id: number;
@@ -122,7 +125,7 @@ export const aktivitaetService = {
     return this.findById(Number(result.lastInsertRowid));
   },
 
-  async update(id: number, dto: AktivitaetCreateDTO): Promise<AktivitaetDTO> {
+  async update(id: number, dto: AktivitaetUpdateDTO): Promise<AktivitaetDTO> {
     await this.findById(id);
     const now = new Date().toISOString();
     await client.execute({

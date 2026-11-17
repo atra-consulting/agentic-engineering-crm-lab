@@ -3,7 +3,10 @@ import type { InValue } from '@libsql/client';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
 import { type ChancePhase } from '../db/schema/enums.js';
-import type { ChanceCreateDTO } from '../utils/validation.js';
+import type { RequestBody } from '../openapi/types.js';
+
+type ChanceCreateDTO = RequestBody<'createChance'>;
+type ChanceUpdateDTO = RequestBody<'updateChance'>;
 
 export interface ChanceDTO {
   id: number;
@@ -152,7 +155,7 @@ export const chanceService = {
     return this.findById(Number(result.lastInsertRowid));
   },
 
-  async update(id: number, dto: ChanceCreateDTO): Promise<ChanceDTO> {
+  async update(id: number, dto: ChanceUpdateDTO): Promise<ChanceDTO> {
     await this.findById(id);
     const now = new Date().toISOString();
     await client.execute({

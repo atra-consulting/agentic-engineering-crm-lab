@@ -2,7 +2,8 @@ import { Router, type Request, type Response } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { aktivitaetService } from '../services/aktivitaetService.js';
 import { parsePaginationParams, parseSort } from '../utils/pagination.js';
-import { validate, AktivitaetCreateSchema } from '../utils/validation.js';
+import { specValidate } from '../openapi/specValidate.js';
+import type { RequestBody } from '../openapi/types.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = Router();
@@ -11,6 +12,7 @@ const router = Router();
 router.get(
   '/all',
   requireAuth,
+  specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     res.json(await aktivitaetService.listAll());
   }),
@@ -20,6 +22,7 @@ router.get(
 router.get(
   '/',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const { page, size } = parsePaginationParams(req.query as Record<string, unknown>);
     const sort = parseSort(
@@ -36,6 +39,7 @@ router.get(
 router.get(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     res.json(await aktivitaetService.findById(id));
@@ -46,8 +50,9 @@ router.get(
 router.post(
   '/',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
-    const dto = validate(AktivitaetCreateSchema, req.body);
+    const dto: RequestBody<'createAktivitaet'> = req.body;
     res.status(201).json(await aktivitaetService.create(dto));
   }),
 );
@@ -56,9 +61,10 @@ router.post(
 router.put(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(AktivitaetCreateSchema, req.body);
+    const dto: RequestBody<'updateAktivitaet'> = req.body;
     res.json(await aktivitaetService.update(id, dto));
   }),
 );
@@ -67,6 +73,7 @@ router.put(
 router.delete(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     await aktivitaetService.delete(id);

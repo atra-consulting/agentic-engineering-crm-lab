@@ -2,7 +2,8 @@ import { Router, type Request, type Response } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { chanceService } from '../services/chanceService.js';
 import { parsePaginationParams, parseSort } from '../utils/pagination.js';
-import { validate, ChanceCreateSchema } from '../utils/validation.js';
+import { specValidate } from '../openapi/specValidate.js';
+import type { RequestBody } from '../openapi/types.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ValidationError } from '../utils/errors.js';
 import { CHANCE_PHASE, type ChancePhase } from '../db/schema/enums.js';
@@ -13,6 +14,7 @@ const router = Router();
 router.get(
   '/all',
   requireAuth,
+  specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     res.json(await chanceService.listAll());
   }),
@@ -22,6 +24,7 @@ router.get(
 router.get(
   '/',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const { page, size } = parsePaginationParams(req.query as Record<string, unknown>);
     const sort = parseSort(
@@ -47,6 +50,7 @@ router.get(
 router.get(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     res.json(await chanceService.findById(id));
@@ -57,8 +61,9 @@ router.get(
 router.post(
   '/',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
-    const dto = validate(ChanceCreateSchema, req.body);
+    const dto: RequestBody<'createChance'> = req.body;
     res.status(201).json(await chanceService.create(dto));
   }),
 );
@@ -67,9 +72,10 @@ router.post(
 router.put(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(ChanceCreateSchema, req.body);
+    const dto: RequestBody<'updateChance'> = req.body;
     res.json(await chanceService.update(id, dto));
   }),
 );
@@ -78,6 +84,7 @@ router.put(
 router.delete(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     await chanceService.delete(id);
