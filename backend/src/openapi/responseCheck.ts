@@ -20,7 +20,8 @@ function firstError(validator: { errors?: ReadonlyArray<{ instancePath: string; 
  * Checks a response body against the contract. Pure, never throws on bad input
  * (a body that cannot be serialized counts as a violation).
  * - production, 204: ok
- * - status >= 500, 413 (body-parser, never declared per operation) or no operation: validated against `ErrorResponse`
+ * - status >= 500, 413 or no operation: validated against `ErrorResponse`
+ *   (the 413 branch is defensive only: body-parser 400/413 errors never reach this wrapper)
  * - status the operation does not declare: violation
  */
 export function checkResponse(
@@ -38,6 +39,7 @@ export function checkResponse(
   } catch {
     return { ok: false, operationId, pointer: '/', reason: 'body is not serializable to JSON' };
   }
+  // 413 is defensive only: body-parser errors are raised before this wrapper is installed.
   if (status >= 500 || status === 413 || !op) {
     const validate = contract.errorResponseValidator;
     if (validate(copy)) return OK;
@@ -80,7 +82,9 @@ export function responseCheck(mode: ContractMode) {
               });
             }
             if (mode === 'development' && !res.headersSent) {
-              res.setHeader('X-Contract-Violation', `${result.operationId} ${result.pointer}`);
+              // Header values must be printable ASCII; the pointer may carry user-controlled keys.
+              const header = `${result.operationId} ${result.pointer}`.replace(/[^\x20-\x7e]/g, '?').slice(0, 200);
+              res.setHeader('X-Contract-Violation', header);
             }
           }
         } catch (err) {

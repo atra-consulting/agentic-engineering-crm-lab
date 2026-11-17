@@ -2071,6 +2071,7 @@ export interface operations {
                     "application/json": components["schemas"]["EmptyObject"];
                 };
             };
+            400: components["responses"]["BadRequest"];
         };
     };
     getCurrentUser: {
@@ -3454,6 +3455,7 @@ export interface operations {
                     "application/json": components["schemas"]["AgentTaskResetResult"];
                 };
             };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
         };
@@ -3714,6 +3716,7 @@ export interface operations {
                     "application/json": components["schemas"]["TicketResetResult"];
                 };
             };
+            400: components["responses"]["BadRequest"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
         };

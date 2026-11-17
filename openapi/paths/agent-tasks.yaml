@@ -79,6 +79,8 @@
           application/json:
             schema:
               $ref: '../schemas/agent-tasks.yaml#/AgentTaskResetResult'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
       '401':
         $ref: '../common.yaml#/responses/Unauthorized'
       '403':

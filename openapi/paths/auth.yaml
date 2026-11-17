@@ -57,6 +57,8 @@
           application/json:
             schema:
               $ref: '../common.yaml#/schemas/EmptyObject'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
 
 /auth/me:
   get:

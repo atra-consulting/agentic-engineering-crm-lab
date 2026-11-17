@@ -11,7 +11,3 @@ paths/health.yaml:
   # Public liveness probe. It has no 4xx answer.
   operation-4xx-response:
     - '#/~1health/get/responses'
-paths/auth.yaml:
-  # Public logout. It always answers 200 {} (errors are 500 only).
-  operation-4xx-response:
-    - '#/~1auth~1logout/post/responses'
