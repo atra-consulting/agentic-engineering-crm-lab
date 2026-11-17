@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
+import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { findById, CrmUser } from '../config/users.js';
 import { UnauthorizedError, ForbiddenError } from '../utils/errors.js';
 

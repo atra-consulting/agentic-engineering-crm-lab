@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import { findByBenutzername } from '../config/users.js';
 import { requireAuth } from '../middleware/auth.js';

@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import { timingSafeEqual, createHash } from 'node:crypto';
 
 // Augment Express Request with cronTrigger so we can type it without casts

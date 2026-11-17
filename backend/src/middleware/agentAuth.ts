@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { UnauthorizedError, ForbiddenError } from '../utils/errors.js';
 import { findById } from '../config/users.js';

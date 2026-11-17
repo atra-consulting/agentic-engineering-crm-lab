@@ -1,4 +1,4 @@
-import { Router, Request, Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { firmaService } from '../services/firmaService.js';
 import { personService } from '../services/personService.js';
