@@ -1,3 +1,12 @@
+/**
+ * Typed wrapper over HttpClient. Paths, methods, params and bodies are checked against the
+ * generated OpenAPI types (`api-types.ts`), so `ng build` fails when a call drifts from the contract.
+ *
+ * Example: `api.get('/firmen/{id}', { path: { id } })` sends GET /api/firmen/5 (for id = 5).
+ *
+ * Type idiom: `[X] extends [never]` (tuple-wrapped) avoids distribution over `never`/`undefined`,
+ * so "is this absent?" checks give one answer instead of a union.
+ */
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -36,6 +45,13 @@ export type QueryOf<P extends keyof Paths, M extends ApiMethod> = [QueryObj<P, M
   ? never
   : QueryObj<P, M>;
 
+/** True when the operation declares a non-optional `query` (e.g. `source` on GET /agent-tasks/next). */
+export type QueryRequired<P extends keyof Paths, M extends ApiMethod> = ParamsOf<P, M> extends { query: unknown }
+  ? [QueryOf<P, M>] extends [never]
+    ? false
+    : true
+  : false;
+
 type BodyObj<P extends keyof Paths, M extends ApiMethod> = Op<P, M> extends { requestBody?: infer X }
   ? NonNullable<X>
   : never;
@@ -68,16 +84,22 @@ export type JsonResponse<P extends keyof Paths, M extends ApiMethod> = [JsonOf<S
 export type ApiOptions<P extends keyof Paths, M extends ApiMethod> = ([PathParams<P, M>] extends [never]
   ? { path?: never }
   : { path: PathParams<P, M> }) &
-  ([QueryOf<P, M>] extends [never] ? { query?: never } : { query?: QueryOf<P, M> }) &
+  ([QueryOf<P, M>] extends [never]
+    ? { query?: never }
+    : QueryRequired<P, M> extends true
+      ? { query: QueryOf<P, M> }
+      : { query?: QueryOf<P, M> }) &
   ([RequestBody<P, M>] extends [never]
     ? { body?: never }
     : BodyRequired<P, M> extends true
       ? { body: RequestBody<P, M> }
       : { body?: RequestBody<P, M> });
 
-/** True when the caller must pass an options object (path params or a body are required). */
+/** True when the caller must pass an options object (path params, a query or a body is required). */
 export type NeedsOptions<P extends keyof Paths, M extends ApiMethod> = [PathParams<P, M>] extends [never]
-  ? BodyRequired<P, M>
+  ? QueryRequired<P, M> extends true
+    ? true
+    : BodyRequired<P, M>
   : true;
 
 type Args<P extends keyof Paths, M extends ApiMethod> = NeedsOptions<P, M> extends true
@@ -90,7 +112,11 @@ interface UntypedOptions {
   body?: unknown;
 }
 
-/** Thin typed wrapper over HttpClient. Paths, params and bodies are checked against the OpenAPI contract. */
+/**
+ * Thin typed wrapper over HttpClient.
+ * Callers must list query keys in the same order the old HttpParams.set chain used,
+ * so URLs stay byte-identical.
+ */
 @Injectable({ providedIn: 'root' })
 export class ApiClient {
   private http = inject(HttpClient);
@@ -125,6 +151,9 @@ export class ApiClient {
       '/api' +
       path.replace(/\{(\w+)\}/g, (_m, name: string) => encodeURIComponent(String(pathParams?.[name])));
 
+    // Order matters: params are appended in the caller's key order (never sorted), so URLs stay
+    // byte-identical to the old HttpParams.set chain. Values go through String() (the contract has
+    // no array or date params today); only undefined/null are skipped, '' is kept.
     let params = new HttpParams();
     for (const [key, value] of Object.entries(query ?? {})) {
       if (value === undefined || value === null) continue;
