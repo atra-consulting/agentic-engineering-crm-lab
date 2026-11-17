@@ -116,7 +116,10 @@ if not exist "node_modules\.bin\tsx.cmd" (
     call npm install
 )
 
+REM Development mode turns on test-login, contract answer checks and /api/docs.
+set "NODE_ENV=development"
 start "CRM-Backend" /b cmd /c "npx tsx --watch src/index.ts"
+set "NODE_ENV="
 cd /d "%ROOT_DIR%"
 
 :: Wait for backend to be ready
