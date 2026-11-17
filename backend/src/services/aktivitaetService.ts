@@ -1,24 +1,13 @@
 import { client } from '../config/db.js';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import type { RequestBody } from '../openapi/types.js';
+import { AKTIVITAET_TYP, type AktivitaetTyp } from '../db/schema/enums.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
 type AktivitaetCreateDTO = RequestBody<'createAktivitaet'>;
 type AktivitaetUpdateDTO = RequestBody<'updateAktivitaet'>;
 
-export interface AktivitaetDTO {
-  id: number;
-  typ: string;
-  subject: string;
-  description: string | null;
-  datum: string;
-  firmaId: number | null;
-  firmaName: string | null;
-  personId: number | null;
-  personName: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type AktivitaetDTO = Schema<'Aktivitaet'>;
 
 interface AktivitaetRow {
   id: number;
@@ -35,11 +24,19 @@ interface AktivitaetRow {
   updatedAt: string;
 }
 
+function isAktivitaetTyp(value: string): value is AktivitaetTyp {
+  return (AKTIVITAET_TYP as readonly string[]).includes(value);
+}
+
 function toDTO(row: AktivitaetRow): AktivitaetDTO {
   const personName =
     row.personFirstName && row.personLastName
       ? `${row.personFirstName} ${row.personLastName}`
       : row.personFirstName ?? row.personLastName ?? null;
+
+  if (!isAktivitaetTyp(row.typ)) {
+    throw new Error(`Unexpected aktivitaet.typ in database: ${row.typ}`);
+  }
 
   return {
     id: row.id,

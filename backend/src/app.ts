@@ -21,6 +21,7 @@ import agentTasksRouter from './routes/agentTasks.js';
 import ticketsRouter from './routes/tickets.js';
 import cronRouter from './routes/cron.js';
 import szenarienRouter from './routes/szenario.js';
+import type { JsonResponse } from './openapi/types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8')) as { version: string };
@@ -50,7 +51,8 @@ export function createApp(mode: ContractMode = getContractMode()): Express {
 
   // Health check (public)
   app.get('/api/health', specValidate, (_req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString(), version });
+    const body: JsonResponse<'getHealth', 200> = { status: 'ok', timestamp: new Date().toISOString(), version };
+    res.json(body);
   });
 
   // Routes

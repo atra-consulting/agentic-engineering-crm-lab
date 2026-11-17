@@ -2,28 +2,13 @@ import { client } from '../config/db.js';
 import type { InValue } from '@libsql/client';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import { type ChancePhase } from '../db/schema/enums.js';
-import type { RequestBody } from '../openapi/types.js';
+import { CHANCE_PHASE, type ChancePhase } from '../db/schema/enums.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
 type ChanceCreateDTO = RequestBody<'createChance'>;
 type ChanceUpdateDTO = RequestBody<'updateChance'>;
 
-export interface ChanceDTO {
-  id: number;
-  titel: string;
-  beschreibung: string | null;
-  wert: number | null;
-  currency: string;
-  phase: string;
-  wahrscheinlichkeit: number | null;
-  erwartetesDatum: string | null;
-  firmaId: number;
-  firmaName: string | null;
-  kontaktPersonId: number | null;
-  kontaktPersonName: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type ChanceDTO = Schema<'Chance'>;
 
 interface ChanceRow {
   id: number;
@@ -43,11 +28,19 @@ interface ChanceRow {
   updatedAt: string;
 }
 
+function isChancePhase(value: string): value is ChancePhase {
+  return (CHANCE_PHASE as readonly string[]).includes(value);
+}
+
 function toDTO(row: ChanceRow): ChanceDTO {
   const kontaktPersonName =
     row.kontaktPersonFirstName && row.kontaktPersonLastName
       ? `${row.kontaktPersonFirstName} ${row.kontaktPersonLastName}`
       : row.kontaktPersonFirstName ?? row.kontaktPersonLastName ?? null;
+
+  if (!isChancePhase(row.phase)) {
+    throw new Error(`Unexpected chance.phase in database: ${row.phase}`);
+  }
 
   return {
     id: row.id,

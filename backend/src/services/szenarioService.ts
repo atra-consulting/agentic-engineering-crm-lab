@@ -1,22 +1,9 @@
 import { client } from '../config/db.js';
 import { NotFoundError, ConflictError } from '../utils/errors.js';
-import type { RequestBody } from '../openapi/types.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
-export interface ProzessDauer {
-  works: number[];
-  waits: number[];
-}
-
-export interface SzenarioDTO {
-  id: number;
-  name: string;
-  humanSteps: ProzessDauer;
-  agileKiSteps: ProzessDauer;
-  semiAutomatedSteps: ProzessDauer;
-  automatedSteps: ProzessDauer;
-  createdAt: string;
-  updatedAt: string;
-}
+export type ProzessDauer = Schema<'ProzessDauer'>;
+export type SzenarioDTO = Schema<'Szenario'>;
 
 interface SzenarioRow {
   id: number;
