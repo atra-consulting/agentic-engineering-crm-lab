@@ -18,7 +18,7 @@ Your spec reading list (paths are relative to the repo root):
 
 ## Contract Coverage
 
-- Every new operation must answer 2xx at least once in the suite, or the `contract-coverage` Playwright project fails. Add a test call, not an exemption
+- Every new operation must answer 2xx at least once in the suite, or the `contract-coverage` Playwright project fails. Prefer a test call. An exemption needs a reason in `backend/src/test/contract-coverage-exemptions.ts`.
 
 ## Test Framework
 

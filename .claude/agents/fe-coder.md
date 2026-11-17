@@ -23,6 +23,8 @@ Your spec reading list (paths are relative to the repo root):
 - Commit the contract together with those three generated files
 - Frontend types come from `cd backend && npm run api:generate` (or `cd frontend && npm run api:generate`)
 - `cd backend && npm run api:check` must pass after a contract change
+- `api:check` fails → run `cd backend && npm run api:generate`, commit the result.
+- `api:check` also fails while regenerated files are uncommitted (it compares against git) — commit first, then rerun.
 
 ## Architecture Rules
 
