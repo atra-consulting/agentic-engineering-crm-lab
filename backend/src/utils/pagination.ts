@@ -21,7 +21,7 @@ export interface SortParams {
 }
 
 // Per-entity allowed sort fields (camelCase as in query param → DB column name)
-const ALLOWED_SORT_FIELDS: Record<string, Record<string, string>> = {
+export const ALLOWED_SORT_FIELDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   firma: {
     name: 'name',
     industry: 'industry',

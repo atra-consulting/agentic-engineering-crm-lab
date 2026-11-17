@@ -12,6 +12,12 @@ function timestamp(): string {
   return new Date().toISOString().replace(/Z$/, '');
 }
 
+function isBodyParserError(err: unknown): err is { status: number; type: string } {
+  if (typeof err !== 'object' || err === null) return false;
+  const e = err as { status?: unknown; type?: unknown };
+  return typeof e.status === 'number' && e.status >= 400 && e.status <= 499 && typeof e.type === 'string';
+}
+
 // 4-argument signature is required for Express to treat this as an error handler
 export function errorHandler(
   err: unknown,
@@ -64,6 +70,26 @@ export function errorHandler(
     res.status(409).json({
       status: 409,
       message: err.message,
+      timestamp: timestamp(),
+      fieldErrors: {},
+    });
+    return;
+  }
+
+  // body-parser errors (malformed JSON, too large, ...)
+  if (isBodyParserError(err)) {
+    if (err.type === 'entity.parse.failed') {
+      res.status(400).json({
+        status: 400,
+        message: 'Validierungsfehler',
+        timestamp: timestamp(),
+        fieldErrors: { _: 'Ungültige Anfrage' },
+      });
+      return;
+    }
+    res.status(err.status).json({
+      status: err.status,
+      message: err.type === 'entity.too.large' ? 'Anfrage zu groß' : 'Ungültige Anfrage',
       timestamp: timestamp(),
       fieldErrors: {},
     });

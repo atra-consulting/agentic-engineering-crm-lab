@@ -4,6 +4,7 @@ import { chanceService } from '../services/chanceService.js';
 import { parsePaginationParams, parseSort } from '../utils/pagination.js';
 import { validate, ChanceCreateSchema } from '../utils/validation.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { ValidationError } from '../utils/errors.js';
 import { CHANCE_PHASE, type ChancePhase } from '../db/schema/enums.js';
 
 const router = Router();
@@ -34,8 +35,8 @@ router.get(
     const search = typeof searchFirst === 'string' ? searchFirst : undefined;
     const phaseRaw = req.query['phase'] as string | undefined;
     if (phaseRaw !== undefined && !(CHANCE_PHASE as readonly string[]).includes(phaseRaw)) {
-      res.status(400).json({ status: 400, message: `Ungültiger phase-Wert: ${phaseRaw}. Erlaubt: ${CHANCE_PHASE.join(', ')}` });
-      return;
+      const msg = `Ungültiger phase-Wert: ${phaseRaw}. Erlaubt: ${CHANCE_PHASE.join(', ')}`;
+      throw new ValidationError(msg, { phase: msg });
     }
     const phase = phaseRaw as ChancePhase | undefined;
     res.json(await chanceService.findAll(search, page, size, sort, phase));

@@ -20,7 +20,7 @@ function firstError(validator: { errors?: ReadonlyArray<{ instancePath: string; 
  * Checks a response body against the contract. Pure, never throws on bad input
  * (a body that cannot be serialized counts as a violation).
  * - production, 204: ok
- * - status >= 500 or no operation: validated against `ErrorResponse`
+ * - status >= 500, 413 (body-parser, never declared per operation) or no operation: validated against `ErrorResponse`
  * - status the operation does not declare: violation
  */
 export function checkResponse(
@@ -38,7 +38,7 @@ export function checkResponse(
   } catch {
     return { ok: false, operationId, pointer: '/', reason: 'body is not serializable to JSON' };
   }
-  if (status >= 500 || !op) {
+  if (status >= 500 || status === 413 || !op) {
     const validate = contract.errorResponseValidator;
     if (validate(copy)) return OK;
     return { ok: false, operationId, ...firstError(validate) };

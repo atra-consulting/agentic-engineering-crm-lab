@@ -8,7 +8,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { NotFoundError } from './utils/errors.js';
 import { getContractMode, type ContractMode } from './openapi/runtimeMode.js';
 import { responseCheck } from './openapi/responseCheck.js';
-import authRouter from './routes/auth.js';
+import { createAuthRouter } from './routes/auth.js';
 import firmenRouter from './routes/firmen.js';
 import personenRouter from './routes/personen.js';
 import abteilungenRouter from './routes/abteilungen.js';
@@ -54,7 +54,7 @@ export function createApp(mode: ContractMode = getContractMode()): Express {
 
   // Routes
   const apiRouters: ApiRouter[] = [
-    { basePath: '/api/auth', router: authRouter },
+    { basePath: '/api/auth', router: createAuthRouter(mode) },
     { basePath: '/api/firmen', router: firmenRouter },
     { basePath: '/api/personen', router: personenRouter },
     { basePath: '/api/abteilungen', router: abteilungenRouter },
