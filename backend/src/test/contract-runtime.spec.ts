@@ -236,6 +236,26 @@ test.describe('checkResponse', () => {
     expect(checkResponse('test', op('deleteFirma'), 204, { anything: true })).toEqual({ ok: true });
   });
 
+  test('circular body is a violation, not a throw', () => {
+    const circular: Record<string, unknown> = {};
+    circular['self'] = circular;
+    expect(checkResponse('test', op('getFirma'), 200, circular)).toEqual({
+      ok: false,
+      operationId: 'getFirma',
+      pointer: '/',
+      reason: 'body is not serializable to JSON',
+    });
+  });
+
+  test('BigInt body is a violation, not a throw', () => {
+    expect(checkResponse('test', op('getFirma'), 200, { id: BigInt(1) })).toEqual({
+      ok: false,
+      operationId: 'getFirma',
+      pointer: '/',
+      reason: 'body is not serializable to JSON',
+    });
+  });
+
   test('production is skipped', () => {
     expect(checkResponse('production', op('getFirma'), 200, {})).toEqual({ ok: true });
   });

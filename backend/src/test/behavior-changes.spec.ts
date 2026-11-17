@@ -4,6 +4,7 @@
 import { test, expect, request as playwrightRequest } from '@playwright/test';
 import type { APIRequestContext } from '@playwright/test';
 import { loginCtx } from './helpers.js';
+import { CHANCE_PHASE } from '../db/schema/enums.js';
 
 const BASE_URL = 'http://localhost:7070';
 
@@ -31,11 +32,13 @@ test.describe('D1 chancen phase error', () => {
   test('invalid phase answers 400 in the standard shape', async () => {
     const resp = await adminCtx.get('/api/chancen?phase=BOGUS');
     expect(resp.status()).toBe(400);
-    const body = (await resp.json()) as ErrorBody;
-    expect(body.status).toBe(400);
-    expect(body.message).toMatch(/^Ungültiger phase-Wert: BOGUS\. Erlaubt: /);
-    expect(typeof body.timestamp).toBe('string');
-    expect(body.fieldErrors['phase']).toBe(body.message);
+    const message = `Ungültiger phase-Wert: BOGUS. Erlaubt: ${CHANCE_PHASE.join(', ')}`;
+    expect((await resp.json()) as ErrorBody).toEqual({
+      status: 400,
+      message,
+      timestamp: expect.any(String),
+      fieldErrors: { phase: message },
+    });
   });
 });
 
@@ -43,9 +46,10 @@ test.describe('D3 JSON 404 catch-all', () => {
   test('unknown /api path answers 404 JSON', async () => {
     const resp = await adminCtx.get('/api/does-not-exist');
     expect(resp.status()).toBe(404);
-    expect(((await resp.json()) as ErrorBody)).toMatchObject({
+    expect((await resp.json()) as ErrorBody).toEqual({
       status: 404,
       message: 'Ressource nicht gefunden',
+      timestamp: expect.any(String),
       fieldErrors: {},
     });
   });
@@ -53,9 +57,10 @@ test.describe('D3 JSON 404 catch-all', () => {
   test('unsupported method on a known path answers 404 JSON', async () => {
     const resp = await adminCtx.delete('/api/firmen');
     expect(resp.status()).toBe(404);
-    expect(((await resp.json()) as ErrorBody)).toMatchObject({
+    expect((await resp.json()) as ErrorBody).toEqual({
       status: 404,
       message: 'Ressource nicht gefunden',
+      timestamp: expect.any(String),
       fieldErrors: {},
     });
   });
@@ -68,9 +73,10 @@ test.describe('D4 body-parser errors', () => {
       data: '{"name": ',
     });
     expect(resp.status()).toBe(400);
-    expect(((await resp.json()) as ErrorBody)).toMatchObject({
+    expect((await resp.json()) as ErrorBody).toEqual({
       status: 400,
       message: 'Validierungsfehler',
+      timestamp: expect.any(String),
       fieldErrors: { _: 'Ungültige Anfrage' },
     });
   });
@@ -81,7 +87,12 @@ test.describe('D4 body-parser errors', () => {
       data: JSON.stringify({ name: 'a'.repeat(150 * 1024) }),
     });
     expect(resp.status()).toBe(413);
-    expect(((await resp.json()) as ErrorBody)).toMatchObject({ status: 413, message: 'Anfrage zu groß' });
+    expect((await resp.json()) as ErrorBody).toEqual({
+      status: 413,
+      message: 'Anfrage zu groß',
+      timestamp: expect.any(String),
+      fieldErrors: {},
+    });
   });
 });
 

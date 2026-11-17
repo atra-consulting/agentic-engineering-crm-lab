@@ -8,12 +8,12 @@ import { test, expect } from '@playwright/test';
 import express from 'express';
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createApp } from '../app.js';
 import { responseCheck } from '../openapi/responseCheck.js';
-import type { ContractMode } from '../openapi/runtimeMode.js';
+import { getContractMode, type ContractMode } from '../openapi/runtimeMode.js';
 
 interface ErrorBody {
   status: number;
@@ -43,7 +43,23 @@ function checkApp(mode: ContractMode): express.Express {
   const app = express();
   app.use(responseCheck(mode));
   // Violates the getFirma contract on purpose: required fields are missing.
-  app.get('/api/firmen/:id', (_req, res) => {
+  app.get('/api/firmen/:id', (req, res) => {
+    if (req.query['case'] === 'circular') {
+      const circular: Record<string, unknown> = {};
+      circular['self'] = circular;
+      res.json(circular);
+      return;
+    }
+    if (req.query['case'] === 'header') {
+      // Violation pointer carries a long non-ASCII key.
+      res.status(500).json({
+        status: 500,
+        message: 'x',
+        timestamp: 't',
+        fieldErrors: { ['ü'.repeat(300)]: 1 },
+      });
+      return;
+    }
     res.json({});
   });
   // Valid getHealth answer.
@@ -72,17 +88,49 @@ test.describe('createApp(production)', () => {
       body: JSON.stringify({ benutzername: 'admin' }),
     });
     expect(resp.status).toBe(404);
-    const body = (await resp.json()) as ErrorBody;
-    expect(body).toMatchObject({ status: 404, message: 'Ressource nicht gefunden', fieldErrors: {} });
-    expect(typeof body.timestamp).toBe('string');
+    expect((await resp.json()) as ErrorBody).toEqual({
+      status: 404,
+      message: 'Ressource nicht gefunden',
+      timestamp: expect.any(String),
+      fieldErrors: {},
+    });
   });
 
   test('GET /api/docs is a JSON 404', async () => {
     const resp = await fetch(`${url}/api/docs`);
     expect(resp.status).toBe(404);
     expect(resp.headers.get('content-type')).toContain('application/json');
-    expect(((await resp.json()) as ErrorBody).status).toBe(404);
+    expect((await resp.json()) as ErrorBody).toEqual({
+      status: 404,
+      message: 'Ressource nicht gefunden',
+      timestamp: expect.any(String),
+      fieldErrors: {},
+    });
   });
+});
+
+test.describe('fail-closed mode integration', () => {
+  const cases: ReadonlyArray<[string, Record<string, string | undefined>]> = [
+    ['NODE_ENV=Staging', { NODE_ENV: 'Staging' }],
+    ['NODE_ENV unset', {}],
+  ];
+  for (const [label, env] of cases) {
+    test(`${label} registers no test-login`, async () => {
+      const { server, url } = await listen(createApp(getContractMode(env)));
+      try {
+        const resp = await fetch(`${url}/api/auth/test-login`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ benutzername: 'admin' }),
+        });
+        expect(resp.status).toBe(404);
+        expect(resp.headers.get('content-type')).toContain('application/json');
+        expect(((await resp.json()) as ErrorBody).message).toBe('Ressource nicht gefunden');
+      } finally {
+        await close(server);
+      }
+    });
+  }
 });
 
 test.describe('responseCheck per mode', () => {
@@ -124,6 +172,27 @@ test.describe('responseCheck per mode', () => {
     expect(body.fieldErrors).toEqual({});
   });
 
+  for (const mode of ['test', 'development'] as const) {
+    test(`${mode}: circular body does not crash the server`, async () => {
+      const first = await fetch(`${urls[mode]}/api/firmen/1?case=circular`);
+      await first.text();
+      // test mode swaps in the standard 500; development fails in JSON.stringify and Express answers 500.
+      expect(first.status).toBe(500);
+      const second = await fetch(`${urls[mode]}/api/health`);
+      expect(second.status).toBe(200);
+    });
+  }
+
+  test('development: header carries printable ASCII only, at most 200 chars', async () => {
+    const resp = await fetch(`${urls.development}/api/firmen/1?case=header`);
+    expect(resp.status).toBe(500);
+    const header = resp.headers.get('x-contract-violation');
+    expect(header).not.toBeNull();
+    expect(header).toMatch(/^[\x20-\x7e]+$/);
+    expect(header?.length).toBeLessThanOrEqual(200);
+    expect(header).toContain('getFirma');
+  });
+
   test('a valid answer passes in test mode', async () => {
     const resp = await fetch(`${urls.test}/api/health`);
     expect(resp.status).toBe(200);
@@ -133,31 +202,70 @@ test.describe('responseCheck per mode', () => {
 test.describe('coverage file', () => {
   let dir: string;
   let saved: string | undefined;
-  let server: Server | undefined;
+  const servers: Server[] = [];
+
+  async function hitHealth(mode: ContractMode): Promise<void> {
+    const started = await listen(checkApp(mode));
+    servers.push(started.server);
+    const resp = await fetch(`${started.url}/api/health`);
+    expect(resp.status).toBe(200);
+    await resp.text();
+  }
+
+  async function waitForFile(file: string): Promise<boolean> {
+    for (let i = 0; i < 40; i++) {
+      if (existsSync(file)) return true;
+      await new Promise((r) => setTimeout(r, 25));
+    }
+    return false;
+  }
 
   test.beforeAll(() => {
     dir = mkdtempSync(join(tmpdir(), 'contract-cov-'));
     saved = process.env['CONTRACT_COVERAGE_FILE'];
-    delete process.env['CONTRACT_COVERAGE_FILE'];
+  });
+
+  test.afterEach(() => {
+    if (saved === undefined) delete process.env['CONTRACT_COVERAGE_FILE'];
+    else process.env['CONTRACT_COVERAGE_FILE'] = saved;
   });
 
   test.afterAll(async () => {
-    if (saved === undefined) delete process.env['CONTRACT_COVERAGE_FILE'];
-    else process.env['CONTRACT_COVERAGE_FILE'] = saved;
-    await close(server);
+    await Promise.all(servers.map((s) => close(s)));
     rmSync(dir, { recursive: true, force: true });
   });
 
-  test('no file appears while CONTRACT_COVERAGE_FILE is unset', async () => {
-    const file = join(dir, 'coverage.txt');
-    const started = await listen(checkApp('test'));
-    server = started.server;
-    const resp = await fetch(`${started.url}/api/health`);
-    expect(resp.status).toBe(200);
-    await resp.text();
-    // The finish handler runs after the response; give it a tick.
-    await new Promise((r) => setTimeout(r, 50));
+  test('unset: no file, no coverage error log', async () => {
+    delete process.env['CONTRACT_COVERAGE_FILE'];
+    const errors: unknown[][] = [];
+    const original = console.error;
+    console.error = (...args: unknown[]): void => {
+      errors.push(args);
+    };
+    try {
+      await hitHealth('test');
+      await new Promise((r) => setTimeout(r, 100));
+    } finally {
+      console.error = original;
+    }
+    expect(errors.filter((e) => String(e[0]).includes('coverage'))).toEqual([]);
+    expect(readdirSync(dir)).toEqual([]);
+  });
+
+  test('development and production write nothing even when set', async () => {
+    const file = join(dir, 'other.txt');
+    process.env['CONTRACT_COVERAGE_FILE'] = file;
+    await hitHealth('development');
+    await hitHealth('production');
+    await new Promise((r) => setTimeout(r, 100));
     expect(existsSync(file)).toBe(false);
-    expect(process.env['CONTRACT_COVERAGE_FILE']).toBeUndefined();
+  });
+
+  test('positive control: test mode with the env set records getHealth', async () => {
+    const file = join(dir, 'cov.txt');
+    process.env['CONTRACT_COVERAGE_FILE'] = file;
+    await hitHealth('test');
+    expect(await waitForFile(file)).toBe(true);
+    expect(readFileSync(file, 'utf8')).toBe('getHealth\n');
   });
 });
