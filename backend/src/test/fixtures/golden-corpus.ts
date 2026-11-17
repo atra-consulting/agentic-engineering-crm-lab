@@ -166,8 +166,9 @@ const optId = (name: string): FieldDef => ({
 const optIdPlain = (name: string): FieldDef => ({
   name,
   kind: 'number',
-  intText: NOT_WHOLE,
-  zeroText: DEFAULT_TEXT,
+  typeText: BAD_ID,
+  intText: BAD_ID,
+  zeroText: BAD_ID,
 });
 const requiredFirmaId: FieldDef = {
   name: 'firmaId',
@@ -175,7 +176,7 @@ const requiredFirmaId: FieldDef = {
   required: true,
   good: 1,
   typeText: 'Firma ist erforderlich',
-  intText: NOT_WHOLE,
+  intText: 'Firma ist erforderlich',
   zeroText: 'native',
 };
 const emailField: FieldDef = {
@@ -528,6 +529,7 @@ const rejectFields: FieldDef[] = [
     good: 'Golden Grund',
     nonEmpty: true,
     emptyText: 'Kommentar ist erforderlich',
+    typeText: 'Kommentar ist erforderlich',
     missingText: 'Kommentar ist erforderlich',
   },
 ];
