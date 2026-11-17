@@ -8,6 +8,8 @@ import { createApp, type ApiRouter } from '../app.js';
 import { operations } from './contract-helpers.js';
 
 interface Layer {
+  name?: string;
+  handle?: unknown;
   route?: { path: unknown; methods: Record<string, boolean> };
 }
 interface RouterLike {
@@ -21,6 +23,11 @@ const EXEMPT = (key: string): boolean => {
 
 function toContractPath(p: string): string {
   return p.replace(/:([A-Za-z0-9_]+)/g, '{$1}');
+}
+
+/** Router layers (app.use(router) or nested routers) that are not in `known`. */
+function unknownRouterLayers(stack: Layer[], known: unknown[]): number {
+  return stack.filter((l) => l.name === 'router' && !known.includes(l.handle)).length;
 }
 
 function collect(prefix: string, router: RouterLike, out: Set<string>): void {
@@ -47,10 +54,28 @@ test.describe('contract routes', () => {
   for (const { basePath, router } of apiRouters) {
     collect(basePath, router as unknown as RouterLike, actual);
   }
+  const topStack = (app as unknown as { _router: RouterLike })._router.stack;
   const expected = new Set(operations.map((o) => `${o.method} ${o.fullPath}`));
 
   test('app exposes the 12 api routers', () => {
     expect(apiRouters).toHaveLength(12);
+  });
+
+  test('app stack mounts exactly the known routers', () => {
+    expect(unknownRouterLayers(topStack, apiRouters.map((r) => r.router))).toBe(0);
+    const mounted = topStack.filter((l) => l.name === 'router').length;
+    expect(mounted).toBe(apiRouters.length);
+  });
+
+  test('routers contain no nested routers (the scan would miss them)', () => {
+    for (const { basePath, router } of apiRouters) {
+      const nested = (router as unknown as RouterLike).stack.filter((l) => l.name === 'router').length;
+      expect(nested, `nested router under ${basePath}`).toBe(0);
+    }
+  });
+
+  test('collected route count is at least the 79 contract operations', () => {
+    expect(actual.size).toBeGreaterThanOrEqual(79);
   });
 
   test('every contract operation has a route', () => {

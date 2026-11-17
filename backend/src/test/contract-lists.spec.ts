@@ -2,7 +2,8 @@
  * Contract lists: enums, sort fields, default sorts and roles/permissions in
  * the bundle equal their sources in code.
  */
-import { test, expect } from '@playwright/test';
+import { test, expect, type APIRequestContext } from '@playwright/test';
+import { loginCtx } from './helpers.js';
 import {
   CHANCE_PHASE,
   AKTIVITAET_TYP,
@@ -91,10 +92,21 @@ test.describe('contract lists: sort', () => {
       expect(sameSet(fields, Object.keys(ALLOWED_SORT_FIELDS[entity] ?? {}))).toBe(true);
     });
 
-    test(`${operationId} x-default-sort is ${DEFAULT_SORT[entity]}`, () => {
-      expect(getOp(operationId).raw['x-default-sort']).toBe(DEFAULT_SORT[entity]);
-    });
   }
+
+  test('expected lists are non-empty (guards empty-equals-empty)', () => {
+    expect(Object.keys(SCHEMA_ENUMS).length).toBeGreaterThan(0);
+    for (const [name, values] of Object.entries(SCHEMA_ENUMS)) expect(values.length, name).toBeGreaterThan(0);
+    for (const [opId, entity] of Object.entries(SORT_ENTITY)) {
+      expect(Object.keys(ALLOWED_SORT_FIELDS[entity] ?? {}).length, opId).toBeGreaterThan(0);
+      expect(getOp(opId).raw['x-sort-fields']?.length ?? 0, opId).toBeGreaterThan(0);
+    }
+    expect(USERS.length).toBeGreaterThan(0);
+  });
+
+  test('ALLOWED_SORT_FIELDS entities equal the mapped entities', () => {
+    expect(sameSet(Object.keys(ALLOWED_SORT_FIELDS), Object.values(SORT_ENTITY))).toBe(true);
+  });
 
   test('every operation that declares sort is in the map', () => {
     const withSort = operations
@@ -109,6 +121,46 @@ test.describe('contract lists: sort', () => {
       (id) => !resolveParameters(getOp(id)).some((p) => p.name === 'sort' && p.in === 'query'),
     );
     expect(noSort).toEqual([]);
+  });
+});
+
+test.describe('contract lists: default sort behaviour', () => {
+  let admin: APIRequestContext;
+  test.beforeAll(async () => {
+    admin = await loginCtx('admin', 'admin123');
+  });
+  test.afterAll(async () => {
+    await admin.dispose();
+  });
+
+  interface Page {
+    content: { id: number }[];
+  }
+
+  for (const [operationId, entity] of Object.entries(SORT_ENTITY)) {
+    test(`${operationId}: no sort equals sort=x-default-sort`, async () => {
+      const op = getOp(operationId);
+      const defaultSort = op.raw['x-default-sort'] ?? '';
+      const base = `${op.fullPath}?page=0&size=20`;
+      const plain = await admin.get(base);
+      expect(plain.status()).toBe(200);
+      const explicit = await admin.get(`${base}&sort=${encodeURIComponent(defaultSort)}`);
+      expect(explicit.status()).toBe(200);
+      const plainIds = ((await plain.json()) as Page).content.map((r) => r.id);
+      const explicitIds = ((await explicit.json()) as Page).content.map((r) => r.id);
+      if (plainIds.length < 2) {
+        // Order is not observable with fewer than 2 rows: fall back to the literal.
+        expect(defaultSort).toBe(DEFAULT_SORT[entity]);
+        return;
+      }
+      expect(explicitIds).toEqual(plainIds);
+    });
+  }
+
+  test('x-default-sort literals match the expected table', () => {
+    for (const [operationId, entity] of Object.entries(SORT_ENTITY)) {
+      expect(getOp(operationId).raw['x-default-sort'], operationId).toBe(DEFAULT_SORT[entity]);
+    }
   });
 });
 

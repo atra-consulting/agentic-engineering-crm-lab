@@ -3,10 +3,15 @@
  * at least once during the `api` project. The suite backend appends the
  * operationId to CONTRACT_COVERAGE_FILE (see globalSetup.ts).
  * Runs in its own project that depends on `api`.
+ *
+ * NOTE: filtered runs (a single spec file, --grep) fail by design, because the
+ * coverage file then misses the operations of the specs that did not run.
+ * Run the full suite for this project.
  */
 import { test, expect } from '@playwright/test';
 import { existsSync, readFileSync } from 'node:fs';
-import { COVERAGE_FILE, operations } from './contract-helpers.js';
+import { operations } from './contract-helpers.js';
+import { CONTRACT_COVERAGE_FILE as COVERAGE_FILE } from './globalSetup.js';
 import { COVERAGE_EXEMPTIONS } from './contract-coverage-exemptions.js';
 
 test.describe('contract coverage', () => {

@@ -86,6 +86,9 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
     CONTRACT_COVERAGE_FILE,
   };
 
+  // A shell value must not disable the contract response check in the suite backend.
+  delete env['CONTRACT_RESPONSE_CHECK'];
+
   const tsxBin = join(BACKEND_ROOT, 'backend', 'node_modules', '.bin', 'tsx');
   const indexTs = join(BACKEND_ROOT, 'backend', 'src', 'index.ts');
 

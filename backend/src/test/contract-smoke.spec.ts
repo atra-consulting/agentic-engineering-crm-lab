@@ -13,7 +13,7 @@
  */
 import { test, expect, request as playwrightRequest, type APIRequestContext } from '@playwright/test';
 import { loginCtx } from './helpers.js';
-import { deleteCronRuns } from './contract-helpers.js';
+import { cronRunBaseline, deleteCronRunsAbove } from './contract-helpers.js';
 
 const BASE_URL = 'http://localhost:7070';
 
@@ -26,12 +26,13 @@ let firmaId: number | undefined;
 let abteilungId: number | undefined;
 let personId: number | undefined;
 let chanceId: number | undefined;
-const createdCronRunIds: number[] = [];
+let cronBaseline = 0;
 
 test.describe.configure({ mode: 'serial' });
 
 test.beforeAll(async () => {
   admin = await loginCtx('admin', 'admin123');
+  cronBaseline = await cronRunBaseline();
 });
 
 test.afterAll(async () => {
@@ -40,7 +41,7 @@ test.afterAll(async () => {
   if (personId !== undefined) await admin.delete(`/api/personen/${personId}`);
   if (abteilungId !== undefined) await admin.delete(`/api/abteilungen/${abteilungId}`);
   if (firmaId !== undefined) await admin.delete(`/api/firmen/${firmaId}`);
-  await deleteCronRuns(createdCronRunIds);
+  await deleteCronRunsAbove(cronBaseline);
   await admin.dispose();
 });
 
@@ -145,7 +146,5 @@ test('firma tree: delete', async () => {
 
 test('triggerGithubIssuesRun: GET /api/cron/github-issues (no network, empty token)', async () => {
   const resp = await admin.get('/api/cron/github-issues');
-  const run = (await resp.json()) as Created;
-  createdCronRunIds.push(run.id);
   expect(resp.status()).toBe(200);
 });

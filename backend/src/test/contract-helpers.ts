@@ -10,7 +10,6 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export const BUNDLE_PATH = resolve(__dirname, '..', 'generated', 'openapi.json');
-export const COVERAGE_FILE = resolve(__dirname, '..', '..', 'data', 'contract-coverage.7070.test.jsonl');
 
 export const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const;
 export type HttpMethod = (typeof HTTP_METHODS)[number];
@@ -115,14 +114,17 @@ export function sameSet(a: readonly string[], b: readonly string[]): boolean {
 }
 
 /**
- * Delete exactly the given cron_run rows from the test DB. Other specs
- * (cron.spec.ts) assume no leftover runs. Dynamic import keeps the DB
- * connection out of specs that do not need it.
+ * cron_run cleanup. Other specs (cron.spec.ts) assume no leftover runs.
+ * Record the baseline in beforeAll, delete everything above it in afterAll.
+ * Dynamic import keeps the DB connection out of specs that do not need it.
  */
-export async function deleteCronRuns(ids: readonly number[]): Promise<void> {
-  if (ids.length === 0) return;
+export async function cronRunBaseline(): Promise<number> {
   const { client } = await import('../config/db.js');
-  for (const id of ids) {
-    await client.execute({ sql: 'DELETE FROM cron_run WHERE id = ?', args: [id] });
-  }
+  const rs = await client.execute('SELECT COALESCE(MAX(id), 0) AS m FROM cron_run');
+  return Number(rs.rows[0]?.['m'] ?? 0);
+}
+
+export async function deleteCronRunsAbove(baseline: number): Promise<void> {
+  const { client } = await import('../config/db.js');
+  await client.execute({ sql: 'DELETE FROM cron_run WHERE id > ?', args: [baseline] });
 }
