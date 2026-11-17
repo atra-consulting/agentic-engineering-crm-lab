@@ -25,11 +25,17 @@ Generated and committed (never edit):
 
 ## Workflow
 
-1. Edit the contract. New schema name → add it to `components.schemas` in `openapi.yaml`.
-2. `cd backend && npm run api:generate` (or `cd frontend && npm run api:generate`).
-3. Implement the backend. Adapt the web app. Both use the generated types.
-4. Run the tests. Run `cd backend && npm run api:check`.
-5. Commit the contract and the three generated files together.
+Adding an entity or endpoint:
+
+1. Edit the contract: paths and schemas with `operationId`, `security`, `x-error-messages`, `x-sort-fields` / `x-default-sort`. New schema name → add it to `components.schemas` in `openapi.yaml`.
+2. `cd backend && npm run api:generate` (or `cd frontend && npm run api:generate`, which delegates).
+3. Drizzle schema and `migrate.ts`.
+4. Service with the generated types (`Schema<'Firma'>`, `RequestBody<'createFirma'>`, `JsonResponse<'op', 200>`).
+5. Route: guard, then `specValidate`, then the handler.
+6. Web app: model alias of the generated type. Service calls `ApiClient` with the literal spec path.
+7. Tests. In test mode the response check turns a contract violation into 500. `contract-coverage` needs each operation to answer 2xx once.
+8. `cd backend && npm run api:check` must pass.
+9. Commit the contract and the three generated files together.
 
 `ng build`, `ng serve`, Karma and `start.sh` never regenerate.
 
@@ -146,7 +152,7 @@ Manual lint: `cd backend && npx redocly lint --config ../openapi/redocly.yaml ..
 - Sits on the property schema (or the path parameter schema). Keys are Ajv keywords: `required`, `type`, `const`, `enum`, `format`, `pattern`, `anyOf`, `oneOf`, `minLength`, `maxLength`, `minimum`, `maximum`, `exclusiveMinimum`, `exclusiveMaximum`, `multipleOf`, `minItems`, `maxItems`, `uniqueItems`.
 - `required` goes on the property, not on the object.
 - Placeholders: `{limit}`, `{min}`, `{max}`, `{value}`.
-- Write a text only where the mapper default is wrong. Mapper defaults (as planned for `backend/src/openapi/errorMapper.ts`):
+- Write a text only where the mapper default is wrong. Mapper defaults (in `backend/src/openapi/errorMapper.ts`):
 
 | Case | Default |
 |---|---|
