@@ -94,10 +94,162 @@
         }
       }
     },
-    "/auth/login": {},
-    "/auth/logout": {},
-    "/auth/me": {},
-    "/auth/test-login": {},
+    "/auth/login": {
+      "post": {
+        "operationId": "login",
+        "summary": "Log in with user name and password",
+        "description": "Starts a new session (the old session id is replaced) and sets the\ncookie `JSESSIONID` (httpOnly). Missing, empty or wrong credentials all\nanswer 401 `Ungültige Anmeldedaten`. The contract does not validate the\nbody.\n",
+        "tags": [
+          "auth"
+        ],
+        "security": [],
+        "x-skip-request-validation": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logged in.",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Session cookie `JSESSIONID=<id>; Path=/; HttpOnly`.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "logout",
+        "summary": "Log out",
+        "description": "Destroys the session and clears the cookie `JSESSIONID`. Always answers\n200 `{}`, also without a session.\n",
+        "tags": [
+          "auth"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logged out. Empty object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "getCurrentUser",
+        "summary": "Get the session user",
+        "tags": [
+          "auth"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The session user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BenutzerInfo"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/auth/test-login": {
+      "post": {
+        "operationId": "testLogin",
+        "summary": "Log in by user name only (test helper)",
+        "description": "Exists only in development and test. In production the route answers 404\n`{status, message}`. No password check. A missing `benutzername` answers\n401 `benutzername required`; an unknown user answers 401\n`Benutzer nicht gefunden`. Sets the cookie `JSESSIONID`. The contract does\nnot validate the body.\n",
+        "tags": [
+          "auth"
+        ],
+        "security": [],
+        "x-environments": [
+          "development",
+          "test"
+        ],
+        "x-skip-request-validation": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logged in.",
+            "headers": {
+              "Set-Cookie": {
+                "description": "Session cookie `JSESSIONID=<id>; Path=/; HttpOnly`.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
     "/firmen": {
       "get": {
         "operationId": "listFirmen",
@@ -436,53 +588,3115 @@
         }
       }
     },
-    "/personen": {},
-    "/personen/all": {},
-    "/personen/{id}": {},
-    "/abteilungen": {},
-    "/abteilungen/all": {},
-    "/abteilungen/firma/{firmaId}": {},
-    "/abteilungen/{id}": {},
-    "/abteilungen/{id}/personen": {},
-    "/adressen": {},
-    "/adressen/all": {},
-    "/adressen/{id}": {},
-    "/aktivitaeten": {},
-    "/aktivitaeten/all": {},
-    "/aktivitaeten/{id}": {},
-    "/chancen": {},
-    "/chancen/all": {},
-    "/chancen/{id}": {},
-    "/dashboard": {},
-    "/szenarien": {},
-    "/szenarien/{id}": {},
-    "/agent-tasks/next": {},
-    "/agent-tasks/summary": {},
-    "/agent-tasks/reset": {},
-    "/agent-tasks/{id}/start": {},
-    "/agent-tasks/{id}/reject": {},
-    "/agent-tasks/{id}/done": {},
-    "/agent-tasks/{id}": {},
-    "/agent-tasks": {},
-    "/tickets/next": {},
-    "/tickets/board": {},
-    "/tickets/summary": {},
-    "/tickets/reset": {},
-    "/tickets": {},
-    "/tickets/{id}": {},
-    "/tickets/{id}/status": {},
-    "/tickets/{id}/owner": {},
-    "/tickets/{id}/start": {},
-    "/tickets/{id}/done": {},
-    "/tickets/{id}/ask": {},
-    "/tickets/{id}/wont-do": {},
-    "/tickets/{id}/hand-to-ai": {},
-    "/tickets/{id}/comments": {},
-    "/cron/agent-tasks": {},
-    "/cron/github-issues": {},
-    "/cron/runs/{id}/complete": {},
-    "/cron/runs": {},
-    "/cron/jobs": {}
+    "/personen": {
+      "get": {
+        "operationId": "listPersonen",
+        "summary": "List contacts (paged)",
+        "description": "`search` matches `firstName` or `lastName` (case-insensitive substring).\n`abteilungId` filters by department. It is lenient: a missing, non-numeric\nor non-positive value is ignored.\n",
+        "tags": [
+          "personen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-sort-fields": [
+          "firstName",
+          "lastName",
+          "email",
+          "position",
+          "createdAt",
+          "updatedAt"
+        ],
+        "x-default-sort": "lastName,ASC",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SearchQuery"
+          },
+          {
+            "name": "abteilungId",
+            "in": "query",
+            "required": false,
+            "description": "Only contacts of this department. Ignored when missing, non-numeric or not positive.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SortQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of contacts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createPerson",
+        "summary": "Create a contact",
+        "description": "Answers the new record as read back from the database.",
+        "tags": [
+          "personen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/personen/all": {
+      "get": {
+        "operationId": "listAllPersonen",
+        "summary": "List all contacts (not paged)",
+        "description": "Sorted by `lastName`, then `firstName`, ascending. The optional\n`abteilungId` filter is lenient: a missing, non-numeric or non-positive\nvalue is ignored.\n",
+        "tags": [
+          "personen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "abteilungId",
+            "in": "query",
+            "required": false,
+            "description": "Only contacts of this department. Ignored when missing, non-numeric or not positive.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The all contacts (not paged).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Person"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/personen/{id}": {
+      "get": {
+        "operationId": "getPerson",
+        "summary": "Get one contact",
+        "tags": [
+          "personen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The contact.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updatePerson",
+        "summary": "Update contact (full replace)",
+        "description": "Overwrites every field. Optional fields left out are stored as null, including `abteilungId`.\nAnswers the record as read back from the database.\n",
+        "tags": [
+          "personen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersonInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePerson",
+        "summary": "Delete contact",
+        "description": "Cascades to the contact's addresses and activities. Opportunities that name the contact lose that link (`kontaktPersonId` becomes null).",
+        "tags": [
+          "personen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted. No body."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/abteilungen": {
+      "get": {
+        "operationId": "listAbteilungen",
+        "summary": "List departments (paged)",
+        "description": "No `search`.\n",
+        "tags": [
+          "abteilungen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-sort-fields": [
+          "name",
+          "firmaId",
+          "createdAt",
+          "updatedAt"
+        ],
+        "x-default-sort": "name,ASC",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SortQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of departments.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbteilungPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAbteilung",
+        "summary": "Create a department",
+        "description": "Answers the new record as read back from the database.",
+        "tags": [
+          "abteilungen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbteilungInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Abteilung"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/abteilungen/all": {
+      "get": {
+        "operationId": "listAllAbteilungen",
+        "summary": "List all departments (not paged)",
+        "description": "Sorted by `name` ascending.",
+        "tags": [
+          "abteilungen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The all departments (not paged).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Abteilung"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/abteilungen/firma/{firmaId}": {
+      "get": {
+        "operationId": "listAbteilungenByFirma",
+        "summary": "List the departments of a company (not paged)",
+        "description": "A plain array sorted by `name` ascending. An unknown company id answers\nan empty array, not 404.\n",
+        "tags": [
+          "abteilungen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/FirmaIdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The departments of the company.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Abteilung"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/abteilungen/{id}": {
+      "get": {
+        "operationId": "getAbteilung",
+        "summary": "Get one department",
+        "tags": [
+          "abteilungen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The department.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Abteilung"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateAbteilung",
+        "summary": "Update department (full replace)",
+        "description": "Overwrites every field. Optional fields left out are stored as null.\nAnswers the record as read back from the database.\n",
+        "tags": [
+          "abteilungen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AbteilungInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Abteilung"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAbteilung",
+        "summary": "Delete department",
+        "description": "Contacts of the department stay; their `abteilungId` becomes null.",
+        "tags": [
+          "abteilungen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted. No body."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/abteilungen/{id}/personen": {
+      "get": {
+        "operationId": "listAbteilungPersonen",
+        "summary": "List the contacts of a department (paged)",
+        "description": "Fixed order: `lastName`, then `firstName`, ascending. No `sort` and no\n`search`. An unknown department id answers 404.\n",
+        "tags": [
+          "abteilungen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          },
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of contacts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/adressen": {
+      "get": {
+        "operationId": "listAdressen",
+        "summary": "List addresses (paged)",
+        "description": "`search` matches `city` (case-insensitive substring).\n",
+        "tags": [
+          "adressen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-sort-fields": [
+          "city",
+          "postalCode",
+          "street",
+          "createdAt",
+          "updatedAt"
+        ],
+        "x-default-sort": "city,ASC",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SearchQuery"
+          },
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SortQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of addresses.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdressePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAdresse",
+        "summary": "Create an address",
+        "description": "Answers the new record as read back from the database.",
+        "tags": [
+          "adressen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdresseInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Adresse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/adressen/all": {
+      "get": {
+        "operationId": "listAllAdressen",
+        "summary": "List all addresses (not paged)",
+        "description": "Sorted by `city` ascending.",
+        "tags": [
+          "adressen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The all addresses (not paged).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Adresse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/adressen/{id}": {
+      "get": {
+        "operationId": "getAdresse",
+        "summary": "Get one address",
+        "tags": [
+          "adressen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The address.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Adresse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateAdresse",
+        "summary": "Update address (full replace)",
+        "description": "Overwrites every field. Optional fields left out are stored as null, except `latitude` and `longitude`: a left-out value keeps the current one (an explicit null clears it).\nAnswers the record as read back from the database.\n",
+        "tags": [
+          "adressen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdresseInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Adresse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAdresse",
+        "summary": "Delete address",
+        "description": "Deletes the single address only.",
+        "tags": [
+          "adressen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted. No body."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/aktivitaeten": {
+      "get": {
+        "operationId": "listAktivitaeten",
+        "summary": "List activities (paged)",
+        "description": "Paged list. No `search` filter.\n",
+        "tags": [
+          "aktivitaeten"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-sort-fields": [
+          "datum",
+          "typ",
+          "subject",
+          "createdAt",
+          "updatedAt"
+        ],
+        "x-default-sort": "datum,DESC",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SortQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of activities.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AktivitaetPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAktivitaet",
+        "summary": "Create an activity",
+        "tags": [
+          "aktivitaeten"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AktivitaetInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aktivitaet"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/aktivitaeten/all": {
+      "get": {
+        "operationId": "listAllAktivitaeten",
+        "summary": "List all activities (not paged)",
+        "description": "Every activity, sorted by `datum` descending.",
+        "tags": [
+          "aktivitaeten"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All activities.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Aktivitaet"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/aktivitaeten/{id}": {
+      "get": {
+        "operationId": "getAktivitaet",
+        "summary": "Get one an activity",
+        "tags": [
+          "aktivitaeten"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The an activity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aktivitaet"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateAktivitaet",
+        "summary": "Update an activity (full replace)",
+        "description": "Overwrites every field. Optional fields left out are stored as null (or reset to their default).",
+        "tags": [
+          "aktivitaeten"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AktivitaetInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Aktivitaet"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAktivitaet",
+        "summary": "Delete an activity",
+        "tags": [
+          "aktivitaeten"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted. No body."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/chancen": {
+      "get": {
+        "operationId": "listChancen",
+        "summary": "List opportunities (paged)",
+        "description": "Paged list. `search` matches `titel` (case-insensitive substring, trimmed).\nIf `search` is repeated, only the first value counts. `phase` filters by exact phase.\n",
+        "tags": [
+          "chancen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-sort-fields": [
+          "titel",
+          "wert",
+          "phase",
+          "wahrscheinlichkeit",
+          "erwartetesDatum",
+          "createdAt",
+          "updatedAt"
+        ],
+        "x-default-sort": "createdAt,DESC",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SearchQuery"
+          },
+          {
+            "name": "phase",
+            "in": "query",
+            "required": false,
+            "description": "Exact-match phase filter. An unknown value answers 400 with message\n`Ungültiger phase-Wert: <value>. Erlaubt: NEU, QUALIFIZIERT, ANGEBOT, VERHANDLUNG, GEWONNEN, VERLOREN`\nand `fieldErrors.phase`.\n",
+            "schema": {
+              "$ref": "#/components/schemas/ChancePhase"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SortQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of opportunities.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChancePage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createChance",
+        "summary": "Create an opportunity",
+        "tags": [
+          "chancen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChanceInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chance"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/chancen/all": {
+      "get": {
+        "operationId": "listAllChancen",
+        "summary": "List all opportunities (not paged)",
+        "description": "Every opportunity, sorted by `createdAt` descending.",
+        "tags": [
+          "chancen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All opportunities.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Chance"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/chancen/{id}": {
+      "get": {
+        "operationId": "getChance",
+        "summary": "Get one an opportunity",
+        "tags": [
+          "chancen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The an opportunity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chance"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateChance",
+        "summary": "Update an opportunity (full replace)",
+        "description": "Overwrites every field. Optional fields left out are stored as null (or reset to their default).",
+        "tags": [
+          "chancen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChanceInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chance"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteChance",
+        "summary": "Delete an opportunity",
+        "tags": [
+          "chancen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted. No body."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/dashboard": {
+      "get": {
+        "operationId": "getDashboard",
+        "summary": "Get the dashboard data",
+        "description": "Counters plus the 5 newest opportunities and activities. The whole\nrouter is guarded with `router.use(requireAuth)`.\n",
+        "tags": [
+          "dashboard"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dashboard data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardData"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/szenarien": {
+      "get": {
+        "operationId": "listSzenarien",
+        "summary": "List scenarios",
+        "description": "Plain array (not paged), newest `createdAt` first.",
+        "tags": [
+          "szenarien"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All scenarios.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Szenario"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createSzenario",
+        "summary": "Create a scenario",
+        "tags": [
+          "szenarien"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SzenarioInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Szenario"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/szenarien/{id}": {
+      "get": {
+        "operationId": "getSzenario",
+        "summary": "Get one scenario",
+        "tags": [
+          "szenarien"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The scenario.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Szenario"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateSzenario",
+        "summary": "Update a scenario (full replace)",
+        "tags": [
+          "szenarien"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SzenarioInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Szenario"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteSzenario",
+        "summary": "Delete a scenario",
+        "tags": [
+          "szenarien"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/agent-tasks/next": {
+      "get": {
+        "operationId": "claimNextAgentTask",
+        "summary": "Claim the oldest open task of a source",
+        "description": "Sets the oldest `OPEN` task of `source` to `IN_PROGRESS` and answers it.\n`source` is required and checked in code (400 when missing or not an\nenum value). Answers 204 without body when no task is open.\nA wrong agent token never falls through to a session: it answers 401. Needs `AGENT_API_TOKEN` to be configured, also for the loopback bypass.\n",
+        "tags": [
+          "agent-tasks"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": true,
+            "description": "Task source. Checked in code, not by schema validation.",
+            "schema": {
+              "$ref": "#/components/schemas/AgentTaskSource"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The claimed task.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTask"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No open task for this source."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/agent-tasks/summary": {
+      "get": {
+        "operationId": "getAgentTaskSummary",
+        "summary": "Count tasks per source and status",
+        "description": "One entry per source. All four sources always appear.",
+        "tags": [
+          "agent-tasks"
+        ],
+        "security": [
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Counts per source.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AgentTaskSummary"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/agent-tasks/reset": {
+      "post": {
+        "operationId": "resetAgentTasks",
+        "summary": "Set every task back to OPEN",
+        "description": "Clears `comment`, `pickedUpAt` and `resolvedAt` on all rows. The body is optional and ignored.",
+        "tags": [
+          "agent-tasks"
+        ],
+        "security": [
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Number of rows reset.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTaskResetResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/agent-tasks/{id}/start": {
+      "post": {
+        "operationId": "startAgentTask",
+        "summary": "Start a task",
+        "description": "`OPEN` → `IN_PROGRESS`. Answers 409 when the task is not `OPEN`. The body is optional and ignored.\nA wrong agent token never falls through to a session: it answers 401.\n",
+        "tags": [
+          "agent-tasks"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The started task.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTask"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/agent-tasks/{id}/reject": {
+      "post": {
+        "operationId": "rejectAgentTask",
+        "summary": "Reject a task",
+        "description": "Sets `REJECTED` with the comment. Answers 409 when the task is already `DONE` or `REJECTED`.\nA wrong agent token never falls through to a session: it answers 401.\n",
+        "tags": [
+          "agent-tasks"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentTaskRejectInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The rejected task.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTask"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/agent-tasks/{id}/done": {
+      "post": {
+        "operationId": "completeAgentTask",
+        "summary": "Mark a task as done",
+        "description": "Sets `DONE` with an optional comment. Answers 409 when the task is already `DONE` or `REJECTED`.\nA wrong agent token never falls through to a session: it answers 401.\n",
+        "tags": [
+          "agent-tasks"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentTaskDoneInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The completed task.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTask"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/agent-tasks/{id}": {
+      "get": {
+        "operationId": "getAgentTask",
+        "summary": "Get one task",
+        "description": "Agent token, loopback bypass or admin session. A non-admin session answers 403.\nA wrong agent token never falls through to a session: it answers 401.\n",
+        "tags": [
+          "agent-tasks"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          },
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The task.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTask"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/agent-tasks": {
+      "get": {
+        "operationId": "listAgentTasks",
+        "summary": "List tasks (paged)",
+        "description": "Optional filters `source` and `status`. A value outside the enum answers 400.",
+        "tags": [
+          "agent-tasks"
+        ],
+        "security": [
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-sort-fields": [
+          "createdAt",
+          "updatedAt",
+          "status",
+          "source",
+          "title"
+        ],
+        "x-default-sort": "createdAt,DESC",
+        "parameters": [
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "description": "Filter by source.",
+            "schema": {
+              "$ref": "#/components/schemas/AgentTaskSource"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter by status.",
+            "schema": {
+              "$ref": "#/components/schemas/AgentTaskStatus"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SortQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of tasks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentTaskPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/tickets/next": {
+      "get": {
+        "operationId": "claimNextTicket",
+        "summary": "Claim the next ticket",
+        "description": "Atomic claim: the oldest `TODO` + `AI` ticket becomes `IN_PROGRESS` (sets `pickedUpAt`).\nOptional `type` filter. Answers 204 when no ticket matches.\nAgent token or loopback only. A session cookie is not accepted, because this GET changes state (CSRF).\nA wrong agent token answers 401 and never falls through to a session.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Ticket type filter. An unknown value answers 400 `Ungültiger Ticket-Typ: <value>`.",
+            "schema": {
+              "$ref": "#/components/schemas/TicketType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The claimed ticket with comments.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No claimable ticket. No body."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/tickets/board": {
+      "get": {
+        "operationId": "getTicketBoard",
+        "summary": "Get the Kanban board",
+        "description": "Five columns, each an array of list items (with `commentCount`), oldest first.\nAny logged-in session (no admin needed) or an agent token.\nA wrong agent token answers 401 and never falls through to a session.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          },
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-loopback-bypass": true,
+        "responses": {
+          "200": {
+            "description": "The board.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketBoard"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/tickets/summary": {
+      "get": {
+        "operationId": "getTicketSummary",
+        "summary": "Get ticket counts",
+        "description": "Counts by status, type, owner and solution. Any logged-in session. Agent tokens are not accepted.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The counts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketSummary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/tickets/reset": {
+      "post": {
+        "operationId": "resetTickets",
+        "summary": "Reset to the workshop tickets",
+        "description": "Deletes all tickets and comments, then re-seeds the workshop tickets. Admin session only.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Re-seeded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketResetResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/tickets": {
+      "get": {
+        "operationId": "listTickets",
+        "summary": "List tickets (paged)",
+        "description": "Paged list of list items (with `commentCount`). Admin session only.\nFilters `type`, `status`, `owner`: an unknown value answers 400 (`Ungültiger Ticket-Typ: <value>`, `Ungültiger Status: <value>`, `Ungültiger Eigentümer: <value>`).\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-sort-fields": [
+          "createdAt",
+          "updatedAt",
+          "status",
+          "type",
+          "owner",
+          "title"
+        ],
+        "x-default-sort": "createdAt,DESC",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SortQuery"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "description": "Filter by type.",
+            "schema": {
+              "$ref": "#/components/schemas/TicketType"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Filter by status.",
+            "schema": {
+              "$ref": "#/components/schemas/TicketStatus"
+            }
+          },
+          {
+            "name": "owner",
+            "in": "query",
+            "required": false,
+            "description": "Filter by owner.",
+            "schema": {
+              "$ref": "#/components/schemas/TicketOwner"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of tickets.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketListItemPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createTicket",
+        "summary": "Create a ticket",
+        "description": "New ticket starts as `owner=HUMAN`, `status=DEFINITION`, without comments.\nAn unknown `agentTaskId` answers 400 with a field error on `agentTaskId`.\nAgent token, loopback or admin session.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          },
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-loopback-bypass": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/tickets/{id}": {
+      "get": {
+        "operationId": "getTicket",
+        "summary": "Get one ticket",
+        "description": "Ticket with comments. Any logged-in session (no admin needed) or an agent token.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          },
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ticket.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/tickets/{id}/status": {
+      "patch": {
+        "operationId": "setTicketStatus",
+        "summary": "Set the status",
+        "description": "Moves the ticket to any column. Into `DONE` sets `solution=DONE` and `resolvedAt`. Out of `DONE` clears both. Owner never changes.\nAgent token, loopback or admin session.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          },
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketStatusInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated ticket.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/tickets/{id}/owner": {
+      "patch": {
+        "operationId": "setTicketOwner",
+        "summary": "Set the owner",
+        "description": "Changes the owner only. `AI` keeps the ticket in `DEFINITION`. Agent token, loopback or admin session.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          },
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketOwnerInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated ticket.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/tickets/{id}/start": {
+      "post": {
+        "operationId": "startTicket",
+        "summary": "Start a specific ticket",
+        "description": "Claims by id: `TODO` + `AI` becomes `IN_PROGRESS`. Any other state answers 409.\nAgent token, loopback or admin session.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          },
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated ticket.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/tickets/{id}/done": {
+      "post": {
+        "operationId": "completeTicket",
+        "summary": "Finish a ticket",
+        "description": "`IN_PROGRESS` becomes `DONE` with `solution=DONE`. Any other state answers 409.\nAn optional `comment` is stored as an `AGENT` comment. Agent token, loopback or admin session.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          },
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketDoneInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated ticket.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/tickets/{id}/ask": {
+      "post": {
+        "operationId": "askTicketQuestion",
+        "summary": "Ask a question",
+        "description": "`IN_PROGRESS` becomes `ON_HOLD`, owner `HUMAN`. Any other state answers 409.\nThe question is stored as an `AGENT` comment. Agent token, loopback or admin session.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          },
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketAskInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated ticket.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/tickets/{id}/wont-do": {
+      "post": {
+        "operationId": "markTicketWontDo",
+        "summary": "Mark as Won't Do",
+        "description": "Resolves a ticket with `solution=WONT_DO`. Only allowed when the status is not `DONE` and the owner is `HUMAN`, else 409.\nAn optional `comment` is stored as a `HUMAN` comment. Admin session only.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketWontDoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated ticket.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/tickets/{id}/hand-to-ai": {
+      "post": {
+        "operationId": "handTicketToAi",
+        "summary": "Hand a ticket to the AI",
+        "description": "Only from `DEFINITION`, else 409. Sets owner `AI` and status `TODO`. Admin session only.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyObject"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated ticket.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/tickets/{id}/comments": {
+      "post": {
+        "operationId": "addTicketComment",
+        "summary": "Add a comment",
+        "description": "Appends a comment, author defaults to `HUMAN`. `handBackToAi` needs an `ON_HOLD` + `HUMAN` ticket, else 409.\nAnswers 403 when `author=AGENT` comes with an authenticated session cookie, also on loopback. Only an agent token or loopback without a session may post as `AGENT`.\nAgent token, loopback or admin session.\n",
+        "tags": [
+          "tickets"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          },
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TicketCommentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated ticket.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketDetail"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/cron/agent-tasks": {
+      "get": {
+        "operationId": "triggerAgentTasksRun",
+        "summary": "Trigger the agent-task runner",
+        "description": "Job `solve-tasks`. Skips when a run is already `RUNNING` or no agent task is `OPEN`.\nAuth: `CRON_SECRET` bearer or admin session. A wrong `CRON_SECRET` falls\nthrough to the session check. A non-admin session answers 401, not 403.\nAlways answers 200 with the run, also when the run was skipped or the\nGitHub dispatch failed (then `status` is `SKIPPED` or `FAILED`).\n",
+        "tags": [
+          "cron"
+        ],
+        "security": [
+          {
+            "cronBearer": []
+          },
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cron run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CronRun"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/cron/github-issues": {
+      "get": {
+        "operationId": "triggerGithubIssuesRun",
+        "summary": "Trigger the GitHub-issue agent",
+        "description": "Job `solve-github-issues`. Skips when a run is already `RUNNING`.\nAuth: `CRON_SECRET` bearer or admin session. A wrong `CRON_SECRET` falls\nthrough to the session check. A non-admin session answers 401, not 403.\nAlways answers 200 with the run, also when the run was skipped or the\nGitHub dispatch failed (then `status` is `SKIPPED` or `FAILED`).\n",
+        "tags": [
+          "cron"
+        ],
+        "security": [
+          {
+            "cronBearer": []
+          },
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cron run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CronRun"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/cron/runs/{id}/complete": {
+      "post": {
+        "operationId": "completeCronRun",
+        "summary": "Report the result of a run",
+        "description": "Called by the GitHub workflow when it finishes. Sets status, counts and run URL.\nA wrong agent token never falls through to a session: it answers 401.\n",
+        "tags": [
+          "cron"
+        ],
+        "security": [
+          {
+            "agentBearer": []
+          },
+          {
+            "agentHeader": []
+          }
+        ],
+        "x-loopback-bypass": true,
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CronRunCompleteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The completed run.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CronRun"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/cron/runs": {
+      "get": {
+        "operationId": "listCronRuns",
+        "summary": "List cron runs (paged)",
+        "description": "Optional exact-match `job` filter. An empty `job` means no filter.",
+        "tags": [
+          "cron"
+        ],
+        "security": [
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "x-sort-fields": [
+          "startedAt",
+          "finishedAt",
+          "status",
+          "job",
+          "trigger"
+        ],
+        "x-default-sort": "startedAt,DESC",
+        "parameters": [
+          {
+            "name": "job",
+            "in": "query",
+            "required": false,
+            "description": "Job name, for example `solve-tasks`.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SortQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of runs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CronRunPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/cron/jobs": {
+      "get": {
+        "operationId": "listCronJobs",
+        "summary": "List configured cron jobs",
+        "description": "Every job with its newest run. `lastRun` is null when it never ran.",
+        "tags": [
+          "cron"
+        ],
+        "security": [
+          {
+            "sessionCookie": [
+              "ADMIN"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All jobs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CronJob"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    }
   },
   "components": {
     "securitySchemes": {
@@ -604,12 +3818,121 @@
           }
         }
       },
-      "LoginRequest": {},
-      "LoginResponse": {},
-      "BenutzerInfo": {},
-      "TestLoginRequest": {},
-      "Rolle": {},
-      "Permission": {},
+      "LoginRequest": {
+        "type": "object",
+        "description": "Credentials. Both fields are optional in the contract: the route is not\nvalidated by the contract (`x-skip-request-validation`). A missing or empty\nfield answers 401 `Ungültige Anmeldedaten`, not 400.\n",
+        "properties": {
+          "benutzername": {
+            "type": "string"
+          },
+          "passwort": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "description": "The logged-in user (short form). The session id travels in the `Set-Cookie` header.",
+        "additionalProperties": false,
+        "required": [
+          "benutzername",
+          "vorname",
+          "nachname",
+          "rollen"
+        ],
+        "properties": {
+          "benutzername": {
+            "type": "string"
+          },
+          "vorname": {
+            "type": "string"
+          },
+          "nachname": {
+            "type": "string"
+          },
+          "rollen": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rolle"
+            }
+          }
+        }
+      },
+      "BenutzerInfo": {
+        "type": "object",
+        "description": "The session user (long form) for `GET /auth/me`.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "benutzername",
+          "vorname",
+          "nachname",
+          "email",
+          "rollen",
+          "permissions"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "benutzername": {
+            "type": "string"
+          },
+          "vorname": {
+            "type": "string"
+          },
+          "nachname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "description": "Not stored. Built as `<benutzername>@crm.local`."
+          },
+          "rollen": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Rolle"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "description": "Listed on the user but not enforced by any middleware.",
+            "items": {
+              "$ref": "#/components/schemas/Permission"
+            }
+          }
+        }
+      },
+      "TestLoginRequest": {
+        "type": "object",
+        "description": "Test login by name only, no password. A missing or empty `benutzername`\nanswers 401 `benutzername required`.\n",
+        "properties": {
+          "benutzername": {
+            "type": "string"
+          }
+        }
+      },
+      "Rolle": {
+        "type": "string",
+        "description": "Role, the name from `users.ts` with the prefix `ROLE_`.",
+        "enum": [
+          "ROLE_ADMIN",
+          "ROLE_USER"
+        ]
+      },
+      "Permission": {
+        "type": "string",
+        "description": "Permission on a user. Informational only.",
+        "enum": [
+          "FIRMEN",
+          "PERSONEN",
+          "ABTEILUNGEN",
+          "ADRESSEN",
+          "AKTIVITAETEN",
+          "CHANCEN",
+          "BENUTZERVERWALTUNG"
+        ]
+      },
       "Firma": {
         "type": "object",
         "description": "A company. `adressen` appears only on single-record answers\n(get, create, update), never in lists.\n",
@@ -855,63 +4178,2350 @@
         ],
         "unevaluatedProperties": false
       },
-      "Person": {},
-      "PersonInput": {},
-      "PersonPage": {},
-      "Abteilung": {},
-      "AbteilungInput": {},
-      "AbteilungPage": {},
-      "Adresse": {},
-      "AdresseInput": {},
-      "AdressePage": {},
-      "Aktivitaet": {},
-      "AktivitaetInput": {},
-      "AktivitaetPage": {},
-      "AktivitaetTyp": {},
-      "Chance": {},
-      "ChanceInput": {},
-      "ChancePage": {},
-      "ChancePhase": {},
-      "DashboardData": {},
-      "RecentChance": {},
-      "RecentAktivitaet": {},
-      "Szenario": {},
-      "SzenarioInput": {},
-      "ProzessDauer": {},
-      "AgentTask": {},
-      "AgentTaskPage": {},
-      "AgentTaskSummary": {},
-      "AgentTaskSource": {},
-      "AgentTaskStatus": {},
-      "AgentTaskRejectInput": {},
-      "AgentTaskDoneInput": {},
-      "AgentTaskResetResult": {},
-      "CronRun": {},
-      "CronRunPage": {},
-      "CronJob": {},
-      "CronJobLastRun": {},
-      "CronRunStatus": {},
-      "CronTrigger": {},
-      "CronRunCompleteInput": {},
-      "TicketDetail": {},
-      "TicketListItem": {},
-      "TicketListItemPage": {},
-      "TicketBoard": {},
-      "TicketSummary": {},
-      "TicketComment": {},
-      "TicketCreateInput": {},
-      "TicketStatusInput": {},
-      "TicketOwnerInput": {},
-      "TicketAskInput": {},
-      "TicketDoneInput": {},
-      "TicketWontDoInput": {},
-      "TicketCommentInput": {},
-      "TicketResetResult": {},
-      "TicketOwner": {},
-      "TicketType": {},
-      "TicketStatus": {},
-      "TicketSolution": {},
-      "TicketCommentAuthor": {}
+      "Person": {
+        "type": "object",
+        "description": "A contact person. `firmaName` and `abteilungName` come from a join.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "phone",
+          "position",
+          "notes",
+          "firmaId",
+          "firmaName",
+          "abteilungId",
+          "abteilungName",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "position": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "firmaId": {
+            "type": "integer"
+          },
+          "firmaName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "abteilungId": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "abteilungName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          }
+        }
+      },
+      "PersonInput": {
+        "type": "object",
+        "description": "Body for create and full update. Required: `firstName`, `lastName`, `firmaId`.\nA left-out optional field is stored as null. Unknown fields are stripped.\n",
+        "required": [
+          "firstName",
+          "lastName",
+          "firmaId"
+        ],
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "x-error-messages": {
+              "required": "Vorname ist erforderlich",
+              "type": "Vorname ist erforderlich",
+              "minLength": "Vorname ist erforderlich"
+            }
+          },
+          "lastName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "x-error-messages": {
+              "required": "Nachname ist erforderlich",
+              "type": "Nachname ist erforderlich",
+              "minLength": "Nachname ist erforderlich"
+            }
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A valid email address, the empty string, or null.",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "string",
+                "const": ""
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-error-messages": {
+              "type": "Ungültige E-Mail-Adresse",
+              "anyOf": "Ungültige E-Mail-Adresse",
+              "format": "Ungültige E-Mail-Adresse",
+              "const": "Ungültige E-Mail-Adresse"
+            }
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "position": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "firmaId": {
+            "type": "integer",
+            "minimum": 1,
+            "x-error-messages": {
+              "required": "Firma ist erforderlich",
+              "type": "Firma ist erforderlich",
+              "minimum": "Firma ist erforderlich"
+            }
+          },
+          "abteilungId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "x-error-messages": {
+              "type": "Ungültige ID",
+              "minimum": "Ungültige ID"
+            }
+          }
+        }
+      },
+      "PersonPage": {
+        "type": "object",
+        "description": "One page of contacts.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Person"
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "Abteilung": {
+        "type": "object",
+        "description": "A department. `firmaName` comes from a join; `personenCount` is computed.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "description",
+          "firmaId",
+          "firmaName",
+          "personenCount",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "firmaId": {
+            "type": "integer"
+          },
+          "firmaName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "personenCount": {
+            "type": "integer",
+            "description": "Number of contacts in this department (computed, not stored)."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          }
+        }
+      },
+      "AbteilungInput": {
+        "type": "object",
+        "description": "Body for create and full update. Required: `name`, `firmaId`.\nA left-out `description` is stored as null. Unknown fields are stripped.\n",
+        "required": [
+          "name",
+          "firmaId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "x-error-messages": {
+              "required": "Name ist erforderlich",
+              "type": "Name ist erforderlich",
+              "minLength": "Name ist erforderlich"
+            }
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "firmaId": {
+            "type": "integer",
+            "minimum": 1,
+            "x-error-messages": {
+              "required": "Firma ist erforderlich",
+              "type": "Firma ist erforderlich",
+              "minimum": "Firma ist erforderlich"
+            }
+          }
+        }
+      },
+      "AbteilungPage": {
+        "type": "object",
+        "description": "One page of departments.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Abteilung"
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "Adresse": {
+        "type": "object",
+        "description": "An address, linked to a company, a person, both or neither.\n`firmaName` and `personName` come from joins.\n",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "street",
+          "houseNumber",
+          "postalCode",
+          "city",
+          "country",
+          "typ",
+          "firmaId",
+          "firmaName",
+          "personId",
+          "personName",
+          "latitude",
+          "longitude",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "street": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "houseNumber": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "postalCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "typ": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Free text, for example `HAUPTQUARTIER` or `NIEDERLASSUNG`."
+          },
+          "firmaId": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "firmaName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "personId": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "personName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "First and last name joined by a space; null when the address has no person."
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          }
+        }
+      },
+      "AdresseInput": {
+        "type": "object",
+        "description": "Body for create and full update. Every field is optional.\nOn update, a left-out text or id field is stored as null, but a left-out\n`latitude` or `longitude` keeps its current value (an explicit null clears it).\nUnknown fields are stripped.\n",
+        "properties": {
+          "street": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255
+          },
+          "houseNumber": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "postalCode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "country": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "typ": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "firmaId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "x-error-messages": {
+              "type": "Ungültige ID",
+              "minimum": "Ungültige ID"
+            }
+          },
+          "personId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "x-error-messages": {
+              "type": "Ungültige ID",
+              "minimum": "Ungültige ID"
+            }
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": -90,
+            "maximum": 90
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      },
+      "AdressePage": {
+        "type": "object",
+        "description": "One page of addresses.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Adresse"
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "Aktivitaet": {
+        "type": "object",
+        "description": "An activity (call, email, meeting, note, task), optionally linked to a company and a contact.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "typ",
+          "subject",
+          "description",
+          "datum",
+          "firmaId",
+          "firmaName",
+          "personId",
+          "personName",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "typ": {
+            "$ref": "#/components/schemas/AktivitaetTyp"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "datum": {
+            "type": "string",
+            "description": "Free text as sent by the client (no format enforced)."
+          },
+          "firmaId": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "firmaName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "personId": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "personName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "`firstName lastName`; only one part if the other is empty; null without contact."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          }
+        }
+      },
+      "AktivitaetInput": {
+        "type": "object",
+        "description": "Body for create and full update. `typ`, `subject` and `datum` are required.\nA left-out optional field is stored as null. Unknown fields are stripped.\n",
+        "required": [
+          "typ",
+          "subject",
+          "datum"
+        ],
+        "properties": {
+          "typ": {
+            "type": "string",
+            "description": "Same values as `AktivitaetTyp`. Inline so the error texts sit next to `enum`.",
+            "enum": [
+              "ANRUF",
+              "EMAIL",
+              "MEETING",
+              "NOTIZ",
+              "AUFGABE"
+            ],
+            "x-error-messages": {
+              "required": "Ungültiger Typ",
+              "type": "Ungültiger Typ",
+              "enum": "Ungültiger Typ"
+            }
+          },
+          "subject": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "x-error-messages": {
+              "required": "Betreff ist erforderlich",
+              "type": "Betreff ist erforderlich",
+              "minLength": "Betreff ist erforderlich"
+            }
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "datum": {
+            "type": "string",
+            "minLength": 1,
+            "x-error-messages": {
+              "required": "Datum ist erforderlich",
+              "type": "Datum ist erforderlich",
+              "minLength": "Datum ist erforderlich"
+            }
+          },
+          "firmaId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "x-error-messages": {
+              "type": "Ungültige ID",
+              "minimum": "Ungültige ID"
+            }
+          },
+          "personId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "x-error-messages": {
+              "type": "Ungültige ID",
+              "minimum": "Ungültige ID"
+            }
+          }
+        }
+      },
+      "AktivitaetPage": {
+        "type": "object",
+        "description": "One page of activities.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Aktivitaet"
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "AktivitaetTyp": {
+        "type": "string",
+        "enum": [
+          "ANRUF",
+          "EMAIL",
+          "MEETING",
+          "NOTIZ",
+          "AUFGABE"
+        ]
+      },
+      "Chance": {
+        "type": "object",
+        "description": "A sales opportunity of a company, optionally with a contact.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "titel",
+          "beschreibung",
+          "wert",
+          "currency",
+          "phase",
+          "wahrscheinlichkeit",
+          "erwartetesDatum",
+          "firmaId",
+          "firmaName",
+          "kontaktPersonId",
+          "kontaktPersonName",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titel": {
+            "type": "string"
+          },
+          "beschreibung": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "wert": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "description": "Default `EUR`."
+          },
+          "phase": {
+            "$ref": "#/components/schemas/ChancePhase"
+          },
+          "wahrscheinlichkeit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Percent, 0 to 100."
+          },
+          "erwartetesDatum": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Free text as sent by the client (no format enforced)."
+          },
+          "firmaId": {
+            "type": "integer"
+          },
+          "firmaName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kontaktPersonId": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "kontaktPersonName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "`firstName lastName`; only one part if the other is empty; null without contact."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          }
+        }
+      },
+      "ChanceInput": {
+        "type": "object",
+        "description": "Body for create and full update. `titel` and `firmaId` are required.\nLeft out: `phase` becomes `NEU`, `currency` becomes `EUR`, other optional\nfields are stored as null. Unknown fields are stripped.\n",
+        "required": [
+          "titel",
+          "firmaId"
+        ],
+        "properties": {
+          "titel": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "x-error-messages": {
+              "required": "Titel ist erforderlich",
+              "type": "Titel ist erforderlich",
+              "minLength": "Titel ist erforderlich"
+            }
+          },
+          "beschreibung": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "wert": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Optional, not nullable. Default `EUR`."
+          },
+          "phase": {
+            "type": "string",
+            "description": "Optional, not nullable. Default `NEU`. Same values as `ChancePhase`, inline so the error texts sit next to `enum`.",
+            "enum": [
+              "NEU",
+              "QUALIFIZIERT",
+              "ANGEBOT",
+              "VERHANDLUNG",
+              "GEWONNEN",
+              "VERLOREN"
+            ],
+            "x-error-messages": {
+              "type": "Ungültige Phase",
+              "enum": "Ungültige Phase"
+            }
+          },
+          "wahrscheinlichkeit": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100
+          },
+          "erwartetesDatum": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "firmaId": {
+            "type": "integer",
+            "minimum": 1,
+            "x-error-messages": {
+              "required": "Firma ist erforderlich",
+              "type": "Firma ist erforderlich",
+              "minimum": "Firma ist erforderlich"
+            }
+          },
+          "kontaktPersonId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "x-error-messages": {
+              "type": "Ungültige ID",
+              "minimum": "Ungültige ID"
+            }
+          }
+        }
+      },
+      "ChancePage": {
+        "type": "object",
+        "description": "One page of opportunities.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Chance"
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "ChancePhase": {
+        "type": "string",
+        "enum": [
+          "NEU",
+          "QUALIFIZIERT",
+          "ANGEBOT",
+          "VERHANDLUNG",
+          "GEWONNEN",
+          "VERLOREN"
+        ]
+      },
+      "DashboardData": {
+        "type": "object",
+        "description": "Counters and the latest records for the start page.",
+        "additionalProperties": false,
+        "required": [
+          "firmenCount",
+          "personenCount",
+          "offeneChancenCount",
+          "gewonneneChancenSumme",
+          "recentChancen",
+          "recentAktivitaeten"
+        ],
+        "properties": {
+          "firmenCount": {
+            "type": "integer",
+            "description": "Number of companies."
+          },
+          "personenCount": {
+            "type": "integer",
+            "description": "Number of contacts."
+          },
+          "offeneChancenCount": {
+            "type": "integer",
+            "description": "Number of opportunities not in phase `GEWONNEN` or `VERLOREN`."
+          },
+          "gewonneneChancenSumme": {
+            "type": "number",
+            "description": "Sum of `wert` over all opportunities in phase `GEWONNEN`. 0 if none. Mixed currencies are added as is."
+          },
+          "recentChancen": {
+            "type": "array",
+            "description": "The 5 newest opportunities by `createdAt`, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/RecentChance"
+            }
+          },
+          "recentAktivitaeten": {
+            "type": "array",
+            "description": "The 5 newest activities by `createdAt`, newest first.",
+            "items": {
+              "$ref": "#/components/schemas/RecentAktivitaet"
+            }
+          }
+        }
+      },
+      "RecentChance": {
+        "type": "object",
+        "description": "Short opportunity entry on the dashboard.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "titel",
+          "wert",
+          "currency",
+          "phase",
+          "firmaName",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "titel": {
+            "type": "string"
+          },
+          "wert": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "currency": {
+            "type": "string"
+          },
+          "phase": {
+            "$ref": "#/components/schemas/ChancePhase"
+          },
+          "firmaName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          }
+        }
+      },
+      "RecentAktivitaet": {
+        "type": "object",
+        "description": "Short activity entry on the dashboard.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "typ",
+          "subject",
+          "datum",
+          "firmaName",
+          "personName",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "typ": {
+            "$ref": "#/components/schemas/AktivitaetTyp"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "datum": {
+            "type": "string"
+          },
+          "firmaName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "personName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "`firstName lastName` of the linked contact, null without contact."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          }
+        }
+      },
+      "Szenario": {
+        "type": "object",
+        "description": "A process scenario. Durations are whole minutes.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "humanSteps",
+          "agileKiSteps",
+          "semiAutomatedSteps",
+          "automatedSteps",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "humanSteps": {
+            "$ref": "#/components/schemas/ProzessDauer"
+          },
+          "agileKiSteps": {
+            "$ref": "#/components/schemas/ProzessDauer"
+          },
+          "semiAutomatedSteps": {
+            "$ref": "#/components/schemas/ProzessDauer"
+          },
+          "automatedSteps": {
+            "$ref": "#/components/schemas/ProzessDauer"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored."
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored."
+          }
+        }
+      },
+      "SzenarioInput": {
+        "type": "object",
+        "description": "Create or replace a scenario. `name` must be unique (409 otherwise).\nEach process needs exactly N work durations and N-1 wait durations.\nDurations are whole minutes from 0 to 479520 (999 days).\n",
+        "required": [
+          "name",
+          "humanSteps",
+          "agileKiSteps",
+          "semiAutomatedSteps",
+          "automatedSteps"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "x-error-messages": {
+              "required": "Name ist erforderlich",
+              "type": "Name ist erforderlich",
+              "minLength": "Name ist erforderlich"
+            }
+          },
+          "humanSteps": {
+            "type": "object",
+            "description": "Human process. 19 works, 18 waits.",
+            "required": [
+              "works",
+              "waits"
+            ],
+            "properties": {
+              "works": {
+                "type": "array",
+                "minItems": 19,
+                "maxItems": 19,
+                "x-error-messages": {
+                  "minItems": "Genau 19 Arbeitszeiten",
+                  "maxItems": "Genau 19 Arbeitszeiten"
+                },
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 479520,
+                  "x-error-messages": {
+                    "minimum": "Darf nicht negativ sein",
+                    "maximum": "Maximal 999 Tage"
+                  }
+                }
+              },
+              "waits": {
+                "type": "array",
+                "minItems": 18,
+                "maxItems": 18,
+                "x-error-messages": {
+                  "minItems": "Genau 18 Wartezeiten",
+                  "maxItems": "Genau 18 Wartezeiten"
+                },
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 479520,
+                  "x-error-messages": {
+                    "minimum": "Darf nicht negativ sein",
+                    "maximum": "Maximal 999 Tage"
+                  }
+                }
+              }
+            }
+          },
+          "agileKiSteps": {
+            "type": "object",
+            "description": "Agile KI process. 19 works, 18 waits.",
+            "required": [
+              "works",
+              "waits"
+            ],
+            "properties": {
+              "works": {
+                "type": "array",
+                "minItems": 19,
+                "maxItems": 19,
+                "x-error-messages": {
+                  "minItems": "Genau 19 Arbeitszeiten",
+                  "maxItems": "Genau 19 Arbeitszeiten"
+                },
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 479520,
+                  "x-error-messages": {
+                    "minimum": "Darf nicht negativ sein",
+                    "maximum": "Maximal 999 Tage"
+                  }
+                }
+              },
+              "waits": {
+                "type": "array",
+                "minItems": 18,
+                "maxItems": 18,
+                "x-error-messages": {
+                  "minItems": "Genau 18 Wartezeiten",
+                  "maxItems": "Genau 18 Wartezeiten"
+                },
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 479520,
+                  "x-error-messages": {
+                    "minimum": "Darf nicht negativ sein",
+                    "maximum": "Maximal 999 Tage"
+                  }
+                }
+              }
+            }
+          },
+          "semiAutomatedSteps": {
+            "type": "object",
+            "description": "Semi-automated process. 11 works, 10 waits.",
+            "required": [
+              "works",
+              "waits"
+            ],
+            "properties": {
+              "works": {
+                "type": "array",
+                "minItems": 11,
+                "maxItems": 11,
+                "x-error-messages": {
+                  "minItems": "Genau 11 Arbeitszeiten",
+                  "maxItems": "Genau 11 Arbeitszeiten"
+                },
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 479520,
+                  "x-error-messages": {
+                    "minimum": "Darf nicht negativ sein",
+                    "maximum": "Maximal 999 Tage"
+                  }
+                }
+              },
+              "waits": {
+                "type": "array",
+                "minItems": 10,
+                "maxItems": 10,
+                "x-error-messages": {
+                  "minItems": "Genau 10 Wartezeiten",
+                  "maxItems": "Genau 10 Wartezeiten"
+                },
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 479520,
+                  "x-error-messages": {
+                    "minimum": "Darf nicht negativ sein",
+                    "maximum": "Maximal 999 Tage"
+                  }
+                }
+              }
+            }
+          },
+          "automatedSteps": {
+            "type": "object",
+            "description": "Automated process. 2 works, 1 waits.",
+            "required": [
+              "works",
+              "waits"
+            ],
+            "properties": {
+              "works": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "x-error-messages": {
+                  "minItems": "Genau 2 Arbeitszeiten",
+                  "maxItems": "Genau 2 Arbeitszeiten"
+                },
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 479520,
+                  "x-error-messages": {
+                    "minimum": "Darf nicht negativ sein",
+                    "maximum": "Maximal 999 Tage"
+                  }
+                }
+              },
+              "waits": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 1,
+                "x-error-messages": {
+                  "minItems": "Genau 1 Wartezeiten",
+                  "maxItems": "Genau 1 Wartezeiten"
+                },
+                "items": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 479520,
+                  "x-error-messages": {
+                    "minimum": "Darf nicht negativ sein",
+                    "maximum": "Maximal 999 Tage"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ProzessDauer": {
+        "type": "object",
+        "description": "Work and wait durations (minutes) of one process. Stored as JSON text, sent as arrays.",
+        "additionalProperties": false,
+        "required": [
+          "works",
+          "waits"
+        ],
+        "properties": {
+          "works": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "waits": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "AgentTask": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "title",
+          "body",
+          "status",
+          "comment",
+          "metadata",
+          "pickedUpAt",
+          "resolvedAt",
+          "createdAt",
+          "updatedAt",
+          "ticketId"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "source": {
+            "$ref": "#/components/schemas/AgentTaskSource"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AgentTaskStatus"
+          },
+          "comment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Agent comment from `done` or `reject`."
+          },
+          "metadata": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Free text, usually a JSON string."
+          },
+          "pickedUpAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO-8601 time of the claim or start."
+          },
+          "resolvedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO-8601 time of `done` or `reject`."
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 time."
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "ISO-8601 time."
+          },
+          "ticketId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Id of the newest ticket that links to this task, or null."
+          }
+        }
+      },
+      "AgentTaskPage": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/AgentTask"
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "AgentTaskSummary": {
+        "type": "object",
+        "description": "Counts per source. All four sources always appear, zero-filled.",
+        "additionalProperties": false,
+        "required": [
+          "source",
+          "openCount",
+          "inProgressCount",
+          "doneCount",
+          "rejectedCount"
+        ],
+        "properties": {
+          "source": {
+            "$ref": "#/components/schemas/AgentTaskSource"
+          },
+          "openCount": {
+            "type": "integer"
+          },
+          "inProgressCount": {
+            "type": "integer"
+          },
+          "doneCount": {
+            "type": "integer"
+          },
+          "rejectedCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "AgentTaskSource": {
+        "type": "string",
+        "description": "Where the task came from.",
+        "enum": [
+          "EMAIL",
+          "GITHUB_ISSUE",
+          "APP_LOG",
+          "ERROR_REPORT"
+        ]
+      },
+      "AgentTaskStatus": {
+        "type": "string",
+        "description": "Lifecycle `OPEN` → `IN_PROGRESS` → `DONE` or `REJECTED`.",
+        "enum": [
+          "OPEN",
+          "IN_PROGRESS",
+          "DONE",
+          "REJECTED"
+        ]
+      },
+      "AgentTaskRejectInput": {
+        "type": "object",
+        "required": [
+          "comment"
+        ],
+        "properties": {
+          "comment": {
+            "type": "string",
+            "minLength": 1,
+            "x-error-messages": {
+              "required": "Kommentar ist erforderlich",
+              "type": "Kommentar ist erforderlich",
+              "minLength": "Kommentar ist erforderlich"
+            }
+          }
+        }
+      },
+      "AgentTaskDoneInput": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string"
+          }
+        }
+      },
+      "AgentTaskResetResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "reset"
+        ],
+        "properties": {
+          "reset": {
+            "type": "integer",
+            "description": "Number of rows set back to `OPEN`."
+          }
+        }
+      },
+      "CronRun": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "job",
+          "status",
+          "trigger",
+          "startedAt",
+          "finishedAt",
+          "durationMs",
+          "result",
+          "githubRunUrl",
+          "error"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "job": {
+            "type": "string",
+            "description": "Job name, for example `solve-tasks`."
+          },
+          "status": {
+            "$ref": "#/components/schemas/CronRunStatus"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/CronTrigger"
+          },
+          "startedAt": {
+            "type": "string",
+            "description": "ISO-8601 time."
+          },
+          "finishedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO-8601 time."
+          },
+          "durationMs": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "result": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "JSON string, `{\"skipReason\":...}` or `{\"tasksSolved\":...,\"tasksRejected\":...}`."
+          },
+          "githubRunUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "CronRunPage": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/CronRun"
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "CronJob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "schedule",
+          "description",
+          "dispatchEventType",
+          "lastRun"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "schedule": {
+            "type": "string",
+            "description": "Cron expression, or `manuell`."
+          },
+          "description": {
+            "type": "string"
+          },
+          "dispatchEventType": {
+            "type": "string",
+            "description": "GitHub `repository_dispatch` event type."
+          },
+          "lastRun": {
+            "$ref": "#/components/schemas/CronJobLastRun"
+          }
+        }
+      },
+      "CronJobLastRun": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "description": "Newest run of the job, or null when it never ran. Same fields as `CronRun`.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "job",
+          "status",
+          "trigger",
+          "startedAt",
+          "finishedAt",
+          "durationMs",
+          "result",
+          "githubRunUrl",
+          "error"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "job": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CronRunStatus"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/CronTrigger"
+          },
+          "startedAt": {
+            "type": "string"
+          },
+          "finishedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "durationMs": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "result": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "githubRunUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "error": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "CronRunStatus": {
+        "type": "string",
+        "enum": [
+          "RUNNING",
+          "SUCCESS",
+          "FAILED",
+          "SKIPPED"
+        ]
+      },
+      "CronTrigger": {
+        "type": "string",
+        "description": "`CRON` for the `CRON_SECRET` bearer, `MANUAL` for an admin session.",
+        "enum": [
+          "CRON",
+          "MANUAL"
+        ]
+      },
+      "CronRunCompleteInput": {
+        "type": "object",
+        "required": [
+          "status",
+          "tasksSolved",
+          "tasksRejected",
+          "githubRunUrl"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "SUCCESS",
+              "FAILED"
+            ],
+            "x-error-messages": {
+              "required": "Ungültiger Status",
+              "type": "Ungültiger Status",
+              "enum": "Ungültiger Status"
+            }
+          },
+          "tasksSolved": {
+            "type": "integer",
+            "minimum": 0,
+            "x-error-messages": {
+              "minimum": "Darf nicht negativ sein"
+            }
+          },
+          "tasksRejected": {
+            "type": "integer",
+            "minimum": 0,
+            "x-error-messages": {
+              "minimum": "Darf nicht negativ sein"
+            }
+          },
+          "githubRunUrl": {
+            "type": "string",
+            "format": "uri",
+            "x-error-messages": {
+              "required": "Ungültige URL",
+              "type": "Ungültige URL",
+              "format": "Ungültige URL"
+            }
+          }
+        }
+      },
+      "TicketDetail": {
+        "type": "object",
+        "description": "A ticket with its full comment thread (oldest first). Single-ticket answers.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "owner",
+          "type",
+          "title",
+          "body",
+          "status",
+          "solution",
+          "pickedUpAt",
+          "resolvedAt",
+          "createdAt",
+          "updatedAt",
+          "fullyReady",
+          "agentTaskId",
+          "comments"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/TicketOwner"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TicketType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TicketStatus"
+          },
+          "solution": {
+            "description": "Set when the ticket is resolved (`DONE` column), else null.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "DONE",
+              "WONT_DO",
+              null
+            ]
+          },
+          "pickedUpAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO-8601 text. Set when an agent claims the ticket."
+          },
+          "resolvedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO-8601 text. Set when the ticket is resolved."
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "fullyReady": {
+            "type": "boolean",
+            "description": "Marker \"ready to build without further human input\". Stored as 0/1."
+          },
+          "agentTaskId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Linked agent task (feedback item) that spawned the ticket."
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TicketComment"
+            }
+          }
+        }
+      },
+      "TicketListItem": {
+        "type": "object",
+        "description": "A ticket in a list or board column. No comments, only their count.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "owner",
+          "type",
+          "title",
+          "body",
+          "status",
+          "solution",
+          "pickedUpAt",
+          "resolvedAt",
+          "createdAt",
+          "updatedAt",
+          "fullyReady",
+          "agentTaskId",
+          "commentCount"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/TicketOwner"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TicketType"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TicketStatus"
+          },
+          "solution": {
+            "description": "Set when the ticket is resolved (`DONE` column), else null.",
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "DONE",
+              "WONT_DO",
+              null
+            ]
+          },
+          "pickedUpAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "resolvedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "fullyReady": {
+            "type": "boolean"
+          },
+          "agentTaskId": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "commentCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "TicketListItemPage": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TicketListItem"
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "TicketBoard": {
+        "type": "object",
+        "description": "Tickets grouped by status, each column oldest first (`createdAt` ascending).",
+        "additionalProperties": false,
+        "required": [
+          "DEFINITION",
+          "TODO",
+          "IN_PROGRESS",
+          "ON_HOLD",
+          "DONE"
+        ],
+        "properties": {
+          "DEFINITION": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TicketListItem"
+            }
+          },
+          "TODO": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TicketListItem"
+            }
+          },
+          "IN_PROGRESS": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TicketListItem"
+            }
+          },
+          "ON_HOLD": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TicketListItem"
+            }
+          },
+          "DONE": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TicketListItem"
+            }
+          }
+        }
+      },
+      "TicketSummary": {
+        "type": "object",
+        "description": "Counts per enum value. Every key is always present (zero when empty).",
+        "additionalProperties": false,
+        "required": [
+          "byStatus",
+          "byType",
+          "byOwner",
+          "bySolution"
+        ],
+        "properties": {
+          "byStatus": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "DEFINITION",
+              "TODO",
+              "IN_PROGRESS",
+              "ON_HOLD",
+              "DONE"
+            ],
+            "properties": {
+              "DEFINITION": {
+                "type": "integer"
+              },
+              "TODO": {
+                "type": "integer"
+              },
+              "IN_PROGRESS": {
+                "type": "integer"
+              },
+              "ON_HOLD": {
+                "type": "integer"
+              },
+              "DONE": {
+                "type": "integer"
+              }
+            }
+          },
+          "byType": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "FEATURE",
+              "BUG",
+              "CHORE"
+            ],
+            "properties": {
+              "FEATURE": {
+                "type": "integer"
+              },
+              "BUG": {
+                "type": "integer"
+              },
+              "CHORE": {
+                "type": "integer"
+              }
+            }
+          },
+          "byOwner": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "AI",
+              "HUMAN"
+            ],
+            "properties": {
+              "AI": {
+                "type": "integer"
+              },
+              "HUMAN": {
+                "type": "integer"
+              }
+            }
+          },
+          "bySolution": {
+            "type": "object",
+            "description": "Counts among resolved tickets only.",
+            "additionalProperties": false,
+            "required": [
+              "DONE",
+              "WONT_DO"
+            ],
+            "properties": {
+              "DONE": {
+                "type": "integer"
+              },
+              "WONT_DO": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "TicketComment": {
+        "type": "object",
+        "description": "One comment of a ticket thread.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "ticketId",
+          "author",
+          "authorName",
+          "body",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "ticketId": {
+            "type": "integer"
+          },
+          "author": {
+            "$ref": "#/components/schemas/TicketCommentAuthor"
+          },
+          "authorName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "body": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored."
+          }
+        }
+      },
+      "TicketCreateInput": {
+        "type": "object",
+        "description": "New ticket. It starts as `owner=HUMAN`, `status=DEFINITION`.",
+        "required": [
+          "type",
+          "title",
+          "body"
+        ],
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TicketType",
+            "x-error-messages": {
+              "required": "Ungültiger Ticket-Typ",
+              "type": "Ungültiger Ticket-Typ",
+              "enum": "Ungültiger Ticket-Typ"
+            }
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "x-error-messages": {
+              "required": "Titel ist erforderlich",
+              "type": "Titel ist erforderlich",
+              "minLength": "Titel ist erforderlich"
+            }
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "x-error-messages": {
+              "required": "Beschreibung ist erforderlich",
+              "type": "Beschreibung ist erforderlich",
+              "minLength": "Beschreibung ist erforderlich"
+            }
+          },
+          "agentTaskId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "description": "Must name an existing agent task, else 400 with a field error on `agentTaskId`.",
+            "x-error-messages": {
+              "type": "Ungültige ID",
+              "minimum": "Ungültige ID"
+            }
+          },
+          "fullyReady": {
+            "type": "boolean",
+            "description": "Default false."
+          }
+        }
+      },
+      "TicketStatusInput": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/TicketStatus",
+            "x-error-messages": {
+              "required": "Ungültiger Status",
+              "type": "Ungültiger Status",
+              "enum": "Ungültiger Status"
+            }
+          }
+        }
+      },
+      "TicketOwnerInput": {
+        "type": "object",
+        "required": [
+          "owner"
+        ],
+        "properties": {
+          "owner": {
+            "$ref": "#/components/schemas/TicketOwner",
+            "x-error-messages": {
+              "required": "Ungültiger Eigentümer",
+              "type": "Ungültiger Eigentümer",
+              "enum": "Ungültiger Eigentümer"
+            }
+          }
+        }
+      },
+      "TicketAskInput": {
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "x-error-messages": {
+              "required": "Frage ist erforderlich",
+              "type": "Frage ist erforderlich",
+              "minLength": "Frage ist erforderlich"
+            }
+          }
+        }
+      },
+      "TicketDoneInput": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "description": "Closing comment, stored as an `AGENT` comment."
+          }
+        }
+      },
+      "TicketWontDoInput": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string",
+            "description": "Closing comment, stored as a `HUMAN` comment."
+          }
+        }
+      },
+      "TicketCommentInput": {
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "properties": {
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "x-error-messages": {
+              "required": "Kommentar-Text ist erforderlich",
+              "type": "Kommentar-Text ist erforderlich",
+              "minLength": "Kommentar-Text ist erforderlich"
+            }
+          },
+          "handBackToAi": {
+            "type": "boolean",
+            "description": "Moves the ticket to `TODO`, owner `AI`. Only allowed on `ON_HOLD` + `HUMAN` tickets, else 409."
+          },
+          "clearFullyReady": {
+            "type": "boolean",
+            "description": "Resets `fullyReady` to false."
+          },
+          "author": {
+            "$ref": "#/components/schemas/TicketCommentAuthor",
+            "description": "Default `HUMAN`. `AGENT` is rejected with 403 when the request carries an authenticated session.",
+            "x-error-messages": {
+              "type": "Ungültiger Autor",
+              "enum": "Ungültiger Autor"
+            }
+          }
+        }
+      },
+      "TicketResetResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "seeded"
+        ],
+        "properties": {
+          "seeded": {
+            "type": "integer",
+            "description": "Number of seeded workshop tickets."
+          }
+        }
+      },
+      "TicketOwner": {
+        "type": "string",
+        "enum": [
+          "AI",
+          "HUMAN"
+        ]
+      },
+      "TicketType": {
+        "type": "string",
+        "enum": [
+          "FEATURE",
+          "BUG",
+          "CHORE"
+        ]
+      },
+      "TicketStatus": {
+        "type": "string",
+        "enum": [
+          "DEFINITION",
+          "TODO",
+          "IN_PROGRESS",
+          "ON_HOLD",
+          "DONE"
+        ]
+      },
+      "TicketSolution": {
+        "type": "string",
+        "enum": [
+          "DONE",
+          "WONT_DO"
+        ]
+      },
+      "TicketCommentAuthor": {
+        "type": "string",
+        "enum": [
+          "HUMAN",
+          "AGENT"
+        ]
+      }
     },
     "parameters": {
       "IdPath": {

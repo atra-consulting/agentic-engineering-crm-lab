@@ -30,6 +30,10 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Backend — API contract check
+        working-directory: backend
+        run: npm run api:check
+
       - name: Backend — type-check backend sources
         working-directory: backend
         run: npx tsc --noEmit
