@@ -1,10 +1,13 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import express from 'express';
+import express, { type Express, type Router } from 'express';
 import { corsMiddleware } from './middleware/cors.js';
 import { sessionMiddleware } from './middleware/session.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { NotFoundError } from './utils/errors.js';
+import { getContractMode, type ContractMode } from './openapi/runtimeMode.js';
+import { responseCheck } from './openapi/responseCheck.js';
 import authRouter from './routes/auth.js';
 import firmenRouter from './routes/firmen.js';
 import personenRouter from './routes/personen.js';
@@ -21,39 +24,61 @@ import szenarienRouter from './routes/szenario.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8')) as { version: string };
 
-const app = express();
+export interface ApiRouter {
+  basePath: string;
+  router: Router;
+}
 
-// Trust the first proxy hop (reverse proxy / TLS terminator) so that cookie.secure works correctly
-// in production. Without this, Express sees a plain-HTTP upstream connection and
-// suppresses Set-Cookie for secure cookies entirely.
-app.set('trust proxy', 1);
+export function createApp(mode: ContractMode = getContractMode()): Express {
+  const app = express();
 
-// Middleware order matters: cors -> body parser -> session -> routes -> error handler
+  // Trust the first proxy hop (reverse proxy / TLS terminator) so that cookie.secure works correctly
+  // in production. Without this, Express sees a plain-HTTP upstream connection and
+  // suppresses Set-Cookie for secure cookies entirely.
+  app.set('trust proxy', 1);
 
-app.use(corsMiddleware);
-app.use(express.json());
-app.use(sessionMiddleware);
+  // Middleware order matters: cors -> body parser -> session -> response check -> routes -> 404 -> error handler
 
-// Health check (public)
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), version });
-});
+  app.use(corsMiddleware);
+  app.use(express.json());
+  app.use(sessionMiddleware);
 
-// Routes
-app.use('/api/auth', authRouter);
-app.use('/api/firmen', firmenRouter);
-app.use('/api/personen', personenRouter);
-app.use('/api/abteilungen', abteilungenRouter);
-app.use('/api/adressen', adressenRouter);
-app.use('/api/aktivitaeten', aktivitaetenRouter);
-app.use('/api/chancen', chancenRouter);
-app.use('/api/dashboard', dashboardRouter);
-app.use('/api/agent-tasks', agentTasksRouter);
-app.use('/api/tickets', ticketsRouter);
-app.use('/api/cron', cronRouter);
-app.use('/api/szenarien', szenarienRouter);
+  if (mode === 'development' || (mode === 'test' && process.env['CONTRACT_RESPONSE_CHECK'] !== 'off')) {
+    app.use(responseCheck(mode));
+  }
 
-// Error handler MUST be last
-app.use(errorHandler);
+  // Health check (public)
+  app.get('/api/health', (_req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString(), version });
+  });
 
-export default app;
+  // Routes
+  const apiRouters: ApiRouter[] = [
+    { basePath: '/api/auth', router: authRouter },
+    { basePath: '/api/firmen', router: firmenRouter },
+    { basePath: '/api/personen', router: personenRouter },
+    { basePath: '/api/abteilungen', router: abteilungenRouter },
+    { basePath: '/api/adressen', router: adressenRouter },
+    { basePath: '/api/aktivitaeten', router: aktivitaetenRouter },
+    { basePath: '/api/chancen', router: chancenRouter },
+    { basePath: '/api/dashboard', router: dashboardRouter },
+    { basePath: '/api/agent-tasks', router: agentTasksRouter },
+    { basePath: '/api/tickets', router: ticketsRouter },
+    { basePath: '/api/cron', router: cronRouter },
+    { basePath: '/api/szenarien', router: szenarienRouter },
+  ];
+  app.locals['apiRouters'] = apiRouters;
+  for (const { basePath, router } of apiRouters) {
+    app.use(basePath, router);
+  }
+
+  // Unknown /api path or method: JSON 404 in the standard error shape (no 405)
+  app.use('/api', (_req, _res, next) => next(new NotFoundError('Ressource nicht gefunden')));
+
+  // Error handler MUST be last
+  app.use(errorHandler);
+
+  return app;
+}
+
+export default createApp();
