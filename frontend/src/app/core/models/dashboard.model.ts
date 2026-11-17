@@ -1,33 +1,7 @@
-import { ChancePhase } from './chance.model';
-import { AktivitaetTyp } from './aktivitaet.model';
+import type { components } from '../api/api-types';
 
-export type { ChancePhase, AktivitaetTyp };
-
-export interface RecentChance {
-  id: number;
-  titel: string;
-  wert: number | null;
-  currency: string;
-  phase: ChancePhase;
-  firmaName: string;
-  createdAt: string;
-}
-
-export interface RecentAktivitaet {
-  id: number;
-  typ: AktivitaetTyp;
-  subject: string;
-  datum: string;
-  firmaName: string | null;
-  personName: string | null;
-  createdAt: string;
-}
-
-export interface DashboardData {
-  firmenCount: number;
-  personenCount: number;
-  offeneChancenCount: number;
-  gewonneneChancenSumme: number;
-  recentChancen: RecentChance[];
-  recentAktivitaeten: RecentAktivitaet[];
-}
+export type ChancePhase = components['schemas']['ChancePhase'];
+export type AktivitaetTyp = components['schemas']['AktivitaetTyp'];
+export type RecentChance = components['schemas']['RecentChance'];
+export type RecentAktivitaet = components['schemas']['RecentAktivitaet'];
+export type DashboardData = components['schemas']['DashboardData'];

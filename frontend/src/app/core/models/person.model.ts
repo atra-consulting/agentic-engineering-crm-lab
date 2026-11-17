@@ -1,26 +1,4 @@
-export interface Person {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  position: string;
-  notes: string;
-  createdAt: string;
-  updatedAt: string;
-  firmaId: number;
-  firmaName: string;
-  abteilungId: number | null;
-  abteilungName: string | null;
-}
+import type { components } from '../api/api-types';
 
-export interface PersonCreate {
-  firstName: string;
-  lastName: string;
-  email?: string;
-  phone?: string;
-  position?: string;
-  notes?: string;
-  firmaId: number;
-  abteilungId?: number | null;
-}
+export type Person = components['schemas']['Person'];
+export type PersonCreate = components['schemas']['PersonInput'];

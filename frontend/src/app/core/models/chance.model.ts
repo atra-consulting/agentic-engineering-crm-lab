@@ -1,37 +1,5 @@
-export type ChancePhase =
-  | 'NEU'
-  | 'QUALIFIZIERT'
-  | 'ANGEBOT'
-  | 'VERHANDLUNG'
-  | 'GEWONNEN'
-  | 'VERLOREN';
+import type { components } from '../api/api-types';
 
-export interface Chance {
-  id: number;
-  titel: string;
-  beschreibung: string;
-  wert: number;
-  currency: string;
-  phase: ChancePhase;
-  wahrscheinlichkeit: number;
-  erwartetesDatum: string;
-  createdAt: string;
-  updatedAt: string;
-  firmaId: number;
-  firmaName: string;
-  kontaktPersonId: number | null;
-  kontaktPersonName: string | null;
-}
-
-export interface ChanceCreate {
-  titel: string;
-  beschreibung?: string;
-  wert?: number;
-  currency?: string;
-  phase: ChancePhase;
-  wahrscheinlichkeit?: number;
-  erwartetesDatum?: string;
-  firmaId: number;
-  kontaktPersonId?: number | null;
-}
-
+export type ChancePhase = components['schemas']['ChancePhase'];
+export type Chance = components['schemas']['Chance'];
+export type ChanceCreate = components['schemas']['ChanceInput'];

@@ -1,26 +1,4 @@
-export interface Adresse {
-  id: number;
-  street: string;
-  houseNumber: string;
-  postalCode: string;
-  city: string;
-  country: string;
-  firmaId: number | null;
-  firmaName: string | null;
-  personId: number | null;
-  personName: string | null;
-  latitude: number | null;
-  longitude: number | null;
-}
+import type { components } from '../api/api-types';
 
-export interface AdresseCreate {
-  street: string;
-  houseNumber?: string;
-  postalCode: string;
-  city: string;
-  country?: string;
-  firmaId?: number | null;
-  personId?: number | null;
-  latitude?: number | null;
-  longitude?: number | null;
-}
+export type Adresse = components['schemas']['Adresse'];
+export type AdresseCreate = components['schemas']['AdresseInput'];

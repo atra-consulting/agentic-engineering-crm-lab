@@ -1,14 +1,4 @@
-export interface Abteilung {
-  id: number;
-  name: string;
-  description: string;
-  firmaId: number;
-  firmaName: string;
-  personenCount: number;
-}
+import type { components } from '../api/api-types';
 
-export interface AbteilungCreate {
-  name: string;
-  description?: string;
-  firmaId: number;
-}
+export type Abteilung = components['schemas']['Abteilung'];
+export type AbteilungCreate = components['schemas']['AbteilungInput'];
