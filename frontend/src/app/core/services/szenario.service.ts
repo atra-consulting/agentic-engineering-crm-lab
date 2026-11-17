@@ -1,30 +1,29 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiClient } from '../api/api-client';
 import { Szenario, SzenarioCreate, SzenarioUpdate } from '../models/szenario.model';
 
 @Injectable({ providedIn: 'root' })
 export class SzenarioService {
-  private http = inject(HttpClient);
-  private baseUrl = '/api/szenarien';
+  private api = inject(ApiClient);
 
   list(): Observable<Szenario[]> {
-    return this.http.get<Szenario[]>(this.baseUrl);
+    return this.api.get('/szenarien');
   }
 
   getById(id: number): Observable<Szenario> {
-    return this.http.get<Szenario>(`${this.baseUrl}/${id}`);
+    return this.api.get('/szenarien/{id}', { path: { id } });
   }
 
   create(dto: SzenarioCreate): Observable<Szenario> {
-    return this.http.post<Szenario>(this.baseUrl, dto);
+    return this.api.post('/szenarien', { body: dto });
   }
 
   update(id: number, dto: SzenarioUpdate): Observable<Szenario> {
-    return this.http.put<Szenario>(`${this.baseUrl}/${id}`, dto);
+    return this.api.put('/szenarien/{id}', { path: { id }, body: dto });
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.api.delete('/szenarien/{id}', { path: { id } });
   }
 }

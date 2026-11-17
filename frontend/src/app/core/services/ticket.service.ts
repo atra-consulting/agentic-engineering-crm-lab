@@ -1,11 +1,11 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiClient } from '../api/api-client';
 import {
-  Ticket,
   TicketBoard,
   TicketCommentCreate,
   TicketCreate,
+  TicketDetail,
   TicketListItem,
   TicketOwner,
   TicketStatus,
@@ -16,19 +16,18 @@ import { Page } from '../models/page.model';
 
 @Injectable({ providedIn: 'root' })
 export class TicketService {
-  private http = inject(HttpClient);
-  private baseUrl = '/api/tickets';
+  private api = inject(ApiClient);
 
   getBoard(): Observable<TicketBoard> {
-    return this.http.get<TicketBoard>(`${this.baseUrl}/board`);
+    return this.api.get('/tickets/board');
   }
 
   getSummary(): Observable<TicketSummary> {
-    return this.http.get<TicketSummary>(`${this.baseUrl}/summary`);
+    return this.api.get('/tickets/summary');
   }
 
-  getById(id: number): Observable<Ticket> {
-    return this.http.get<Ticket>(`${this.baseUrl}/${id}`);
+  getById(id: number): Observable<TicketDetail> {
+    return this.api.get('/tickets/{id}', { path: { id } });
   }
 
   getAll(
@@ -37,40 +36,39 @@ export class TicketService {
     sort = 'createdAt,desc',
     filters?: { type?: TicketType; status?: TicketStatus; owner?: TicketOwner },
   ): Observable<Page<TicketListItem>> {
-    let params = new HttpParams().set('page', page).set('size', size).set('sort', sort);
-    if (filters?.type) {
-      params = params.set('type', filters.type);
-    }
-    if (filters?.status) {
-      params = params.set('status', filters.status);
-    }
-    if (filters?.owner) {
-      params = params.set('owner', filters.owner);
-    }
-    return this.http.get<Page<TicketListItem>>(this.baseUrl, { params });
+    return this.api.get('/tickets', {
+      query: {
+        page,
+        size,
+        sort,
+        type: filters?.type || undefined,
+        status: filters?.status || undefined,
+        owner: filters?.owner || undefined,
+      },
+    });
   }
 
-  create(dto: TicketCreate): Observable<Ticket> {
-    return this.http.post<Ticket>(this.baseUrl, dto);
+  create(dto: TicketCreate): Observable<TicketDetail> {
+    return this.api.post('/tickets', { body: dto });
   }
 
-  setStatus(id: number, status: TicketStatus): Observable<Ticket> {
-    return this.http.patch<Ticket>(`${this.baseUrl}/${id}/status`, { status });
+  setStatus(id: number, status: TicketStatus): Observable<TicketDetail> {
+    return this.api.patch('/tickets/{id}/status', { path: { id }, body: { status } });
   }
 
-  setOwner(id: number, owner: TicketOwner): Observable<Ticket> {
-    return this.http.patch<Ticket>(`${this.baseUrl}/${id}/owner`, { owner });
+  setOwner(id: number, owner: TicketOwner): Observable<TicketDetail> {
+    return this.api.patch('/tickets/{id}/owner', { path: { id }, body: { owner } });
   }
 
-  handToAi(id: number): Observable<Ticket> {
-    return this.http.post<Ticket>(`${this.baseUrl}/${id}/hand-to-ai`, {});
+  handToAi(id: number): Observable<TicketDetail> {
+    return this.api.post('/tickets/{id}/hand-to-ai', { path: { id }, body: {} });
   }
 
-  wontDo(id: number, comment?: string): Observable<Ticket> {
-    return this.http.post<Ticket>(`${this.baseUrl}/${id}/wont-do`, { comment });
+  wontDo(id: number, comment?: string): Observable<TicketDetail> {
+    return this.api.post('/tickets/{id}/wont-do', { path: { id }, body: { comment } });
   }
 
-  addComment(id: number, dto: TicketCommentCreate): Observable<Ticket> {
-    return this.http.post<Ticket>(`${this.baseUrl}/${id}/comments`, dto);
+  addComment(id: number, dto: TicketCommentCreate): Observable<TicketDetail> {
+    return this.api.post('/tickets/{id}/comments', { path: { id }, body: dto });
   }
 }
