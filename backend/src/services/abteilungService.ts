@@ -2,18 +2,9 @@ import { client } from '../config/db.js';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
 import type { PersonDTO } from './personService.js';
-import type { AbteilungCreateDTO } from '../utils/validation.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
-export interface AbteilungDTO {
-  id: number;
-  name: string;
-  description: string | null;
-  firmaId: number;
-  firmaName: string | null;
-  personenCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
+export type AbteilungDTO = Schema<'Abteilung'>;
 
 interface AbteilungRow {
   id: number;
@@ -143,7 +134,7 @@ export const abteilungService = {
     return buildPage(rows, total, page, size);
   },
 
-  async create(dto: AbteilungCreateDTO): Promise<AbteilungDTO> {
+  async create(dto: RequestBody<'createAbteilung'>): Promise<AbteilungDTO> {
     const now = new Date().toISOString();
     const result = await client.execute({
       sql: `INSERT INTO abteilung (name, description, firmaId, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?)`,
@@ -155,7 +146,7 @@ export const abteilungService = {
     return this.findById(Number(result.lastInsertRowid));
   },
 
-  async update(id: number, dto: AbteilungCreateDTO): Promise<AbteilungDTO> {
+  async update(id: number, dto: RequestBody<'createAbteilung'>): Promise<AbteilungDTO> {
     await this.findById(id);
     const now = new Date().toISOString();
     await client.execute({

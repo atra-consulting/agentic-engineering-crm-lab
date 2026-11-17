@@ -14,6 +14,17 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-frontend.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-ui.md`, `docs/specs/SPECS-testing.md`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`, `openapi/common.yaml` (shared `ErrorResponse`, `PageMeta`, parameters, responses, shared `x-error-messages`)
+
+## Contract Rules
+
+- Never edit generated files: `backend/src/generated/openapi.json`, `backend/src/generated/api-types.ts`, `frontend/src/app/core/api/api-types.ts`
+- Merge conflict in a generated file: resolve it in `openapi/`, then run `cd backend && npm run api:generate`. Never hand-merge
+- Commit the contract together with those three generated files
+- Frontend types come from `cd backend && npm run api:generate` (or `cd frontend && npm run api:generate`)
+- `cd backend && npm run api:check` must pass after a contract change
+- `api:check` fails at the drift step → run `cd backend && npm run api:generate` and commit the result. Lint, rule or Ajv-compile failures → fix the contract in `openapi/`.
+- `api:check` also fails while regenerated files are uncommitted (it compares against git) — commit first, then rerun.
 
 ## Architecture Rules
 
@@ -39,8 +50,10 @@ Your spec reading list (paths are relative to the repo root):
 
 ## Models & Services
 
-- Separate interfaces: `Firma` (response) and `FirmaCreate` (input) in `core/models/`
-- One service per entity in `core/services/`, wrapping HttpClient calls to `/api/<plural>`
+- Models in `core/models/` are aliases of generated types from the contract (e.g. `Firma`, `FirmaCreate`). No hand-written interfaces
+- One service per entity in `core/services/`. Services use `ApiClient` with literal spec paths
+- Forms keep `null` for empty values
+- No `!` or `as` casts for nullability
 
 ## Key Locations
 
@@ -53,8 +66,9 @@ Your spec reading list (paths are relative to the repo root):
 
 ## Authorization
 
-- Routes guarded with `canActivate: [permissionGuard('PERMISSION')]`
-- Sidebar items need `permission: 'PERMISSION'`
+- Routes use `canActivate: [authGuard]`; admin-only routes add `roleGuard('ROLE_ADMIN')`
+- Admin-only sidebar items set `requiredRole: 'ROLE_ADMIN'`
+- The `permissions` array is not enforced. No permission guard exists
 
 ## Commands
 
@@ -66,5 +80,11 @@ Your spec reading list (paths are relative to the repo root):
 Always run:
 1. `cd frontend && npx ng build` — verifies the production build compiles
 2. Smoke-test the affected route in the dev server (`http://localhost:7200`) — `ng serve` hot-reloads, so no restart needed
+
+Checklist:
+- [ ] Models are aliases of generated types
+- [ ] Services use `ApiClient` with literal spec paths
+- [ ] Forms keep `null`
+- [ ] No `!` or `as` casts for nullability
 
 Fix any TypeScript errors before committing.

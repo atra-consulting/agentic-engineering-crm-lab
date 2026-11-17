@@ -1,0 +1,197 @@
+# Area: abteilungen. Source: backend/src/routes/abteilungen.ts, backend/src/services/abteilungService.ts.
+
+/abteilungen:
+  get:
+    operationId: listAbteilungen
+    summary: List departments (paged)
+    description: |
+      No `search`.
+    tags: [abteilungen]
+    security:
+      - sessionCookie: []
+    x-sort-fields: [name, firmaId, createdAt, updatedAt]
+    x-default-sort: name,ASC
+    parameters:
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+      - $ref: '../common.yaml#/parameters/SortQuery'
+    responses:
+      '200':
+        description: One page of departments.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/abteilungen.yaml#/AbteilungPage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+  post:
+    operationId: createAbteilung
+    summary: Create a department
+    description: Answers the new record as read back from the database.
+    tags: [abteilungen]
+    security:
+      - sessionCookie: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/abteilungen.yaml#/AbteilungInput'
+    responses:
+      '201':
+        description: Created.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/abteilungen.yaml#/Abteilung'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/abteilungen/all:
+  get:
+    operationId: listAllAbteilungen
+    summary: List all departments (not paged)
+    description: Sorted by `name` ascending.
+    tags: [abteilungen]
+    security:
+      - sessionCookie: []
+    responses:
+      '200':
+        description: All departments (not paged).
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/abteilungen.yaml#/Abteilung'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/abteilungen/firma/{firmaId}:
+  get:
+    operationId: listAbteilungenByFirma
+    summary: List the departments of a company (not paged)
+    description: |
+      A plain array sorted by `name` ascending. An unknown company id answers
+      an empty array, not 404.
+    tags: [abteilungen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/FirmaIdPath'
+    responses:
+      '200':
+        description: The departments of the company.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/abteilungen.yaml#/Abteilung'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/abteilungen/{id}:
+  get:
+    operationId: getAbteilung
+    summary: Get one department
+    tags: [abteilungen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '200':
+        description: The department.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/abteilungen.yaml#/Abteilung'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  put:
+    operationId: updateAbteilung
+    summary: Update department (full replace)
+    description: |
+      Overwrites every field. Optional fields left out are stored as null.
+      Answers the record as read back from the database.
+    tags: [abteilungen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/abteilungen.yaml#/AbteilungInput'
+    responses:
+      '200':
+        description: Updated.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/abteilungen.yaml#/Abteilung'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  delete:
+    operationId: deleteAbteilung
+    summary: Delete department
+    description: Contacts of the department stay; their `abteilungId` becomes null.
+    tags: [abteilungen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '204':
+        description: Deleted. No body.
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+
+/abteilungen/{id}/personen:
+  get:
+    operationId: listAbteilungPersonen
+    summary: List the contacts of a department (paged)
+    description: |
+      Fixed order: `lastName`, then `firstName`, ascending. No `sort` and no
+      `search`. An unknown department id answers 404.
+    tags: [abteilungen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+    responses:
+      '200':
+        description: One page of contacts.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/personen.yaml#/PersonPage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'

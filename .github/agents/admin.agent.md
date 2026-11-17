@@ -46,7 +46,8 @@ Your spec reading list (paths are relative to the repo root):
 - Schema created on startup from `backend/src/config/migrate.ts` (also runs `seedAgentTasks()` from `backend/src/seed/agentTaskSeed.ts` — idempotent)
 - CRM seed data loaded on first run by `runDataMigration()` from `backend/src/seed/dataMigration.ts`, which reads `backend/src/seed/fixture.json`; skipped if Firma rows already exist
 - Session-based auth (express-session + memorystore, `JSESSIONID` cookie)
-- Start: `cd backend && npx tsx --watch src/index.ts`
+- Start: `cd backend && NODE_ENV=development npx tsx --watch src/index.ts`
+  - Dev mode required. Without `NODE_ENV=development` the backend runs as production: no test-login, no `/api/docs`, no response check.
 
 ### Frontend (Port 7200)
 - Angular 21 standalone components
@@ -98,7 +99,7 @@ rm -rf backend/data/
 ### Tail backend logs
 The backend runs in the foreground via `tsx --watch` — logs appear in the terminal that started it. For troubleshooting a one-off run:
 ```bash
-cd backend && npx tsx src/index.ts 2>&1 | tail -50
+cd backend && NODE_ENV=development npx tsx src/index.ts 2>&1 | tail -50
 ```
 
 ## Output Format

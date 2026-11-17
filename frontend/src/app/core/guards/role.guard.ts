@@ -10,7 +10,7 @@ export const roleGuard =
 
     const user = authService.currentUser();
 
-    if (user && requiredRoles.some((r) => user.rollen.includes(r))) {
+    if (user && requiredRoles.some((r) => user.rollen.some((rolle) => rolle === r))) {
       return true;
     }
 

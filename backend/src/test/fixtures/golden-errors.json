@@ -1,0 +1,2828 @@
+{
+  "abteilungen-post-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "abteilungen-post-description-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "description": "Invalid input: expected string, received number"
+    }
+  },
+  "abteilungen-post-firmaId-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received undefined"
+    }
+  },
+  "abteilungen-post-firmaId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected int, received number"
+    }
+  },
+  "abteilungen-post-firmaId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received string"
+    }
+  },
+  "abteilungen-post-firmaId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Firma ist erforderlich"
+    }
+  },
+  "abteilungen-post-name-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Name ist erforderlich"
+    }
+  },
+  "abteilungen-post-name-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received undefined"
+    }
+  },
+  "abteilungen-post-name-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "abteilungen-post-name-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received number"
+    }
+  },
+  "abteilungen-put-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "abteilungen-put-description-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "description": "Invalid input: expected string, received number"
+    }
+  },
+  "abteilungen-put-firmaId-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received undefined"
+    }
+  },
+  "abteilungen-put-firmaId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected int, received number"
+    }
+  },
+  "abteilungen-put-firmaId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received string"
+    }
+  },
+  "abteilungen-put-firmaId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Firma ist erforderlich"
+    }
+  },
+  "abteilungen-put-name-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Name ist erforderlich"
+    }
+  },
+  "abteilungen-put-name-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received undefined"
+    }
+  },
+  "abteilungen-put-name-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "abteilungen-put-name-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-post-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "adressen-post-city-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "city": "Too big: expected string to have <=100 characters"
+    }
+  },
+  "adressen-post-city-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "city": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-post-country-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "country": "Too big: expected string to have <=100 characters"
+    }
+  },
+  "adressen-post-country-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "country": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-post-firmaId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected int, received number"
+    }
+  },
+  "adressen-post-firmaId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received string"
+    }
+  },
+  "adressen-post-firmaId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Too small: expected number to be >0"
+    }
+  },
+  "adressen-post-houseNumber-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "houseNumber": "Too big: expected string to have <=20 characters"
+    }
+  },
+  "adressen-post-houseNumber-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "houseNumber": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-post-latitude-out-of-range-9999": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "latitude": "Too big: expected number to be <=90"
+    }
+  },
+  "adressen-post-latitude-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "latitude": "Invalid input: expected number, received string"
+    }
+  },
+  "adressen-post-longitude-out-of-range-minus-9999": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "longitude": "Too small: expected number to be >=-180"
+    }
+  },
+  "adressen-post-longitude-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "longitude": "Invalid input: expected number, received string"
+    }
+  },
+  "adressen-post-personId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Invalid input: expected int, received number"
+    }
+  },
+  "adressen-post-personId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Invalid input: expected number, received string"
+    }
+  },
+  "adressen-post-personId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Too small: expected number to be >0"
+    }
+  },
+  "adressen-post-postalCode-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "postalCode": "Too big: expected string to have <=20 characters"
+    }
+  },
+  "adressen-post-postalCode-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "postalCode": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-post-street-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "street": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "adressen-post-street-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "street": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-post-typ-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "typ": "Too big: expected string to have <=50 characters"
+    }
+  },
+  "adressen-post-typ-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "typ": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-put-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "adressen-put-city-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "city": "Too big: expected string to have <=100 characters"
+    }
+  },
+  "adressen-put-city-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "city": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-put-country-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "country": "Too big: expected string to have <=100 characters"
+    }
+  },
+  "adressen-put-country-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "country": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-put-firmaId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected int, received number"
+    }
+  },
+  "adressen-put-firmaId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received string"
+    }
+  },
+  "adressen-put-firmaId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Too small: expected number to be >0"
+    }
+  },
+  "adressen-put-houseNumber-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "houseNumber": "Too big: expected string to have <=20 characters"
+    }
+  },
+  "adressen-put-houseNumber-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "houseNumber": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-put-latitude-out-of-range-9999": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "latitude": "Too big: expected number to be <=90"
+    }
+  },
+  "adressen-put-latitude-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "latitude": "Invalid input: expected number, received string"
+    }
+  },
+  "adressen-put-longitude-out-of-range-minus-9999": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "longitude": "Too small: expected number to be >=-180"
+    }
+  },
+  "adressen-put-longitude-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "longitude": "Invalid input: expected number, received string"
+    }
+  },
+  "adressen-put-personId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Invalid input: expected int, received number"
+    }
+  },
+  "adressen-put-personId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Invalid input: expected number, received string"
+    }
+  },
+  "adressen-put-personId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Too small: expected number to be >0"
+    }
+  },
+  "adressen-put-postalCode-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "postalCode": "Too big: expected string to have <=20 characters"
+    }
+  },
+  "adressen-put-postalCode-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "postalCode": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-put-street-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "street": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "adressen-put-street-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "street": "Invalid input: expected string, received number"
+    }
+  },
+  "adressen-put-typ-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "typ": "Too big: expected string to have <=50 characters"
+    }
+  },
+  "adressen-put-typ-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "typ": "Invalid input: expected string, received number"
+    }
+  },
+  "agent-tasks-done-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "agent-tasks-done-comment-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "comment": "Invalid input: expected string, received number"
+    }
+  },
+  "agent-tasks-list-status-bogus": {
+    "status": 400,
+    "message": "Ungültiger status: BOGUS",
+    "fieldErrors": {
+      "status": "Ungültiger status: BOGUS"
+    }
+  },
+  "agent-tasks-next-source-bogus": {
+    "status": 400,
+    "message": "Ungültige source: BOGUS",
+    "fieldErrors": {
+      "source": "Ungültige source: BOGUS"
+    }
+  },
+  "agent-tasks-next-source-missing": {
+    "status": 400,
+    "message": "source ist erforderlich",
+    "fieldErrors": {
+      "source": "source ist erforderlich"
+    }
+  },
+  "agent-tasks-reject-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "agent-tasks-reject-comment-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "comment": "Too small: expected string to have >=1 characters"
+    }
+  },
+  "agent-tasks-reject-comment-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "comment": "Invalid input: expected string, received undefined"
+    }
+  },
+  "agent-tasks-reject-comment-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "comment": "Invalid input: expected string, received number"
+    }
+  },
+  "aktivitaeten-post-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "aktivitaeten-post-datum-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "datum": "Datum ist erforderlich"
+    }
+  },
+  "aktivitaeten-post-datum-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "datum": "Invalid input: expected string, received undefined"
+    }
+  },
+  "aktivitaeten-post-datum-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "datum": "Invalid input: expected string, received number"
+    }
+  },
+  "aktivitaeten-post-description-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "description": "Invalid input: expected string, received number"
+    }
+  },
+  "aktivitaeten-post-firmaId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected int, received number"
+    }
+  },
+  "aktivitaeten-post-firmaId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received string"
+    }
+  },
+  "aktivitaeten-post-firmaId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Too small: expected number to be >0"
+    }
+  },
+  "aktivitaeten-post-personId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Invalid input: expected int, received number"
+    }
+  },
+  "aktivitaeten-post-personId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Invalid input: expected number, received string"
+    }
+  },
+  "aktivitaeten-post-personId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Too small: expected number to be >0"
+    }
+  },
+  "aktivitaeten-post-subject-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "subject": "Betreff ist erforderlich"
+    }
+  },
+  "aktivitaeten-post-subject-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "subject": "Invalid input: expected string, received undefined"
+    }
+  },
+  "aktivitaeten-post-subject-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "subject": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "aktivitaeten-post-subject-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "subject": "Invalid input: expected string, received number"
+    }
+  },
+  "aktivitaeten-post-typ-invalid-enum": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "typ": "Ungültiger Typ"
+    }
+  },
+  "aktivitaeten-post-typ-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "typ": "Ungültiger Typ"
+    }
+  },
+  "aktivitaeten-put-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "aktivitaeten-put-datum-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "datum": "Datum ist erforderlich"
+    }
+  },
+  "aktivitaeten-put-datum-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "datum": "Invalid input: expected string, received undefined"
+    }
+  },
+  "aktivitaeten-put-datum-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "datum": "Invalid input: expected string, received number"
+    }
+  },
+  "aktivitaeten-put-description-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "description": "Invalid input: expected string, received number"
+    }
+  },
+  "aktivitaeten-put-firmaId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected int, received number"
+    }
+  },
+  "aktivitaeten-put-firmaId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received string"
+    }
+  },
+  "aktivitaeten-put-firmaId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Too small: expected number to be >0"
+    }
+  },
+  "aktivitaeten-put-personId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Invalid input: expected int, received number"
+    }
+  },
+  "aktivitaeten-put-personId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Invalid input: expected number, received string"
+    }
+  },
+  "aktivitaeten-put-personId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "personId": "Too small: expected number to be >0"
+    }
+  },
+  "aktivitaeten-put-subject-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "subject": "Betreff ist erforderlich"
+    }
+  },
+  "aktivitaeten-put-subject-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "subject": "Invalid input: expected string, received undefined"
+    }
+  },
+  "aktivitaeten-put-subject-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "subject": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "aktivitaeten-put-subject-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "subject": "Invalid input: expected string, received number"
+    }
+  },
+  "aktivitaeten-put-typ-invalid-enum": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "typ": "Ungültiger Typ"
+    }
+  },
+  "aktivitaeten-put-typ-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "typ": "Ungültiger Typ"
+    }
+  },
+  "chancen-post-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "chancen-post-beschreibung-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "beschreibung": "Invalid input: expected string, received number"
+    }
+  },
+  "chancen-post-currency-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "currency": "Too big: expected string to have <=10 characters"
+    }
+  },
+  "chancen-post-currency-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "currency": "Invalid input: expected string, received number"
+    }
+  },
+  "chancen-post-erwartetesDatum-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "erwartetesDatum": "Invalid input: expected string, received number"
+    }
+  },
+  "chancen-post-firmaId-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received undefined"
+    }
+  },
+  "chancen-post-firmaId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected int, received number"
+    }
+  },
+  "chancen-post-firmaId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received string"
+    }
+  },
+  "chancen-post-firmaId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Firma ist erforderlich"
+    }
+  },
+  "chancen-post-kontaktPersonId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "kontaktPersonId": "Invalid input: expected int, received number"
+    }
+  },
+  "chancen-post-kontaktPersonId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "kontaktPersonId": "Invalid input: expected number, received string"
+    }
+  },
+  "chancen-post-kontaktPersonId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "kontaktPersonId": "Too small: expected number to be >0"
+    }
+  },
+  "chancen-post-phase-invalid-enum": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "phase": "Ungültige Phase"
+    }
+  },
+  "chancen-post-titel-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "titel": "Titel ist erforderlich"
+    }
+  },
+  "chancen-post-titel-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "titel": "Invalid input: expected string, received undefined"
+    }
+  },
+  "chancen-post-titel-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "titel": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "chancen-post-titel-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "titel": "Invalid input: expected string, received number"
+    }
+  },
+  "chancen-post-wahrscheinlichkeit-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "wahrscheinlichkeit": "Invalid input: expected int, received number"
+    }
+  },
+  "chancen-post-wahrscheinlichkeit-out-of-range-101": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "wahrscheinlichkeit": "Too big: expected number to be <=100"
+    }
+  },
+  "chancen-post-wahrscheinlichkeit-out-of-range-minus-1": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "wahrscheinlichkeit": "Too small: expected number to be >=0"
+    }
+  },
+  "chancen-post-wahrscheinlichkeit-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "wahrscheinlichkeit": "Invalid input: expected number, received string"
+    }
+  },
+  "chancen-post-wert-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "wert": "Invalid input: expected number, received string"
+    }
+  },
+  "chancen-put-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "chancen-put-beschreibung-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "beschreibung": "Invalid input: expected string, received number"
+    }
+  },
+  "chancen-put-currency-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "currency": "Too big: expected string to have <=10 characters"
+    }
+  },
+  "chancen-put-currency-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "currency": "Invalid input: expected string, received number"
+    }
+  },
+  "chancen-put-erwartetesDatum-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "erwartetesDatum": "Invalid input: expected string, received number"
+    }
+  },
+  "chancen-put-firmaId-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received undefined"
+    }
+  },
+  "chancen-put-firmaId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected int, received number"
+    }
+  },
+  "chancen-put-firmaId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received string"
+    }
+  },
+  "chancen-put-firmaId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Firma ist erforderlich"
+    }
+  },
+  "chancen-put-kontaktPersonId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "kontaktPersonId": "Invalid input: expected int, received number"
+    }
+  },
+  "chancen-put-kontaktPersonId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "kontaktPersonId": "Invalid input: expected number, received string"
+    }
+  },
+  "chancen-put-kontaktPersonId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "kontaktPersonId": "Too small: expected number to be >0"
+    }
+  },
+  "chancen-put-phase-invalid-enum": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "phase": "Ungültige Phase"
+    }
+  },
+  "chancen-put-titel-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "titel": "Titel ist erforderlich"
+    }
+  },
+  "chancen-put-titel-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "titel": "Invalid input: expected string, received undefined"
+    }
+  },
+  "chancen-put-titel-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "titel": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "chancen-put-titel-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "titel": "Invalid input: expected string, received number"
+    }
+  },
+  "chancen-put-wahrscheinlichkeit-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "wahrscheinlichkeit": "Invalid input: expected int, received number"
+    }
+  },
+  "chancen-put-wahrscheinlichkeit-out-of-range-101": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "wahrscheinlichkeit": "Too big: expected number to be <=100"
+    }
+  },
+  "chancen-put-wahrscheinlichkeit-out-of-range-minus-1": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "wahrscheinlichkeit": "Too small: expected number to be >=0"
+    }
+  },
+  "chancen-put-wahrscheinlichkeit-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "wahrscheinlichkeit": "Invalid input: expected number, received string"
+    }
+  },
+  "chancen-put-wert-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "wert": "Invalid input: expected number, received string"
+    }
+  },
+  "cron-complete-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "cron-complete-githubRunUrl-invalid-url": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "githubRunUrl": "Invalid URL"
+    }
+  },
+  "cron-complete-githubRunUrl-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "githubRunUrl": "Invalid input: expected string, received undefined"
+    }
+  },
+  "cron-complete-githubRunUrl-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "githubRunUrl": "Invalid input: expected string, received number"
+    }
+  },
+  "cron-complete-status-invalid-enum": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "status": "Invalid option: expected one of \"SUCCESS\"|\"FAILED\""
+    }
+  },
+  "cron-complete-status-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "status": "Invalid option: expected one of \"SUCCESS\"|\"FAILED\""
+    }
+  },
+  "cron-complete-tasksRejected-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "tasksRejected": "Invalid input: expected number, received undefined"
+    }
+  },
+  "cron-complete-tasksRejected-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "tasksRejected": "Too small: expected number to be >=0"
+    }
+  },
+  "cron-complete-tasksRejected-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "tasksRejected": "Invalid input: expected int, received number"
+    }
+  },
+  "cron-complete-tasksRejected-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "tasksRejected": "Invalid input: expected number, received string"
+    }
+  },
+  "cron-complete-tasksSolved-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "tasksSolved": "Invalid input: expected number, received undefined"
+    }
+  },
+  "cron-complete-tasksSolved-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "tasksSolved": "Too small: expected number to be >=0"
+    }
+  },
+  "cron-complete-tasksSolved-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "tasksSolved": "Invalid input: expected int, received number"
+    }
+  },
+  "cron-complete-tasksSolved-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "tasksSolved": "Invalid input: expected number, received string"
+    }
+  },
+  "firmen-list-sort-bogus": {
+    "status": 400,
+    "message": "Ungültiges Sortierfeld: bogus",
+    "fieldErrors": {}
+  },
+  "firmen-post-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "firmen-post-email-invalid-email": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "email": "Ungültige E-Mail-Adresse"
+    }
+  },
+  "firmen-post-email-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "email": "Invalid input"
+    }
+  },
+  "firmen-post-industry-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "industry": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "firmen-post-industry-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "industry": "Invalid input: expected string, received number"
+    }
+  },
+  "firmen-post-name-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Name ist erforderlich"
+    }
+  },
+  "firmen-post-name-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received undefined"
+    }
+  },
+  "firmen-post-name-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "firmen-post-name-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received number"
+    }
+  },
+  "firmen-post-notes-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "notes": "Invalid input: expected string, received number"
+    }
+  },
+  "firmen-post-phone-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "phone": "Too big: expected string to have <=50 characters"
+    }
+  },
+  "firmen-post-phone-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "phone": "Invalid input: expected string, received number"
+    }
+  },
+  "firmen-post-website-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "website": "Too big: expected string to have <=500 characters"
+    }
+  },
+  "firmen-post-website-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "website": "Invalid input: expected string, received number"
+    }
+  },
+  "firmen-put-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "firmen-put-email-invalid-email": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "email": "Ungültige E-Mail-Adresse"
+    }
+  },
+  "firmen-put-email-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "email": "Invalid input"
+    }
+  },
+  "firmen-put-industry-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "industry": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "firmen-put-industry-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "industry": "Invalid input: expected string, received number"
+    }
+  },
+  "firmen-put-name-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Name ist erforderlich"
+    }
+  },
+  "firmen-put-name-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received undefined"
+    }
+  },
+  "firmen-put-name-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "firmen-put-name-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received number"
+    }
+  },
+  "firmen-put-notes-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "notes": "Invalid input: expected string, received number"
+    }
+  },
+  "firmen-put-phone-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "phone": "Too big: expected string to have <=50 characters"
+    }
+  },
+  "firmen-put-phone-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "phone": "Invalid input: expected string, received number"
+    }
+  },
+  "firmen-put-website-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "website": "Too big: expected string to have <=500 characters"
+    }
+  },
+  "firmen-put-website-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "website": "Invalid input: expected string, received number"
+    }
+  },
+  "personen-post-abteilungId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "abteilungId": "Invalid input: expected int, received number"
+    }
+  },
+  "personen-post-abteilungId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "abteilungId": "Invalid input: expected number, received string"
+    }
+  },
+  "personen-post-abteilungId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "abteilungId": "Too small: expected number to be >0"
+    }
+  },
+  "personen-post-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "personen-post-email-invalid-email": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "email": "Ungültige E-Mail-Adresse"
+    }
+  },
+  "personen-post-email-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "email": "Invalid input"
+    }
+  },
+  "personen-post-firmaId-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received undefined"
+    }
+  },
+  "personen-post-firmaId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected int, received number"
+    }
+  },
+  "personen-post-firmaId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received string"
+    }
+  },
+  "personen-post-firmaId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Firma ist erforderlich"
+    }
+  },
+  "personen-post-firstName-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firstName": "Vorname ist erforderlich"
+    }
+  },
+  "personen-post-firstName-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firstName": "Invalid input: expected string, received undefined"
+    }
+  },
+  "personen-post-firstName-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firstName": "Too big: expected string to have <=100 characters"
+    }
+  },
+  "personen-post-firstName-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firstName": "Invalid input: expected string, received number"
+    }
+  },
+  "personen-post-lastName-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "lastName": "Nachname ist erforderlich"
+    }
+  },
+  "personen-post-lastName-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "lastName": "Invalid input: expected string, received undefined"
+    }
+  },
+  "personen-post-lastName-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "lastName": "Too big: expected string to have <=100 characters"
+    }
+  },
+  "personen-post-lastName-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "lastName": "Invalid input: expected string, received number"
+    }
+  },
+  "personen-post-notes-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "notes": "Invalid input: expected string, received number"
+    }
+  },
+  "personen-post-phone-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "phone": "Too big: expected string to have <=50 characters"
+    }
+  },
+  "personen-post-phone-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "phone": "Invalid input: expected string, received number"
+    }
+  },
+  "personen-post-position-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "position": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "personen-post-position-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "position": "Invalid input: expected string, received number"
+    }
+  },
+  "personen-put-abteilungId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "abteilungId": "Invalid input: expected int, received number"
+    }
+  },
+  "personen-put-abteilungId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "abteilungId": "Invalid input: expected number, received string"
+    }
+  },
+  "personen-put-abteilungId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "abteilungId": "Too small: expected number to be >0"
+    }
+  },
+  "personen-put-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "personen-put-email-invalid-email": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "email": "Ungültige E-Mail-Adresse"
+    }
+  },
+  "personen-put-email-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "email": "Invalid input"
+    }
+  },
+  "personen-put-firmaId-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received undefined"
+    }
+  },
+  "personen-put-firmaId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected int, received number"
+    }
+  },
+  "personen-put-firmaId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Invalid input: expected number, received string"
+    }
+  },
+  "personen-put-firmaId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firmaId": "Firma ist erforderlich"
+    }
+  },
+  "personen-put-firstName-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firstName": "Vorname ist erforderlich"
+    }
+  },
+  "personen-put-firstName-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firstName": "Invalid input: expected string, received undefined"
+    }
+  },
+  "personen-put-firstName-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firstName": "Too big: expected string to have <=100 characters"
+    }
+  },
+  "personen-put-firstName-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "firstName": "Invalid input: expected string, received number"
+    }
+  },
+  "personen-put-lastName-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "lastName": "Nachname ist erforderlich"
+    }
+  },
+  "personen-put-lastName-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "lastName": "Invalid input: expected string, received undefined"
+    }
+  },
+  "personen-put-lastName-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "lastName": "Too big: expected string to have <=100 characters"
+    }
+  },
+  "personen-put-lastName-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "lastName": "Invalid input: expected string, received number"
+    }
+  },
+  "personen-put-notes-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "notes": "Invalid input: expected string, received number"
+    }
+  },
+  "personen-put-phone-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "phone": "Too big: expected string to have <=50 characters"
+    }
+  },
+  "personen-put-phone-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "phone": "Invalid input: expected string, received number"
+    }
+  },
+  "personen-put-position-too-long": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "position": "Too big: expected string to have <=255 characters"
+    }
+  },
+  "personen-put-position-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "position": "Invalid input: expected string, received number"
+    }
+  },
+  "szenarien-post-agile-ki-process-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps": "Invalid input: expected object, received undefined"
+    }
+  },
+  "szenarien-post-agile-ki-process-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps": "Invalid input: expected object, received string"
+    }
+  },
+  "szenarien-post-agile-ki-waits-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.waits": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-post-agile-ki-waits-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.waits": "Genau 18 Wartezeiten"
+    }
+  },
+  "szenarien-post-agile-ki-waits-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.waits": "Genau 18 Wartezeiten"
+    }
+  },
+  "szenarien-post-agile-ki-works-item-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works.0": "Darf nicht negativ sein"
+    }
+  },
+  "szenarien-post-agile-ki-works-item-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works.0": "Muss eine ganze Zahl sein"
+    }
+  },
+  "szenarien-post-agile-ki-works-item-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works.0": "Invalid input: expected number, received string"
+    }
+  },
+  "szenarien-post-agile-ki-works-item-too-large": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works.0": "Maximal 999 Tage"
+    }
+  },
+  "szenarien-post-agile-ki-works-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-post-agile-ki-works-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-agile-ki-works-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-agile-ki-works-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "szenarien-post-automated-process-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps": "Invalid input: expected object, received undefined"
+    }
+  },
+  "szenarien-post-automated-process-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps": "Invalid input: expected object, received string"
+    }
+  },
+  "szenarien-post-automated-waits-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.waits": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-post-automated-waits-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.waits": "Genau 1 Wartezeiten"
+    }
+  },
+  "szenarien-post-automated-waits-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.waits": "Genau 1 Wartezeiten"
+    }
+  },
+  "szenarien-post-automated-works-item-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works.0": "Darf nicht negativ sein"
+    }
+  },
+  "szenarien-post-automated-works-item-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works.0": "Muss eine ganze Zahl sein"
+    }
+  },
+  "szenarien-post-automated-works-item-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works.0": "Invalid input: expected number, received string"
+    }
+  },
+  "szenarien-post-automated-works-item-too-large": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works.0": "Maximal 999 Tage"
+    }
+  },
+  "szenarien-post-automated-works-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-post-automated-works-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works": "Genau 2 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-automated-works-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works": "Genau 2 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-automated-works-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works": "Genau 2 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-human-process-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps": "Invalid input: expected object, received undefined"
+    }
+  },
+  "szenarien-post-human-process-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps": "Invalid input: expected object, received string"
+    }
+  },
+  "szenarien-post-human-waits-17-items": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits": "Genau 18 Wartezeiten"
+    }
+  },
+  "szenarien-post-human-waits-item-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits.0": "Darf nicht negativ sein"
+    }
+  },
+  "szenarien-post-human-waits-item-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits.0": "Muss eine ganze Zahl sein"
+    }
+  },
+  "szenarien-post-human-waits-item-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits.0": "Invalid input: expected number, received string"
+    }
+  },
+  "szenarien-post-human-waits-item-too-large": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits.0": "Maximal 999 Tage"
+    }
+  },
+  "szenarien-post-human-waits-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-post-human-waits-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits": "Genau 18 Wartezeiten"
+    }
+  },
+  "szenarien-post-human-waits-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits": "Genau 18 Wartezeiten"
+    }
+  },
+  "szenarien-post-human-works-18-items": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-human-works-item-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works.0": "Darf nicht negativ sein"
+    }
+  },
+  "szenarien-post-human-works-item-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works.0": "Muss eine ganze Zahl sein"
+    }
+  },
+  "szenarien-post-human-works-item-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works.0": "Invalid input: expected number, received string"
+    }
+  },
+  "szenarien-post-human-works-item-too-large": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works.0": "Maximal 999 Tage"
+    }
+  },
+  "szenarien-post-human-works-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-post-human-works-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-human-works-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-human-works-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-name-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Name ist erforderlich"
+    }
+  },
+  "szenarien-post-name-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received undefined"
+    }
+  },
+  "szenarien-post-name-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received number"
+    }
+  },
+  "szenarien-post-semi-automated-process-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps": "Invalid input: expected object, received undefined"
+    }
+  },
+  "szenarien-post-semi-automated-process-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps": "Invalid input: expected object, received string"
+    }
+  },
+  "szenarien-post-semi-automated-waits-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.waits": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-post-semi-automated-waits-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.waits": "Genau 10 Wartezeiten"
+    }
+  },
+  "szenarien-post-semi-automated-waits-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.waits": "Genau 10 Wartezeiten"
+    }
+  },
+  "szenarien-post-semi-automated-works-item-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works.0": "Darf nicht negativ sein"
+    }
+  },
+  "szenarien-post-semi-automated-works-item-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works.0": "Muss eine ganze Zahl sein"
+    }
+  },
+  "szenarien-post-semi-automated-works-item-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works.0": "Invalid input: expected number, received string"
+    }
+  },
+  "szenarien-post-semi-automated-works-item-too-large": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works.0": "Maximal 999 Tage"
+    }
+  },
+  "szenarien-post-semi-automated-works-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-post-semi-automated-works-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works": "Genau 11 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-semi-automated-works-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works": "Genau 11 Arbeitszeiten"
+    }
+  },
+  "szenarien-post-semi-automated-works-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works": "Genau 11 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-agile-ki-process-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps": "Invalid input: expected object, received undefined"
+    }
+  },
+  "szenarien-put-agile-ki-process-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps": "Invalid input: expected object, received string"
+    }
+  },
+  "szenarien-put-agile-ki-waits-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.waits": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-put-agile-ki-waits-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.waits": "Genau 18 Wartezeiten"
+    }
+  },
+  "szenarien-put-agile-ki-waits-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.waits": "Genau 18 Wartezeiten"
+    }
+  },
+  "szenarien-put-agile-ki-works-item-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works.0": "Darf nicht negativ sein"
+    }
+  },
+  "szenarien-put-agile-ki-works-item-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works.0": "Muss eine ganze Zahl sein"
+    }
+  },
+  "szenarien-put-agile-ki-works-item-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works.0": "Invalid input: expected number, received string"
+    }
+  },
+  "szenarien-put-agile-ki-works-item-too-large": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works.0": "Maximal 999 Tage"
+    }
+  },
+  "szenarien-put-agile-ki-works-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-put-agile-ki-works-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-agile-ki-works-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-agile-ki-works-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agileKiSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "szenarien-put-automated-process-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps": "Invalid input: expected object, received undefined"
+    }
+  },
+  "szenarien-put-automated-process-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps": "Invalid input: expected object, received string"
+    }
+  },
+  "szenarien-put-automated-waits-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.waits": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-put-automated-waits-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.waits": "Genau 1 Wartezeiten"
+    }
+  },
+  "szenarien-put-automated-waits-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.waits": "Genau 1 Wartezeiten"
+    }
+  },
+  "szenarien-put-automated-works-item-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works.0": "Darf nicht negativ sein"
+    }
+  },
+  "szenarien-put-automated-works-item-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works.0": "Muss eine ganze Zahl sein"
+    }
+  },
+  "szenarien-put-automated-works-item-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works.0": "Invalid input: expected number, received string"
+    }
+  },
+  "szenarien-put-automated-works-item-too-large": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works.0": "Maximal 999 Tage"
+    }
+  },
+  "szenarien-put-automated-works-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-put-automated-works-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works": "Genau 2 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-automated-works-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works": "Genau 2 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-automated-works-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "automatedSteps.works": "Genau 2 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-human-process-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps": "Invalid input: expected object, received undefined"
+    }
+  },
+  "szenarien-put-human-process-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps": "Invalid input: expected object, received string"
+    }
+  },
+  "szenarien-put-human-waits-17-items": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits": "Genau 18 Wartezeiten"
+    }
+  },
+  "szenarien-put-human-waits-item-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits.0": "Darf nicht negativ sein"
+    }
+  },
+  "szenarien-put-human-waits-item-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits.0": "Muss eine ganze Zahl sein"
+    }
+  },
+  "szenarien-put-human-waits-item-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits.0": "Invalid input: expected number, received string"
+    }
+  },
+  "szenarien-put-human-waits-item-too-large": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits.0": "Maximal 999 Tage"
+    }
+  },
+  "szenarien-put-human-waits-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-put-human-waits-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits": "Genau 18 Wartezeiten"
+    }
+  },
+  "szenarien-put-human-waits-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.waits": "Genau 18 Wartezeiten"
+    }
+  },
+  "szenarien-put-human-works-18-items": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-human-works-item-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works.0": "Darf nicht negativ sein"
+    }
+  },
+  "szenarien-put-human-works-item-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works.0": "Muss eine ganze Zahl sein"
+    }
+  },
+  "szenarien-put-human-works-item-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works.0": "Invalid input: expected number, received string"
+    }
+  },
+  "szenarien-put-human-works-item-too-large": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works.0": "Maximal 999 Tage"
+    }
+  },
+  "szenarien-put-human-works-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-put-human-works-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-human-works-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-human-works-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "humanSteps.works": "Genau 19 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-name-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Name ist erforderlich"
+    }
+  },
+  "szenarien-put-name-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received undefined"
+    }
+  },
+  "szenarien-put-name-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "name": "Invalid input: expected string, received number"
+    }
+  },
+  "szenarien-put-semi-automated-process-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps": "Invalid input: expected object, received undefined"
+    }
+  },
+  "szenarien-put-semi-automated-process-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps": "Invalid input: expected object, received string"
+    }
+  },
+  "szenarien-put-semi-automated-waits-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.waits": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-put-semi-automated-waits-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.waits": "Genau 10 Wartezeiten"
+    }
+  },
+  "szenarien-put-semi-automated-waits-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.waits": "Genau 10 Wartezeiten"
+    }
+  },
+  "szenarien-put-semi-automated-works-item-negative": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works.0": "Darf nicht negativ sein"
+    }
+  },
+  "szenarien-put-semi-automated-works-item-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works.0": "Muss eine ganze Zahl sein"
+    }
+  },
+  "szenarien-put-semi-automated-works-item-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works.0": "Invalid input: expected number, received string"
+    }
+  },
+  "szenarien-put-semi-automated-works-item-too-large": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works.0": "Maximal 999 Tage"
+    }
+  },
+  "szenarien-put-semi-automated-works-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works": "Invalid input: expected array, received undefined"
+    }
+  },
+  "szenarien-put-semi-automated-works-too-few": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works": "Genau 11 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-semi-automated-works-too-many": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works": "Genau 11 Arbeitszeiten"
+    }
+  },
+  "szenarien-put-semi-automated-works-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "semiAutomatedSteps.works": "Genau 11 Arbeitszeiten"
+    }
+  },
+  "tickets-ask-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "tickets-ask-question-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "question": "Frage ist erforderlich"
+    }
+  },
+  "tickets-ask-question-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "question": "Invalid input: expected string, received undefined"
+    }
+  },
+  "tickets-ask-question-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "question": "Invalid input: expected string, received number"
+    }
+  },
+  "tickets-comments-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "tickets-comments-author-invalid-enum": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "author": "Ungültiger Autor"
+    }
+  },
+  "tickets-comments-body-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "body": "Kommentar-Text ist erforderlich"
+    }
+  },
+  "tickets-comments-body-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "body": "Invalid input: expected string, received undefined"
+    }
+  },
+  "tickets-comments-body-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "body": "Invalid input: expected string, received number"
+    }
+  },
+  "tickets-comments-clearFullyReady-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "clearFullyReady": "Invalid input: expected boolean, received string"
+    }
+  },
+  "tickets-comments-handBackToAi-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "handBackToAi": "Invalid input: expected boolean, received string"
+    }
+  },
+  "tickets-create-agentTaskId-not-whole": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agentTaskId": "Invalid input: expected int, received number"
+    }
+  },
+  "tickets-create-agentTaskId-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agentTaskId": "Invalid input: expected number, received string"
+    }
+  },
+  "tickets-create-agentTaskId-zero": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "agentTaskId": "Too small: expected number to be >0"
+    }
+  },
+  "tickets-create-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "tickets-create-body-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "body": "Beschreibung ist erforderlich"
+    }
+  },
+  "tickets-create-body-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "body": "Invalid input: expected string, received undefined"
+    }
+  },
+  "tickets-create-body-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "body": "Invalid input: expected string, received number"
+    }
+  },
+  "tickets-create-fullyReady-wrong-type-string": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "fullyReady": "Invalid input: expected boolean, received string"
+    }
+  },
+  "tickets-create-title-empty": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "title": "Titel ist erforderlich"
+    }
+  },
+  "tickets-create-title-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "title": "Invalid input: expected string, received undefined"
+    }
+  },
+  "tickets-create-title-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "title": "Invalid input: expected string, received number"
+    }
+  },
+  "tickets-create-type-invalid-enum": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "type": "Ungültiger Ticket-Typ"
+    }
+  },
+  "tickets-create-type-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "type": "Ungültiger Ticket-Typ"
+    }
+  },
+  "tickets-done-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "tickets-done-comment-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "comment": "Invalid input: expected string, received number"
+    }
+  },
+  "tickets-list-owner-invalid": {
+    "status": 400,
+    "message": "Ungültiger Eigentümer: X",
+    "fieldErrors": {
+      "owner": "Ungültiger Eigentümer: X"
+    }
+  },
+  "tickets-list-status-invalid": {
+    "status": 400,
+    "message": "Ungültiger Status: X",
+    "fieldErrors": {
+      "status": "Ungültiger Status: X"
+    }
+  },
+  "tickets-list-type-invalid": {
+    "status": 400,
+    "message": "Ungültiger Ticket-Typ: X",
+    "fieldErrors": {
+      "type": "Ungültiger Ticket-Typ: X"
+    }
+  },
+  "tickets-next-type-invalid": {
+    "status": 400,
+    "message": "Ungültiger Ticket-Typ: X",
+    "fieldErrors": {
+      "type": "Ungültiger Ticket-Typ: X"
+    }
+  },
+  "tickets-owner-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "tickets-owner-owner-invalid-enum": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "owner": "Ungültiger Eigentümer"
+    }
+  },
+  "tickets-owner-owner-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "owner": "Ungültiger Eigentümer"
+    }
+  },
+  "tickets-status-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "tickets-status-status-invalid-enum": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "status": "Ungültiger Status"
+    }
+  },
+  "tickets-status-status-missing": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "status": "Ungültiger Status"
+    }
+  },
+  "tickets-wont-do-array-body": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "_": "Invalid input: expected object, received array"
+    }
+  },
+  "tickets-wont-do-comment-wrong-type-number": {
+    "status": 400,
+    "message": "Validierungsfehler",
+    "fieldErrors": {
+      "comment": "Invalid input: expected string, received number"
+    }
+  }
+}

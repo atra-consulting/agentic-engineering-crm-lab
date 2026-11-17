@@ -17,6 +17,7 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-backend.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-database.md`, `docs/specs/SPECS-testing.md`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`, `openapi/common.yaml` (shared `ErrorResponse`, `PageMeta`, parameters, responses, shared `x-error-messages`)
 
 ## Review Checklist
 
@@ -27,8 +28,10 @@ Your spec reading list (paths are relative to the repo root):
 - [ ] Drizzle schema and `migrate.ts` CREATE TABLE stay in sync
 
 ### Security
-- [ ] Every route uses `requireAuth` plus `requireRole(...)` or `requirePermission(...)`
-- [ ] Zod validation at the boundary on all write routes
+- [ ] Every route uses `requireAuth` plus `requireRole(...)`
+- [ ] `specValidate` after the guards on all routes with a request body or params
+- [ ] Contract updated first, `cd backend && npm run api:generate` run, `npm run api:check` passes
+- [ ] No hand-written DTOs — types come from `backend/src/openapi/types.ts`
 - [ ] No string concatenation in SQL — use parameterized queries or Drizzle builders
 - [ ] `sort` and other dynamic column names validated against a whitelist
 - [ ] No exposed secrets, session secret read from env

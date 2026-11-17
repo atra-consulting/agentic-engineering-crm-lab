@@ -1,30 +1,10 @@
+import type { components } from '../api/api-types';
 import { ProzessKey } from './prozess-defaults';
 
-export interface ProzessDauer {
-  works: number[];
-  waits: number[];
-}
-
-export interface Szenario {
-  id: number;
-  name: string;
-  humanSteps: ProzessDauer;
-  agileKiSteps: ProzessDauer;
-  semiAutomatedSteps: ProzessDauer;
-  automatedSteps: ProzessDauer;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface SzenarioCreate {
-  name: string;
-  humanSteps: ProzessDauer;
-  agileKiSteps: ProzessDauer;
-  semiAutomatedSteps: ProzessDauer;
-  automatedSteps: ProzessDauer;
-}
-
-export type SzenarioUpdate = SzenarioCreate;
+export type ProzessDauer = components['schemas']['ProzessDauer'];
+export type Szenario = components['schemas']['Szenario'];
+export type SzenarioCreate = components['schemas']['SzenarioInput'];
+export type SzenarioUpdate = components['schemas']['SzenarioInput'];
 
 /** The Szenario field name that stores a given process's step durations. */
 export type SzenarioProzessFeld =

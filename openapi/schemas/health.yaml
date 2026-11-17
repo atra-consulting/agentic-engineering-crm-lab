@@ -1,0 +1,15 @@
+# Area: health. Source: backend/src/app.ts.
+Health:
+  type: object
+  additionalProperties: false
+  required: [status, timestamp, version]
+  properties:
+    status:
+      type: string
+      const: ok
+    timestamp:
+      type: string
+      description: Server time, ISO-8601 UTC with `Z` (`new Date().toISOString()`).
+    version:
+      type: string
+      description: The `version` field of `backend/package.json`.

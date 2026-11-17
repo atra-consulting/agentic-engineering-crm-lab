@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { SzenarioService } from './szenario.service';
 import { Szenario, SzenarioCreate, SzenarioUpdate } from '../models/szenario.model';
+import { makeSzenario } from '../testing/model-factories';
 
 describe('SzenarioService', () => {
   let service: SzenarioService;
@@ -13,7 +14,7 @@ describe('SzenarioService', () => {
     waits: [240, 480],
   };
 
-  const mockSzenario: Szenario = {
+  const mockSzenario: Szenario = makeSzenario({
     id: 1,
     name: 'Standard-Szenario',
     humanSteps: mockProzess,
@@ -22,7 +23,7 @@ describe('SzenarioService', () => {
     automatedSteps: { works: [0, 20], waits: [240] },
     createdAt: '2024-01-01T10:00:00.000Z',
     updatedAt: '2024-01-01T10:00:00.000Z',
-  };
+  });
 
   const mockCreate: SzenarioCreate = {
     name: 'Neues Szenario',

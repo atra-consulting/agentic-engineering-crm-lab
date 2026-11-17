@@ -1,30 +1,29 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiClient } from '../api/api-client';
 import { Chance, ChanceCreate } from '../models/chance.model';
 
 @Injectable({ providedIn: 'root' })
 export class ChanceService {
-  private http = inject(HttpClient);
-  private baseUrl = '/api/chancen';
+  private api = inject(ApiClient);
 
   listAll(): Observable<Chance[]> {
-    return this.http.get<Chance[]>(`${this.baseUrl}/all`);
+    return this.api.get('/chancen/all');
   }
 
   getById(id: number): Observable<Chance> {
-    return this.http.get<Chance>(`${this.baseUrl}/${id}`);
+    return this.api.get('/chancen/{id}', { path: { id } });
   }
 
   create(chance: ChanceCreate): Observable<Chance> {
-    return this.http.post<Chance>(this.baseUrl, chance);
+    return this.api.post('/chancen', { body: chance });
   }
 
   update(id: number, chance: ChanceCreate): Observable<Chance> {
-    return this.http.put<Chance>(`${this.baseUrl}/${id}`, chance);
+    return this.api.put('/chancen/{id}', { path: { id }, body: chance });
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.api.delete('/chancen/{id}', { path: { id } });
   }
 }

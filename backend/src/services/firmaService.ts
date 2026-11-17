@@ -2,34 +2,11 @@ import { client } from '../config/db.js';
 import type { InValue } from '@libsql/client';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import type { FirmaCreateDTO } from '../utils/validation.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
-export interface FirmaAddressSummary {
-  id: number;
-  street: string | null;
-  houseNumber: string | null;
-  postalCode: string | null;
-  city: string | null;
-  country: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  typ: string | null;
-}
+export type FirmaAddressSummary = Schema<'FirmaAdresse'>;
 
-export interface FirmaDTO {
-  id: number;
-  name: string;
-  industry: string | null;
-  website: string | null;
-  phone: string | null;
-  email: string | null;
-  notes: string | null;
-  personenCount: number;
-  abteilungenCount: number;
-  adressen?: FirmaAddressSummary[];
-  createdAt: string;
-  updatedAt: string;
-}
+export type FirmaDTO = Schema<'Firma'>;
 
 interface FirmaRow {
   id: number;
@@ -125,7 +102,7 @@ export const firmaService = {
     return { ...toDTO(row), adressen };
   },
 
-  async create(dto: FirmaCreateDTO): Promise<FirmaDTO> {
+  async create(dto: RequestBody<'createFirma'>): Promise<FirmaDTO> {
     const now = new Date().toISOString();
     const result = await client.execute({
       sql: `INSERT INTO firma (name, industry, website, phone, email, notes, createdAt, updatedAt)
@@ -147,7 +124,7 @@ export const firmaService = {
     return this.findById(Number(result.lastInsertRowid));
   },
 
-  async update(id: number, dto: FirmaCreateDTO): Promise<FirmaDTO> {
+  async update(id: number, dto: RequestBody<'updateFirma'>): Promise<FirmaDTO> {
     await this.findById(id); // throws 404 if not found
     const now = new Date().toISOString();
     await client.execute({

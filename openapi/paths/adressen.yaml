@@ -1,0 +1,144 @@
+# Area: adressen. Source: backend/src/routes/adressen.ts, backend/src/services/adresseService.ts.
+
+/adressen:
+  get:
+    operationId: listAdressen
+    summary: List addresses (paged)
+    description: |
+      `search` matches `city` (case-insensitive substring).
+    tags: [adressen]
+    security:
+      - sessionCookie: []
+    x-sort-fields: [city, postalCode, street, createdAt, updatedAt]
+    x-default-sort: city,ASC
+    parameters:
+      - $ref: '../common.yaml#/parameters/SearchQuery'
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+      - $ref: '../common.yaml#/parameters/SortQuery'
+    responses:
+      '200':
+        description: One page of addresses.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/adressen.yaml#/AdressePage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+  post:
+    operationId: createAdresse
+    summary: Create an address
+    description: Answers the new record as read back from the database.
+    tags: [adressen]
+    security:
+      - sessionCookie: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/adressen.yaml#/AdresseInput'
+    responses:
+      '201':
+        description: Created.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/adressen.yaml#/Adresse'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/adressen/all:
+  get:
+    operationId: listAllAdressen
+    summary: List all addresses (not paged)
+    description: Sorted by `city` ascending.
+    tags: [adressen]
+    security:
+      - sessionCookie: []
+    responses:
+      '200':
+        description: All addresses (not paged).
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/adressen.yaml#/Adresse'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/adressen/{id}:
+  get:
+    operationId: getAdresse
+    summary: Get one address
+    tags: [adressen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '200':
+        description: The address.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/adressen.yaml#/Adresse'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  put:
+    operationId: updateAdresse
+    summary: Update address (full replace)
+    description: |
+      Overwrites every field. Optional fields left out are stored as null, except `latitude` and `longitude`: a left-out value keeps the current one (an explicit null clears it).
+      Answers the record as read back from the database.
+    tags: [adressen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/adressen.yaml#/AdresseInput'
+    responses:
+      '200':
+        description: Updated.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/adressen.yaml#/Adresse'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  delete:
+    operationId: deleteAdresse
+    summary: Delete address
+    description: Deletes the single address only.
+    tags: [adressen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '204':
+        description: Deleted. No body.
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'

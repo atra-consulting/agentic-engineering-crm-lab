@@ -1,0 +1,190 @@
+# Area: szenarien. Source of response shapes: backend/src/routes/szenario.ts, backend/src/services/szenarioService.ts.
+# This file is the source of truth for input validation.
+
+Szenario:
+  type: object
+  description: A process scenario. Durations are whole minutes.
+  additionalProperties: false
+  required: [id, name, humanSteps, agileKiSteps, semiAutomatedSteps, automatedSteps, createdAt, updatedAt]
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    humanSteps:
+      $ref: '#/ProzessDauer'
+    agileKiSteps:
+      $ref: '#/ProzessDauer'
+    semiAutomatedSteps:
+      $ref: '#/ProzessDauer'
+    automatedSteps:
+      $ref: '#/ProzessDauer'
+    createdAt:
+      type: string
+      description: ISO-8601 text as stored.
+    updatedAt:
+      type: string
+      description: ISO-8601 text as stored.
+
+ProzessDauer:
+  type: object
+  description: Work and wait durations (minutes) of one process. Stored as JSON text, sent as arrays.
+  additionalProperties: false
+  required: [works, waits]
+  properties:
+    works:
+      type: array
+      items:
+        type: integer
+    waits:
+      type: array
+      items:
+        type: integer
+
+SzenarioInput:
+  type: object
+  description: |
+    Create or replace a scenario. `name` must be unique (409 otherwise).
+    Each process needs exactly N work durations and N-1 wait durations.
+    Durations are whole minutes from 0 to 479520 (999 days).
+  required: [name, humanSteps, agileKiSteps, semiAutomatedSteps, automatedSteps]
+  properties:
+    name:
+      type: string
+      minLength: 1
+      x-error-messages:
+        required: Name ist erforderlich
+        type: Name ist erforderlich
+        minLength: Name ist erforderlich
+    humanSteps:
+      type: object
+      description: Human process. 19 works, 18 waits.
+      required: [works, waits]
+      properties:
+        works:
+          type: array
+          minItems: 19
+          maxItems: 19
+          x-error-messages:
+            minItems: Genau 19 Arbeitszeiten
+            maxItems: Genau 19 Arbeitszeiten
+          items:
+            type: integer
+            minimum: 0
+            maximum: 479520
+            x-error-messages:
+              minimum: Darf nicht negativ sein
+              maximum: Maximal 999 Tage
+        waits:
+          type: array
+          minItems: 18
+          maxItems: 18
+          x-error-messages:
+            minItems: Genau 18 Wartezeiten
+            maxItems: Genau 18 Wartezeiten
+          items:
+            type: integer
+            minimum: 0
+            maximum: 479520
+            x-error-messages:
+              minimum: Darf nicht negativ sein
+              maximum: Maximal 999 Tage
+    agileKiSteps:
+      type: object
+      description: Agile KI process. 19 works, 18 waits.
+      required: [works, waits]
+      properties:
+        works:
+          type: array
+          minItems: 19
+          maxItems: 19
+          x-error-messages:
+            minItems: Genau 19 Arbeitszeiten
+            maxItems: Genau 19 Arbeitszeiten
+          items:
+            type: integer
+            minimum: 0
+            maximum: 479520
+            x-error-messages:
+              minimum: Darf nicht negativ sein
+              maximum: Maximal 999 Tage
+        waits:
+          type: array
+          minItems: 18
+          maxItems: 18
+          x-error-messages:
+            minItems: Genau 18 Wartezeiten
+            maxItems: Genau 18 Wartezeiten
+          items:
+            type: integer
+            minimum: 0
+            maximum: 479520
+            x-error-messages:
+              minimum: Darf nicht negativ sein
+              maximum: Maximal 999 Tage
+    semiAutomatedSteps:
+      type: object
+      description: Semi-automated process. 11 works, 10 waits.
+      required: [works, waits]
+      properties:
+        works:
+          type: array
+          minItems: 11
+          maxItems: 11
+          x-error-messages:
+            minItems: Genau 11 Arbeitszeiten
+            maxItems: Genau 11 Arbeitszeiten
+          items:
+            type: integer
+            minimum: 0
+            maximum: 479520
+            x-error-messages:
+              minimum: Darf nicht negativ sein
+              maximum: Maximal 999 Tage
+        waits:
+          type: array
+          minItems: 10
+          maxItems: 10
+          x-error-messages:
+            minItems: Genau 10 Wartezeiten
+            maxItems: Genau 10 Wartezeiten
+          items:
+            type: integer
+            minimum: 0
+            maximum: 479520
+            x-error-messages:
+              minimum: Darf nicht negativ sein
+              maximum: Maximal 999 Tage
+    automatedSteps:
+      type: object
+      description: Automated process. 2 works, 1 waits.
+      required: [works, waits]
+      properties:
+        works:
+          type: array
+          minItems: 2
+          maxItems: 2
+          x-error-messages:
+            minItems: Genau 2 Arbeitszeiten
+            maxItems: Genau 2 Arbeitszeiten
+          items:
+            type: integer
+            minimum: 0
+            maximum: 479520
+            x-error-messages:
+              minimum: Darf nicht negativ sein
+              maximum: Maximal 999 Tage
+        waits:
+          type: array
+          minItems: 1
+          maxItems: 1
+          x-error-messages:
+            minItems: Genau 1 Wartezeiten
+            maxItems: Genau 1 Wartezeiten
+          items:
+            type: integer
+            minimum: 0
+            maximum: 479520
+            x-error-messages:
+              minimum: Darf nicht negativ sein
+              maximum: Maximal 999 Tage

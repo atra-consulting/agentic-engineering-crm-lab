@@ -1,0 +1,144 @@
+# Area: firmen. Source of response shapes: backend/src/services/firmaService.ts (FirmaDTO, toDTO,
+# FirmaAddressSummary). This file is the source of truth for input validation.
+
+Firma:
+  type: object
+  description: |
+    A company. `adressen` appears only on single-record answers
+    (get, create, update), never in lists.
+  additionalProperties: false
+  required:
+    - id
+    - name
+    - industry
+    - website
+    - phone
+    - email
+    - notes
+    - personenCount
+    - abteilungenCount
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    industry:
+      type: [string, 'null']
+    website:
+      type: [string, 'null']
+    phone:
+      type: [string, 'null']
+    email:
+      type: [string, 'null']
+    notes:
+      type: [string, 'null']
+    personenCount:
+      type: integer
+      description: Number of contacts of this company (computed, not stored).
+    abteilungenCount:
+      type: integer
+      description: Number of departments of this company (computed, not stored).
+    adressen:
+      type: array
+      description: Addresses of this company, sorted by `typ`, then `id`. Single-record answers only.
+      items:
+        $ref: '#/FirmaAdresse'
+    createdAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+    updatedAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+
+FirmaAdresse:
+  type: object
+  description: Address summary inside a single company answer.
+  additionalProperties: false
+  required:
+    - id
+    - street
+    - houseNumber
+    - postalCode
+    - city
+    - country
+    - latitude
+    - longitude
+    - typ
+  properties:
+    id:
+      type: integer
+    street:
+      type: [string, 'null']
+    houseNumber:
+      type: [string, 'null']
+    postalCode:
+      type: [string, 'null']
+    city:
+      type: [string, 'null']
+    country:
+      type: [string, 'null']
+    latitude:
+      type: [number, 'null']
+    longitude:
+      type: [number, 'null']
+    typ:
+      type: [string, 'null']
+      description: Free text, for example `HAUPTQUARTIER` or `NIEDERLASSUNG`.
+
+FirmaPage:
+  type: object
+  description: One page of companies (without `adressen`).
+  allOf:
+    - $ref: '../common.yaml#/schemas/PageMeta'
+    - type: object
+      required: [content]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/Firma'
+  unevaluatedProperties: false
+
+FirmaInput:
+  type: object
+  description: |
+    Body for create and full update. Every field except `name` is optional.
+    A left-out optional field is stored as null. Unknown fields are stripped.
+  required: [name]
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 255
+      x-error-messages:
+        required: Name ist erforderlich
+        type: Name ist erforderlich
+        minLength: Name ist erforderlich
+    industry:
+      type: [string, 'null']
+      maxLength: 255
+    website:
+      type: [string, 'null']
+      maxLength: 500
+    phone:
+      type: [string, 'null']
+      maxLength: 50
+    email:
+      type: [string, 'null']
+      description: A valid email address, the empty string, or null.
+      # Every branch carries its own type; an untyped branch becomes `unknown` in TS.
+      anyOf:
+        - type: string
+          format: email
+        - type: string
+          const: ''
+        - type: 'null'
+      x-error-messages:
+        type: Ungültige E-Mail-Adresse
+        anyOf: Ungültige E-Mail-Adresse
+        format: Ungültige E-Mail-Adresse
+        const: Ungültige E-Mail-Adresse
+    notes:
+      type: [string, 'null']

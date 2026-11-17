@@ -14,13 +14,24 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-backend.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-database.md`, `docs/specs/SPECS-testing.md`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`, `openapi/common.yaml` (shared `ErrorResponse`, `PageMeta`, parameters, responses, shared `x-error-messages`)
+
+## Contract Rules
+
+- Never edit generated files: `backend/src/generated/openapi.json`, `backend/src/generated/api-types.ts`, `frontend/src/app/core/api/api-types.ts`
+- Merge conflict in a generated file: resolve it in `openapi/`, then run `cd backend && npm run api:generate`. Never hand-merge
+- Commit the contract together with those three generated files
+- Every new operation must answer 2xx at least once in the suite, or the `contract-coverage` Playwright project fails. Prefer a test call. An exemption needs a reason in `backend/src/test/contract-coverage-exemptions.ts`.
+- `api:check` fails at the drift step → run `cd backend && npm run api:generate` and commit the result. Lint, rule or Ajv-compile failures → fix the contract in `openapi/`.
+- `api:check` also fails while regenerated files are uncommitted (it compares against git) — commit first, then rerun.
 
 ## Architecture Rules
 
 - Backend code lives in `backend/src/`
 - Layering: `routes/<entity>.ts` → `services/<entity>Service.ts` → `config/db.ts` (@libsql/client via Drizzle, async)
-- Every route file MUST enforce auth via `requireAuth` plus `requireRole(...)` or `requirePermission(...)` middleware from `middleware/auth.ts`
-- Validate request bodies with Zod schemas at the boundary; let the global error handler in `middleware/errorHandler.ts` shape the response
+- Every route file MUST enforce auth via `requireAuth` plus `requireRole(...)` middleware from `middleware/auth.ts`
+- Request validation comes from the contract: put `specValidate` (`backend/src/openapi/specValidate.ts`) after the guards; German input-error texts live in `x-error-messages` in `openapi/schemas/*.yaml` and `openapi/common.yaml`. The global error handler in `middleware/errorHandler.ts` shapes the response
+- Request and answer types come from generated types (`RequestBody<'opId'>`, `Schema<'X'>`, `JsonResponse<'opId', 200>` in `backend/src/openapi/types.ts`). No hand-written DTOs
 
 ## Stack & Versions
 
@@ -29,17 +40,18 @@ Your spec reading list (paths are relative to the repo root):
 - @libsql/client ^0.17.3 with Drizzle ORM 0.45 (async, promise-based)
 - express-session 1.18 with memorystore (24h TTL, cookie `JSESSIONID`, httpOnly)
 - bcryptjs 2.4 for password hashing
-- Zod 4.6 for input validation
+- OpenAPI 3.1 contract in `openapi/` (single source of truth) with generated types
 - Playwright for API tests
 
 ## Route Pattern
 
 Each entity follows:
-1. Drizzle schema in `src/db/schema/schema.ts` (for typed queries) and matching `CREATE TABLE` in `src/config/migrate.ts`
-2. Zod schemas for create/update DTOs (inline in route file or `services/`)
-3. Service module in `src/services/<entity>Service.ts` — plain functions, no classes needed
-4. Route file in `src/routes/<entity>.ts` — `express.Router()` with per-handler auth middleware
-5. Register the router in `src/app.ts` under `/api/<plural>`
+1. Paths + schemas in `openapi/` (`operationId`, `security`, `x-error-messages`, `x-sort-fields` / `x-default-sort`)
+2. `cd backend && npm run api:generate`
+3. Drizzle schema in `src/db/schema/schema.ts` and matching `CREATE TABLE` in `src/config/migrate.ts`
+4. Service in `src/services/<entity>Service.ts` — plain functions, generated types
+5. Route in `src/routes/<entity>.ts`: guard, then `specValidate`, then handler
+6. Register the router in `src/app.ts` under `/api/<plural>`
 
 ## Code Standards
 
@@ -52,9 +64,8 @@ Each entity follows:
 
 ## Authorization Pattern
 
-- Permission-based (preferred): `router.get('/', requireAuth, requirePermission('CHANCEN'), handler)`
-- Role-based: `requireRole('ADMIN', 'USER')`
-- New permissions: add the string to `ALL_PERMISSIONS` in `config/users.ts`, grant it on the relevant user, then reference it via `requirePermission('NAME')`
+- Role-based only: `router.get('/', requireAuth, requireRole('ADMIN'), handler)`
+- The `permissions` array in `config/users.ts` is not enforced. There is no `requirePermission`
 
 ## Pagination & Sorting
 
@@ -89,5 +100,13 @@ Run a typecheck:
 ```bash
 cd backend && npx tsc --noEmit
 ```
+
+Checklist:
+- [ ] Contract updated first
+- [ ] `cd backend && npm run api:generate` run
+- [ ] `cd backend && npm run api:check` passes
+- [ ] `specValidate` after the guards on new routes
+- [ ] No hand-written DTOs
+- [ ] Commit the regenerated files together with the contract
 
 Hot reload is already active via `tsx --watch`, so the dev server picks up changes automatically.

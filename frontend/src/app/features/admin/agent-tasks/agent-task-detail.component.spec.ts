@@ -6,8 +6,9 @@ import { of, throwError } from 'rxjs';
 import { AgentTaskDetailComponent } from './agent-task-detail.component';
 import { AgentTaskService } from '../../../core/services/agent-task.service';
 import { AgentTask } from '../../../core/models/agent-task.model';
+import { makeAgentTask } from '../../../core/testing/model-factories';
 
-const MOCK_TASK: AgentTask = {
+const MOCK_TASK: AgentTask = makeAgentTask({
   id: 7,
   source: 'GITHUB_ISSUE',
   title: 'Show total pipeline value on Chancen board',
@@ -20,7 +21,7 @@ const MOCK_TASK: AgentTask = {
   resolvedAt: '2024-01-02T12:00:00.000Z',
   createdAt: '2024-01-01T10:00:00.000Z',
   updatedAt: '2024-01-02T12:00:00.000Z',
-};
+});
 
 function makeRoute(id: string): Partial<ActivatedRoute> {
   return {

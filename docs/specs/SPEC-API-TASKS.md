@@ -2,7 +2,9 @@
 
 Machine-facing and admin API for the autonomous task sources feature. Base path: **`/api/agent-tasks`**.
 
-Source of truth: `backend/src/routes/agentTasks.ts` and `backend/src/services/agentTaskService.ts`. Full requirement-level spec: `docs/prds/PRD-AUTONOMOUS-TASK-SOURCES.md` (REQ-008 … REQ-012b).
+For signatures, the API contract wins. Paths, bodies, answers, status codes: [`openapi/paths/agent-tasks.yaml`](../../openapi/paths/agent-tasks.yaml), [`openapi/paths/cron.yaml`](../../openapi/paths/cron.yaml), [`openapi/schemas/agent-tasks.yaml`](../../openapi/schemas/agent-tasks.yaml), [`openapi/schemas/cron.yaml`](../../openapi/schemas/cron.yaml). This doc covers concepts, auth, and workflow.
+
+Source of truth for behavior: `backend/src/routes/agentTasks.ts` and `backend/src/services/agentTaskService.ts`. Full requirement-level spec: `docs/prds/PRD-AUTONOMOUS-TASK-SOURCES.md` (REQ-008 … REQ-012b).
 
 ---
 
@@ -17,27 +19,14 @@ status:  OPEN ──(GET /next OR POST /:id/start)──▶ IN_PROGRESS ──(P
          (POST /reset re-arms every task back to OPEN)
 ```
 
-### Task object
-
-```json
-{
-  "id": 9,
-  "source": "APP_LOG",
-  "title": "GET /api/health response missing version field",
-  "body": "…full text the agent reads…",
-  "status": "IN_PROGRESS",
-  "comment": null,
-  "metadata": "{\"level\":\"ERROR\",\"timestamp\":\"…\",\"requestPath\":\"/api/health\"}",
-  "pickedUpAt": "2026-06-16T05:20:00.000Z",
-  "resolvedAt": null,
-  "createdAt": "2026-06-07T03:15:00.000Z",
-  "updatedAt": "2026-06-16T05:20:00.000Z"
-}
-```
-
+- `GET /next?source=…` claims the oldest `OPEN` task of that source. The status flip is the claim guard, so two callers never grab the same task. `204` means none left.
+- `POST /:id/start` does the same flip for a known id.
+- `POST /:id/done` and `POST /:id/reject` work from `OPEN` or `IN_PROGRESS`. `reject` needs a comment. Both return `409` for a task already `DONE` or `REJECTED`.
+- `POST /reset` (admin) sets every task back to `OPEN` and clears `comment`, `pickedUpAt`, `resolvedAt`. Use it to re-run the workshop without `--reset-db`.
+- `GET /:id` is read-only. It never changes a task.
 - `metadata` is a JSON **string** (source-specific fields), or `null`.
-- `comment`, `pickedUpAt`, `resolvedAt` are `null` until set.
-- All timestamps are ISO-8601 strings.
+
+Admin endpoints: list, summary, reset. List and summary serve the dashboard at `/admin/agent-tasks`. Summary always returns all four sources.
 
 ---
 
@@ -80,182 +69,48 @@ Standard browser session cookie + role `ADMIN` (`requireAuth` + `requireRole('AD
 
 - No session → **401**. Authenticated but not admin → **403**.
 
+### `GET /:id` (all three, first match wins)
+
+Loopback bypass · agent token · admin session. On localhost with `AGENT_AUTH_ALLOW_LOOPBACK=1`, skills read a task without a token. In production, send the agent token or use an admin session.
+
+### Path ids and unknown paths
+
+- Path ids must be positive integers. Anything else → **400** `Ungültige ID`.
+- Unknown `/api` paths return a JSON **404**.
+
 ---
 
 ## Endpoints
 
-### GET `/api/agent-tasks/next?source=SOURCE` — claim the next task
-**Auth:** agent token. **`source` is required.**
-
-Atomically returns the oldest `OPEN` task for that source and flips it to `IN_PROGRESS` (sets `pickedUpAt`). The status flip is the claim guard, so two callers can't grab the same task.
-
-| Result | Meaning |
-|--------|---------|
-| `200` + task | claimed |
-| `204` (no body) | no OPEN task for that source |
-| `400` | `source` missing or not a valid enum value |
-| `401` | bad/missing token |
+List, request bodies, answers, and status codes live in the [contract](../../openapi/paths/agent-tasks.yaml). Short usage examples:
 
 ```bash
+# Claim the next EMAIL task
 curl -s -H "Authorization: Bearer $AGENT_API_TOKEN" \
   "$APP_BASE_URL/api/agent-tasks/next?source=EMAIL"
-```
 
----
-
-### POST `/api/agent-tasks/:id/reject` — reject with a mandatory comment
-**Auth:** agent token. **Body:** `{ "comment": "<non-empty string>" }`.
-
-Sets `status=REJECTED`, stores `comment`, sets `resolvedAt`. Allowed from `OPEN` or `IN_PROGRESS`.
-
-| Result | Meaning |
-|--------|---------|
-| `200` + task | rejected |
-| `400` | `comment` missing/empty (`fieldErrors.comment`) |
-| `404` | no task with that id |
-| `409` | task already `DONE` or `REJECTED` |
-| `401` | bad/missing token |
-
-```bash
+# Reject with a mandatory comment
 curl -s -X POST -H "Authorization: Bearer $AGENT_API_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"comment":"Too vague — no concrete change described."}' \
   "$APP_BASE_URL/api/agent-tasks/3/reject"
-```
 
----
-
-### POST `/api/agent-tasks/:id/done` — mark complete
-**Auth:** agent token. **Body:** `{ "comment": "<optional string>" }`.
-
-Sets `status=DONE`, optional `comment`, sets `resolvedAt`. Allowed from `OPEN` or `IN_PROGRESS`.
-
-| Result | Meaning |
-|--------|---------|
-| `200` + task | done |
-| `404` | no task with that id |
-| `409` | task already `DONE` or `REJECTED` |
-| `401` | bad/missing token |
-
-```bash
+# Finish with an optional comment
 curl -s -X POST -H "Authorization: Bearer $AGENT_API_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"comment":"Implemented in PR #62"}' \
   "$APP_BASE_URL/api/agent-tasks/9/done"
-```
 
----
-
-### POST `/api/agent-tasks/reset` — re-arm all tasks (admin)
-**Auth:** admin session. No body.
-
-Sets every task back to `OPEN` and clears `comment`, `pickedUpAt`, `resolvedAt`. Used to re-run the workshop without `--reset-db`.
-
-```json
-{ "reset": 16 }
-```
-
-| Result | Meaning |
-|--------|---------|
-| `200` + `{reset}` | count of tasks reset |
-| `401` / `403` | not logged in / not admin |
-
----
-
-### GET `/api/agent-tasks/summary` — per-source counts (admin)
-**Auth:** admin session. Always returns all four sources.
-
-```json
-[
-  { "source": "APP_LOG",      "openCount": 3, "inProgressCount": 0, "doneCount": 1, "rejectedCount": 0 },
-  { "source": "EMAIL",        "openCount": 4, "inProgressCount": 0, "doneCount": 0, "rejectedCount": 0 },
-  { "source": "ERROR_REPORT", "openCount": 4, "inProgressCount": 0, "doneCount": 0, "rejectedCount": 0 },
-  { "source": "GITHUB_ISSUE", "openCount": 4, "inProgressCount": 0, "doneCount": 0, "rejectedCount": 0 }
-]
-```
-
-| Result | Meaning |
-|--------|---------|
-| `200` + array | counts |
-| `401` / `403` | not logged in / not admin |
-
----
-
-### GET `/api/agent-tasks/:id` — one task
-**Auth:** loopback bypass · agent token · admin session (first match wins).
-
-**Read-only.** Never changes status or any other field.
-
-| Result | Meaning |
-|--------|---------|
-| `200` + task | found |
-| `404` | no task with that id |
-| `401` / `403` | not authenticated / not admin |
-
-Skills and agents can call this endpoint on localhost without any token when `AGENT_AUTH_ALLOW_LOOPBACK=1`. In production, send the agent token or use an admin session.
-
----
-
-### POST `/api/agent-tasks/:id/start` — set task to in progress (agent)
-**Auth:** agent token.
-
-Explicitly transitions an `OPEN` task to `IN_PROGRESS` (sets `pickedUpAt`). Use when you already know the task id and do not want to go through `/next`. The `/next` endpoint does the same transition automatically when it claims a task.
-
-| Result | Meaning |
-|--------|---------|
-| `200` + task | now IN_PROGRESS |
-| `404` | no task with that id |
-| `409` | task is not OPEN (already IN_PROGRESS, DONE, or REJECTED) |
-| `401` | bad/missing token |
-
-```bash
+# Start a known task
 curl -s -X POST -H "Authorization: Bearer $AGENT_API_TOKEN" \
   "$APP_BASE_URL/api/agent-tasks/3/start"
 ```
 
 ---
 
-### GET `/api/agent-tasks` — paginated list (admin)
-**Auth:** admin session.
-
-**Query params:** `source`, `status` (validated against the enums → `400` if invalid), `page` (0-indexed), `size`, `sort` (`field,direction`; default `createdAt,DESC`; sortable fields: `createdAt`, `updatedAt`, `status`, `source`, `title`).
-
-Response is the Spring-Data-style page shape:
-
-```json
-{
-  "content": [ /* task objects */ ],
-  "totalElements": 16,
-  "totalPages": 2,
-  "size": 10,
-  "number": 0,
-  "first": true,
-  "last": false
-}
-```
-
-| Result | Meaning |
-|--------|---------|
-| `200` + page | list |
-| `400` | invalid `source` or `status` filter |
-| `401` / `403` | not logged in / not admin |
-
----
-
 ## Error response shape
 
-All errors use the app-wide handler:
-
-```json
-{
-  "status": 400,
-  "message": "source ist erforderlich",
-  "timestamp": "2026-06-16T05:20:00.000Z",
-  "fieldErrors": { "source": "source ist erforderlich" }
-}
-```
-
-`fieldErrors` is present for validation failures (e.g. missing reject `comment`, invalid `source`/`status`).
+All errors use the app-wide handler: `{ status, message, timestamp, fieldErrors }`. Schema: `ErrorResponse` in [`openapi/common.yaml`](../../openapi/common.yaml).
 
 ---
 
@@ -263,31 +118,16 @@ All errors use the app-wide handler:
 
 Turns the agent-task queue into a scheduled, self-driving loop. An external cron (or the admin "Run now" button) hits the dispatcher; it fires a GitHub `repository_dispatch` that runs `.github/workflows/agent-task-runner.yml`, which drains every source and calls back to close the audit row. Base path: **`/api/cron`**.
 
-Source of truth: `backend/src/routes/cron.ts`, `backend/src/services/cronService.ts`, `backend/src/config/cronJobs.ts`.
+Contract: [`openapi/paths/cron.yaml`](../../openapi/paths/cron.yaml). Source of truth for behavior: `backend/src/routes/cron.ts`, `backend/src/services/cronService.ts`, `backend/src/config/cronJobs.ts`.
 
-### cron_run object
-
-```json
-{
-  "id": 12,
-  "job": "solve-tasks",
-  "status": "SUCCESS",
-  "trigger": "CRON",
-  "startedAt": "2026-06-16T12:30:00.000Z",
-  "finishedAt": "2026-06-16T12:38:21.000Z",
-  "durationMs": 501000,
-  "result": "{\"tasksSolved\":2,\"tasksRejected\":1}",
-  "githubRunUrl": "https://github.com/atra-consulting/coding-with-ai-lab/actions/runs/123",
-  "error": null
-}
-```
-
-- `status`: `RUNNING | SUCCESS | FAILED | SKIPPED`. `trigger`: `CRON | MANUAL`.
-- `result` is a JSON **string** (or `null`): `{openTasks,dispatched}`, `{tasksSolved,tasksRejected}`, or `{skipReason}`.
+A `cron_run` row is the audit record of one run. `status`: `RUNNING | SUCCESS | FAILED | SKIPPED`. `trigger`: `CRON | MANUAL`. `result` is a JSON **string** (or `null`).
 
 ### Authentication
 
-- `GET /api/cron/agent-tasks` accepts **either** `Authorization: Bearer <CRON_SECRET>` (external cron → trigger `CRON`) **or** an admin session (the "Run now" button → trigger `MANUAL`).
+- `GET /api/cron/agent-tasks` and `GET /api/cron/github-issues` accept **either** `Authorization: Bearer <CRON_SECRET>` (external cron → trigger `CRON`) **or** an admin session (the "Run now" button → trigger `MANUAL`).
+  - A wrong `CRON_SECRET` falls through to the admin session check.
+  - A non-admin session → **401**.
+  - Unset `CRON_SECRET` disables the bearer path.
 - `POST /api/cron/runs/:id/complete` uses the agent token (`AGENT_API_TOKEN`), same scheme as `/api/agent-tasks/*`.
 - `GET /api/cron/runs` and `GET /api/cron/jobs` use an admin session (`requireAuth` + `requireRole('ADMIN')`).
 
@@ -296,30 +136,20 @@ Single-flight + skip-when-idle, then dispatch:
 - A run already `RUNNING` (orphans older than 30 min are auto-expired first) → records a `SKIPPED` run.
 - No OPEN tasks across any source → records a `SKIPPED` run.
 - Otherwise creates a `RUNNING` run and fires `repository_dispatch` (`solve-agent-tasks`, `client_payload.cronRunId`). Dispatch failure → the run is marked `FAILED`.
-- **Always returns `200`** with the `cron_run` object — a 4xx/5xx could make a cron scheduler auto-retry and create duplicate runs.
+- Always answers with the `cron_run` object, never an error status. An error could make a cron scheduler retry and create duplicate runs.
 
 ### GET `/api/cron/github-issues` — GitHub-issue agent dispatcher
 Same auth as `/agent-tasks` (admin session via the per-job "Jetzt ausführen" button, or `CRON_SECRET`). Manual-only — no scheduled cron for it.
 - A `solve-github-issues` run already `RUNNING` → records a `SKIPPED` run.
 - Otherwise creates a `RUNNING` run and fires `repository_dispatch` (`solve-github-issues`, `client_payload.cronRunId`) → the [`github-issue-agent.yml`](../../.github/workflows/github-issue-agent.yml) workflow. Dispatch failure → `FAILED`.
 - No work-queue pre-check (the issues live on GitHub): it always dispatches; the agent reports the outcome via the same `/runs/:id/complete` callback (`tasksSolved=1` implemented, `tasksRejected=1` input-needed, both `0` if no issue was open).
-- **Always returns `200`** with the `cron_run` object.
+- Always answers with the `cron_run` object.
 
 ### POST `/api/cron/runs/:id/complete` — runner callback
-**Auth:** agent token. **Body:** `{ "status": "SUCCESS"|"FAILED", "tasksSolved": <int>, "tasksRejected": <int>, "githubRunUrl": "https://…" }`. Sets `finishedAt`, `durationMs`, `status`, `githubRunUrl`, `result`. `404` if no run with that id; `400` on body validation failure.
+Agent token. Closes the run: sets `finishedAt`, `durationMs`, `status`, `githubRunUrl`, `result`.
 
-### GET `/api/cron/runs` — paginated history (admin)
-**Query:** `job`, `page` (0-indexed), `size`, `sort` (`field,direction`; default `startedAt,DESC`; sortable: `startedAt`, `finishedAt`, `status`, `job`, `trigger`). Returns the Spring-Data page shape.
-
-### GET `/api/cron/jobs` — configured jobs + last run (admin)
-Each configured job with its newest run attached:
-
-```json
-[
-  { "name": "solve-tasks", "schedule": "0 2 * * *", "description": "…", "dispatchEventType": "solve-agent-tasks", "lastRun": { /* cron_run or null */ } },
-  { "name": "solve-github-issues", "schedule": "manuell", "description": "…", "dispatchEventType": "solve-github-issues", "lastRun": { /* cron_run or null */ } }
-]
-```
+### GET `/api/cron/runs` and `/api/cron/jobs` (admin)
+`runs` is the paginated history. `jobs` lists each configured job with its newest run attached.
 
 Each job renders as its own card in `/admin/cron` with a dedicated "Jetzt ausführen" button. `solve-tasks` drains the in-app `agent_task` queue; `solve-github-issues` works ONE real GitHub issue labelled `Refinement needed` (see below).
 
@@ -338,7 +168,7 @@ Each job renders as its own card in `/admin/cron` with a dedicated "Jetzt ausfü
 | `CLAUDE_CODE_OAUTH_TOKEN` | GitHub repo secret | Claude CLI auth in the GitHub-issue agent (subscription token via `claude setup-token`; use **instead of** `ANTHROPIC_API_KEY`) |
 | `GH_PROJECT_TOKEN` | GitHub repo secret | **GitHub-issue agent only.** Classic PAT with scopes `repo`, `project`, `read:org`. Used by `gh` + `git` for issue/label/PR/push **and** moving the issue on Project board #7. The default `GITHUB_TOKEN` cannot write Projects v2. |
 
-All are read from `process.env`; never commit values. No cron schedule is configured. The admin "Run now" button (`/admin/cron`) triggers the dispatch on demand, also locally.
+All are read from `process.env`; never commit values. Schedules (`backend/src/config/cronJobs.ts`): `solve-tasks` runs daily at 02:00 UTC (`agent-task-runner.yml` also has a `0 2 * * *` schedule as a legacy fallback). `solve-github-issues` runs manually only. The admin "Run now" button (`/admin/cron`) triggers the dispatch on demand, also locally.
 
 ---
 
@@ -365,7 +195,7 @@ A **second** autonomous agent, separate from the agent-task runner. It works aga
 
 ## For skill authors
 
-A workshop skill drives this API as an agent. Use the **agent endpoints only** — the admin endpoints (`summary`, `reset`, list, detail) are for the human dashboard.
+A workshop skill drives this API as an agent. Use the **agent endpoints only** — the admin-only endpoints (`summary`, `reset`, list) are for the human dashboard. `GET /:id` accepts the agent token or an admin session.
 
 **Auth.** Send the agent token on every call (`AGENT_API_TOKEN`). Same token and header scheme as the Tickets API:
 
@@ -377,13 +207,15 @@ X-Agent-Token: $AGENT_API_TOKEN
 
 **The calls a skill needs:**
 
-| Step | Call | Notes |
-|------|------|-------|
-| Claim | `GET /api/agent-tasks/next?source=…` | **`source` is required** — one of `EMAIL`, `GITHUB_ISSUE`, `APP_LOG`, `ERROR_REPORT`. Claims the oldest `OPEN` task of that source, flips it to `IN_PROGRESS`. **`204` = none for that source.** |
-| Start | `POST /api/agent-tasks/:id/start` | No body. From `OPEN` → `IN_PROGRESS`. Use when you have the id but did not go through `/next`. |
-| Read | `GET /api/agent-tasks/:id` | Re-read a task by id. Accepts agent token or loopback bypass. |
-| Finish | `POST /api/agent-tasks/:id/done` | Body `{ "comment"?: string }`. From `IN_PROGRESS` → `DONE`. |
-| Reject | `POST /api/agent-tasks/:id/reject` | Body `{ "comment": string }` (required). From `IN_PROGRESS` → `REJECTED`. Use when the task is out of scope or not worth doing. |
+Request and response shapes: [`openapi/paths/agent-tasks.yaml`](../../openapi/paths/agent-tasks.yaml).
+
+| Step | Purpose | Notes |
+|------|---------|-------|
+| Claim (`GET /next`) | Take the oldest `OPEN` task of one source | `source` is required. Flips the task to `IN_PROGRESS`. `204` = none for that source. |
+| Start (`POST /:id/start`) | Start a task by id | Only from `OPEN`. Use it when you have the id but skipped `/next`. |
+| Read (`GET /:id`) | Re-read a task | Agent token, loopback bypass, or admin session. |
+| Finish (`POST /:id/done`) | Mark the task `DONE` | Allowed from `OPEN` or `IN_PROGRESS`. A finished task gets `409`. |
+| Reject (`POST /:id/reject`) | Mark the task `REJECTED` | Comment required. Allowed from `OPEN` or `IN_PROGRESS`. Use for out-of-scope tasks. |
 
 **Loop shape:**
 

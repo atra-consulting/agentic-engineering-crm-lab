@@ -99,7 +99,7 @@ export class SidebarComponent {
   ];
 
   hasRole(role: string): boolean {
-    return this.authService.currentUser()?.rollen.includes(role) ?? false;
+    return this.authService.currentUser()?.rollen.some((r) => r === role) ?? false;
   }
 
   visibleItems(items: NavItem[]): NavItem[] {

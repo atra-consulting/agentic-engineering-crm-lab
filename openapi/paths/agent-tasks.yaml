@@ -1,0 +1,266 @@
+# Area: agent-tasks. Source: backend/src/routes/agentTasks.ts, backend/src/services/agentTaskService.ts,
+# backend/src/middleware/agentAuth.ts.
+
+/agent-tasks/next:
+  get:
+    operationId: claimNextAgentTask
+    summary: Claim the oldest open task of a source
+    description: |
+      Sets the oldest `OPEN` task of `source` to `IN_PROGRESS` and answers it.
+      `source` is required and checked in code (400 when missing or not an
+      enum value). Answers 204 without body when no task is open.
+      A wrong agent token never falls through to a session: it answers 401. Needs `AGENT_API_TOKEN` to be configured, also for the loopback bypass.
+    tags: [agent-tasks]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+    x-loopback-bypass: true
+    parameters:
+      - name: source
+        in: query
+        required: true
+        description: Task source. Checked in code, not by schema validation.
+        schema:
+          $ref: '../schemas/agent-tasks.yaml#/AgentTaskSource'
+    responses:
+      '200':
+        description: The claimed task.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/agent-tasks.yaml#/AgentTask'
+      '204':
+        description: No open task for this source.
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/agent-tasks/summary:
+  get:
+    operationId: getAgentTaskSummary
+    summary: Count tasks per source and status
+    description: One entry per source. All four sources always appear.
+    tags: [agent-tasks]
+    security:
+      - sessionCookie: [ADMIN]
+    responses:
+      '200':
+        description: Counts per source.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/agent-tasks.yaml#/AgentTaskSummary'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+
+/agent-tasks/reset:
+  post:
+    operationId: resetAgentTasks
+    summary: Set every task back to OPEN
+    description: Clears `comment`, `pickedUpAt` and `resolvedAt` on all rows. The body is optional and ignored.
+    tags: [agent-tasks]
+    security:
+      - sessionCookie: [ADMIN]
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '../common.yaml#/schemas/EmptyObject'
+    responses:
+      '200':
+        description: Number of rows reset.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/agent-tasks.yaml#/AgentTaskResetResult'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+
+/agent-tasks/{id}/start:
+  post:
+    operationId: startAgentTask
+    summary: Start a task
+    description: |
+      `OPEN` → `IN_PROGRESS`. Answers 409 when the task is not `OPEN`. The body is optional and ignored.
+      A wrong agent token never falls through to a session: it answers 401.
+    tags: [agent-tasks]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '../common.yaml#/schemas/EmptyObject'
+    responses:
+      '200':
+        description: The started task.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/agent-tasks.yaml#/AgentTask'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'
+
+/agent-tasks/{id}/reject:
+  post:
+    operationId: rejectAgentTask
+    summary: Reject a task
+    description: |
+      Sets `REJECTED` with the comment. Answers 409 when the task is already `DONE` or `REJECTED`.
+      A wrong agent token never falls through to a session: it answers 401.
+    tags: [agent-tasks]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/agent-tasks.yaml#/AgentTaskRejectInput'
+    responses:
+      '200':
+        description: The rejected task.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/agent-tasks.yaml#/AgentTask'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'
+
+/agent-tasks/{id}/done:
+  post:
+    operationId: completeAgentTask
+    summary: Mark a task as done
+    description: |
+      Sets `DONE` with an optional comment. Answers 409 when the task is already `DONE` or `REJECTED`.
+      A wrong agent token never falls through to a session: it answers 401.
+    tags: [agent-tasks]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/agent-tasks.yaml#/AgentTaskDoneInput'
+    responses:
+      '200':
+        description: The completed task.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/agent-tasks.yaml#/AgentTask'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'
+
+/agent-tasks/{id}:
+  get:
+    operationId: getAgentTask
+    summary: Get one task
+    description: |
+      Agent token, loopback bypass or admin session. A non-admin session answers 403.
+      A wrong agent token never falls through to a session: it answers 401.
+    tags: [agent-tasks]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+      - sessionCookie: [ADMIN]
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '200':
+        description: The task.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/agent-tasks.yaml#/AgentTask'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+
+/agent-tasks:
+  get:
+    operationId: listAgentTasks
+    summary: List tasks (paged)
+    description: Optional filters `source` and `status`. A value outside the enum answers 400.
+    tags: [agent-tasks]
+    security:
+      - sessionCookie: [ADMIN]
+    x-sort-fields: [createdAt, updatedAt, status, source, title]
+    x-default-sort: createdAt,DESC
+    parameters:
+      - name: source
+        in: query
+        required: false
+        description: Filter by source.
+        schema:
+          $ref: '../schemas/agent-tasks.yaml#/AgentTaskSource'
+      - name: status
+        in: query
+        required: false
+        description: Filter by status.
+        schema:
+          $ref: '../schemas/agent-tasks.yaml#/AgentTaskStatus'
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+      - $ref: '../common.yaml#/parameters/SortQuery'
+    responses:
+      '200':
+        description: One page of tasks.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/agent-tasks.yaml#/AgentTaskPage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'

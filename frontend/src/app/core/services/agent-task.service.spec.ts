@@ -4,12 +4,13 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { AgentTaskService } from './agent-task.service';
 import { AgentTask, AgentTaskSummary } from '../models/agent-task.model';
 import { Page } from '../models/page.model';
+import { makeAgentTask, makePage } from '../testing/model-factories';
 
 describe('AgentTaskService', () => {
   let service: AgentTaskService;
   let httpMock: HttpTestingController;
 
-  const mockTask: AgentTask = {
+  const mockTask: AgentTask = makeAgentTask({
     id: 1,
     source: 'EMAIL',
     title: 'Show company phone in list view',
@@ -22,17 +23,9 @@ describe('AgentTaskService', () => {
     resolvedAt: null,
     createdAt: '2024-01-01T10:00:00.000Z',
     updatedAt: '2024-01-01T10:00:00.000Z',
-  };
+  });
 
-  const mockPage: Page<AgentTask> = {
-    content: [mockTask],
-    totalElements: 1,
-    totalPages: 1,
-    size: 10,
-    number: 0,
-    first: true,
-    last: true,
-  };
+  const mockPage: Page<AgentTask> = makePage([mockTask], { size: 10 });
 
   const mockSummaries: AgentTaskSummary[] = [
     { source: 'EMAIL', openCount: 2, inProgressCount: 1, doneCount: 1, rejectedCount: 0 },

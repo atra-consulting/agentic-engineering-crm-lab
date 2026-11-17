@@ -1,0 +1,140 @@
+# Area: cron. Source: backend/src/routes/cron.ts, backend/src/services/cronService.ts,
+# backend/src/middleware/agentAuth.ts.
+
+/cron/agent-tasks:
+  get:
+    operationId: triggerAgentTasksRun
+    summary: Trigger the agent-task runner
+    description: |
+      Job `solve-tasks`. Skips when a run is already `RUNNING` or no agent task is `OPEN`.
+      Auth: `CRON_SECRET` bearer or admin session. A wrong `CRON_SECRET` falls
+      through to the session check. A non-admin session answers 401, not 403.
+      Always answers 200 with the run, also when the run was skipped or the
+      GitHub dispatch failed (then `status` is `SKIPPED` or `FAILED`).
+    tags: [cron]
+    security:
+      - cronBearer: []
+      - sessionCookie: [ADMIN]
+    responses:
+      '200':
+        description: The cron run.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/cron.yaml#/CronRun'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/cron/github-issues:
+  get:
+    operationId: triggerGithubIssuesRun
+    summary: Trigger the GitHub-issue agent
+    description: |
+      Job `solve-github-issues`. Skips when a run is already `RUNNING`.
+      Auth: `CRON_SECRET` bearer or admin session. A wrong `CRON_SECRET` falls
+      through to the session check. A non-admin session answers 401, not 403.
+      Always answers 200 with the run, also when the run was skipped or the
+      GitHub dispatch failed (then `status` is `SKIPPED` or `FAILED`).
+    tags: [cron]
+    security:
+      - cronBearer: []
+      - sessionCookie: [ADMIN]
+    responses:
+      '200':
+        description: The cron run.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/cron.yaml#/CronRun'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/cron/runs/{id}/complete:
+  post:
+    operationId: completeCronRun
+    summary: Report the result of a run
+    description: |
+      Called by the GitHub workflow when it finishes. Sets status, counts and run URL.
+      A wrong agent token never falls through to a session: it answers 401.
+    tags: [cron]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/cron.yaml#/CronRunCompleteInput'
+    responses:
+      '200':
+        description: The completed run.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/cron.yaml#/CronRun'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+
+/cron/runs:
+  get:
+    operationId: listCronRuns
+    summary: List cron runs (paged)
+    description: Optional exact-match `job` filter. An empty `job` means no filter.
+    tags: [cron]
+    security:
+      - sessionCookie: [ADMIN]
+    x-sort-fields: [startedAt, finishedAt, status, job, trigger]
+    x-default-sort: startedAt,DESC
+    parameters:
+      - name: job
+        in: query
+        required: false
+        description: Job name, for example `solve-tasks`.
+        schema:
+          type: string
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+      - $ref: '../common.yaml#/parameters/SortQuery'
+    responses:
+      '200':
+        description: One page of runs.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/cron.yaml#/CronRunPage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+
+/cron/jobs:
+  get:
+    operationId: listCronJobs
+    summary: List configured cron jobs
+    description: Every job with its newest run. `lastRun` is null when it never ran.
+    tags: [cron]
+    security:
+      - sessionCookie: [ADMIN]
+    responses:
+      '200':
+        description: All jobs.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/cron.yaml#/CronJob'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'

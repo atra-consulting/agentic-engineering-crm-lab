@@ -34,10 +34,16 @@ When writing Markdown (specs, plans, docs, reviews): as short & brief as possibl
 ```bash
 ./start.sh                                        # Full stack (backend:7070 + frontend:7200)
 ./start.sh --reset-db                             # Delete SQLite database (recreated on startup)
-cd backend && npx tsx --watch src/index.ts         # Backend only (with hot reload)
+cd backend && NODE_ENV=development npx tsx --watch src/index.ts  # Backend only (with hot reload)
 cd frontend && npx ng serve --port 7200 --proxy-config proxy.conf.json  # Frontend only
 cd frontend && npx ng build                        # Frontend build check
+cd backend && npm run api:generate                 # Rebuild generated files from openapi/
+cd backend && npm run api:check                    # Lint, rules, Ajv compile, drift check
 ```
+
+`start.sh` and `start.bat` start the backend with `NODE_ENV=development`. Only `development` and `test` count as dev modes. Anything else, including unset, runs as production. In dev and test modes, test-login exists and the response check runs. `cd frontend && npm run api:generate` delegates to the backend command. `ng build`, `ng serve` and Karma never regenerate.
+
+Interactive API docs: http://localhost:7200/api/docs (development and test only; raw contract at /api/openapi.json). Use port 7200 (the proxy). Direct calls to 7070 fail on CORS for non-GET requests. The CORS config allows only GET, POST, PUT, DELETE and the headers `Content-Type` and `Authorization`, and only from the origins in `CORS_ORIGINS` (default `http://localhost:7200`). It allows no PATCH and no `X-Agent-Token` header.
 
 **Prerequisites:** Node.js 20.19+ (checked by `start.sh`).
 
@@ -56,10 +62,12 @@ cd frontend && npx ng build                        # Frontend build check
 - **SQLite numeric**: The monetary column `wert` (in `chance`) is stored as REAL. Returned as JSON numbers.
 - **PRAGMA foreign_keys**: Must be `ON` for cascade deletes to work. Set once at startup in `config/migrate.ts` (`runMigrations()`), not per-connection.
 - **Sort parsing**: Sort arrives as query param `field,direction` (e.g., `name,asc`). Validated against per-entity field whitelists to prevent SQL injection.
-- **Authorization**: Entity routes use `requireAuth` (login required); admin/cron routes use `requireRole('ADMIN')`. Both come from `middleware/auth.ts`, which exports only `requireAuth` and `requireRole` — there is **no** `requirePermission`. Agent endpoints use `requireAgentToken` (`middleware/agentAuth.ts`).
-- **Error responses**: `{ status, message, timestamp, fieldErrors }` via global error handler in `middleware/errorHandler.ts`.
+- **API contract**: `openapi/` is the source of truth for every route, request body and answer. Never hand-write request or answer types. Service DTOs alias generated schemas (`Schema<'Firma'>` from `backend/src/openapi/types.ts`). Bodies use `RequestBody<'createFirma'>`. Inline answers use `JsonResponse<'op', 200>`. `cd backend && npm run api:check` must pass. Workflow and rules: [`openapi/README.md`](openapi/README.md).
+- **Request validation**: `specValidate` (`backend/src/openapi/specValidate.ts`) sits in every route after the guards, right before the handler. It checks path params and body against the contract. It strips unknown body fields. Path ids match `^[1-9][0-9]*$`, else 400 `id` "Ungültige ID". One Ajv factory (`backend/src/openapi/ajv.ts`). No Zod, no ajv-formats.
+- **Authorization**: Entity routes use `requireAuth` (login required); admin/cron routes use `requireRole('ADMIN')`. Both come from `middleware/auth.ts`, which exports only `requireAuth` and `requireRole` — there is **no** `requirePermission`. Agent endpoints use `requireAgentToken`, `requireAgentTokenOrAdminSession` or `requireAgentTokenOrSession` (`middleware/agentAuth.ts`).
+- **Error responses**: `{ status, message, timestamp, fieldErrors }` via global error handler in `middleware/errorHandler.ts`. German input error texts live in `x-error-messages` in the contract, per property. Unknown `/api` paths answer JSON 404 "Ressource nicht gefunden". Malformed JSON answers 400 `Validierungsfehler` with `{ _: 'Ungültige Anfrage' }`. A body over 100 KB answers 413 "Anfrage zu groß". The chancen phase filter error uses the standard shape.
 - **Pagination**: Response shape mimics the Spring Data Page format (name only — backend is Node): `{ content, totalElements, totalPages, size, number, first, last }`. `number` is 0-indexed.
-- **Testing**: Backend uses Playwright (`@playwright/test`) for end-to-end API tests under `backend/src/test/`.
+- **Testing**: Backend uses Playwright (`@playwright/test`) for end-to-end API tests under `backend/src/test/`. In test mode the response check (`responseCheck.ts`) rewrites any answer that breaks the contract to 500 "Antwort verletzt API-Vertrag …". In development it logs and sets `X-Contract-Violation`. Contract tests: `contract-routes`, `contract-route-chain`, `contract-access`, `contract-lists`, `contract-runtime`, `runtime-modes`, `behavior-changes`, `format-parity`, `input-validation`, `input-completeness`. The `contract-coverage` project needs every operation to answer 2xx once. `golden-errors` compares against recorded former-Zod answers in fixtures.
 
 ### Frontend
 
@@ -67,14 +75,33 @@ cd frontend && npx ng build                        # Frontend build check
 - **DI**: `private service = inject(Service)`, not constructor injection.
 - **Control flow**: `@if`/`@for`/`@switch` blocks only, never `*ngIf`/`*ngFor`. `@for` requires `track`.
 - **Pagination**: NgbPagination is 1-indexed, backend is 0-indexed. Convert with `this.currentPage - 1` in service calls.
+- **API calls**: Services call `ApiClient` (`core/api/api-client.ts`) with literal spec paths, e.g. `this.api.get('/firmen/{id}', { path: { id } })`. `ng build` fails on a renamed path, param or body. No raw `HttpClient` calls for API routes.
+- **Models**: Files in `core/models` are thin aliases of generated types (`core/api/api-types.ts`). Never hand-write a request or answer interface.
+- **Nullability**: Forms keep `null`. No `!` and no `as` casts to hide nullability.
+- **Test mocks**: Build them with `core/testing/model-factories.ts`.
 
 ## Adding a New Entity
 
-Backend (3 files): Drizzle schema in `db/schema/schema.ts` + CREATE TABLE in `config/migrate.ts` → Service in `services/` → Route handler in `routes/`. **Route file must guard with `requireAuth`** (or `requireRole('ADMIN')` for admin-only routes).
+Backend:
 
-Frontend (8+ files): Model interface → Service → Route file → List/Detail/Form components → register in `app.routes.ts` **with `canActivate: [authGuard]`** (add `roleGuard('ROLE_ADMIN')` for admin-only) + add the sidebar item (set `requiredRole: 'ROLE_ADMIN'` if admin-only).
+1. Add paths and schemas in `openapi/` (`operationId`, `security`, `x-error-messages`, `x-sort-fields` / `x-default-sort`).
+2. `cd backend && npm run api:generate`.
+3. Drizzle schema in `db/schema/schema.ts` + CREATE TABLE in `config/migrate.ts`.
+4. Service in `services/`, typed with the generated types.
+5. Route handler in `routes/`. **Guard first** (`requireAuth`, or `requireRole('ADMIN')` for admin-only routes), then `specValidate`, then the handler.
+
+Frontend (8+ files): Model alias of the generated type → Service (calls `ApiClient` with spec paths) → Route file → List/Detail/Form components → register in `app.routes.ts` **with `canActivate: [authGuard]`** (add `roleGuard('ROLE_ADMIN')` for admin-only) + add the sidebar item (set `requiredRole: 'ROLE_ADMIN'` if admin-only).
 
 **Access control is role-based.** Enforcement uses roles only: `requireRole('ADMIN')` on the backend, `roleGuard('ROLE_ADMIN')` on the frontend, `requiredRole` on the sidebar item. The per-user `permissions` array in `config/users.ts` exists on the model but is not enforced by any middleware — there is no permission guard or `requirePermission`.
+
+Last steps: write tests (contract coverage needs every new operation to answer 2xx once). Then run `cd backend && npm run api:check`. It must pass.
+
+## Contract Contributor Rules
+
+- `api:check` fails at the drift step → run `npm run api:generate`, commit the result. Lint, rule or Ajv-compile failures → fix the contract in `openapi/`.
+- Merge conflict in a generated file → resolve the conflict in `openapi/`, then run `npm run api:generate`. Never hand-merge.
+- Never edit generated files: `backend/src/generated/openapi.json`, `backend/src/generated/api-types.ts`, `frontend/src/app/core/api/api-types.ts`.
+- Commit the contract and the three generated files together. CI runs `api:check` in `.github/workflows/deploy.yml` before `tsc`.
 
 ## Commits & PRDs
 
@@ -144,3 +171,4 @@ Each subagent in `.claude/agents/` has a `## Specifications` reading list naming
 | [`SPECS-ui.md`](docs/specs/SPECS-ui.md) | Styling, design system, AG Grid, layout & shared components | ui-designer, ui-reviewer |
 | [`SPECS-testing.md`](docs/specs/SPECS-testing.md) | Playwright backend API tests, Jasmine/Karma frontend unit tests | be-test-*, fe-test-* |
 | [`SPECS-infrastructure.md`](docs/specs/SPECS-infrastructure.md) | Build, config, DB engine, startup, project structure | admin |
+| [`openapi/`](openapi/README.md) | API contract (OpenAPI 3.1): paths, schemas, security, error texts. Wins over every Markdown spec for signatures | be-*, db-*, fe-*, be-test-*, fe-test-* |

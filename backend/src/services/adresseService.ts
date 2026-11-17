@@ -2,25 +2,12 @@ import { client } from '../config/db.js';
 import type { InValue } from '@libsql/client';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import type { AdresseCreateDTO } from '../utils/validation.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
-export interface AdresseDTO {
-  id: number;
-  street: string | null;
-  houseNumber: string | null;
-  postalCode: string | null;
-  city: string | null;
-  country: string | null;
-  typ: string | null;
-  firmaId: number | null;
-  firmaName: string | null;
-  personId: number | null;
-  personName: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  createdAt: string;
-  updatedAt: string;
-}
+type AdresseCreateDTO = RequestBody<'createAdresse'>;
+type AdresseUpdateDTO = RequestBody<'updateAdresse'>;
+
+export type AdresseDTO = Schema<'Adresse'>;
 
 interface AdresseRow {
   id: number;
@@ -145,7 +132,7 @@ export const adresseService = {
     return this.findById(Number(result.lastInsertRowid));
   },
 
-  async update(id: number, dto: AdresseCreateDTO): Promise<AdresseDTO> {
+  async update(id: number, dto: AdresseUpdateDTO): Promise<AdresseDTO> {
     const current = await this.findById(id);
     const now = new Date().toISOString();
     await client.execute({

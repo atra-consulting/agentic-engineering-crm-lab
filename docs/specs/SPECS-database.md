@@ -46,7 +46,7 @@ Kanban work items with an owner and status lifecycle. Created by admins or seede
 | solution | text | nullable — `TICKET_SOLUTION` enum; set on `status=DONE` |
 | pickedUpAt | text | nullable — ISO-8601, set when status → `IN_PROGRESS` |
 | resolvedAt | text | nullable — ISO-8601, set when status → `DONE` |
-| fullyReady | integer | NOT NULL, default `0` — boolean (0/1), set only at creation, never shown in the admin UI |
+| fullyReady | integer | NOT NULL, default `0` — boolean (0/1), set at creation. Only a comment with `clearFullyReady: true` resets it to `0`. Never shown in the admin UI |
 | agentTaskId | integer | nullable, FK → agent_task(id) SET NULL — write-once at creation, links to the app-feedback item that spawned the ticket |
 | createdAt | text | NOT NULL, default `datetime('now')` |
 | updatedAt | text | NOT NULL, default `datetime('now')` |
@@ -242,7 +242,7 @@ Cascade deletes to: Adresse, Aktivitaet.
 
 <!-- canonical source — mirrored in SPECS-backend.md Validation section -->
 
-Stored as plain `text` in SQLite. Validated by Zod on write. Defined in `backend/src/db/schema/enums.ts`.
+Stored as plain `text` in SQLite. Validated against the API contract on write. Reads use `asEnum()`. It passes unknown DB values through unchanged and logs `[enum]` once per value. Enum lists must match the contract: `ENUM_CONTRACT_SYNC` checks this at compile time in both directions, the `contract-lists` test at runtime. Defined in `backend/src/db/schema/enums.ts`.
 
 | Enum | Values |
 |------|--------|
@@ -255,6 +255,8 @@ Stored as plain `text` in SQLite. Validated by Zod on write. Defined in `backend
 | TicketStatus | DEFINITION, TODO, IN_PROGRESS, ON_HOLD, DONE |
 | TicketSolution | DONE, WONT_DO |
 | TicketCommentAuthor | HUMAN, AGENT |
+| CronRunStatus | RUNNING, SUCCESS, FAILED, SKIPPED |
+| CronTrigger | CRON, MANUAL |
 
 ## Indexes
 

@@ -1,23 +1,13 @@
-import { z } from 'zod';
+import type { RequestBody, Schema } from '../openapi/types.js';
 import { client } from '../config/db.js';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, parsePaginationParams, parseSort, type PageResult, type SortParams } from '../utils/pagination.js';
 import { CRON_JOBS } from '../config/cronJobs.js';
+import { CRON_RUN_STATUS, CRON_TRIGGER, asEnum } from '../db/schema/enums.js';
 
 // ─── DTO ──────────────────────────────────────────────────────────────────────
 
-export interface CronRunDTO {
-  id: number;
-  job: string;
-  status: string;
-  trigger: string;
-  startedAt: string;
-  finishedAt: string | null;
-  durationMs: number | null;
-  result: string | null;
-  githubRunUrl: string | null;
-  error: string | null;
-}
+export type CronRunDTO = Schema<'CronRun'>;
 
 // Internal row type returned by raw SQL queries (field names == column names)
 interface CronRunRow {
@@ -37,8 +27,8 @@ function toDTO(row: CronRunRow): CronRunDTO {
   return {
     id: row.id,
     job: row.job,
-    status: row.status,
-    trigger: row.trigger,
+    status: asEnum(CRON_RUN_STATUS, row.status, 'cron_run.status'),
+    trigger: asEnum(CRON_TRIGGER, row.trigger, 'cron_run.trigger'),
     startedAt: row.startedAt,
     finishedAt: row.finishedAt,
     durationMs: row.durationMs !== null ? Number(row.durationMs) : null,
@@ -47,17 +37,6 @@ function toDTO(row: CronRunRow): CronRunDTO {
     error: row.error,
   };
 }
-
-// ─── Zod schema for POST /runs/:id/complete ───────────────────────────────────
-
-export const CompleteRunBodySchema = z.object({
-  status: z.enum(['SUCCESS', 'FAILED']),
-  tasksSolved: z.number().int().min(0),
-  tasksRejected: z.number().int().min(0),
-  githubRunUrl: z.string().url(),
-});
-
-export type CompleteRunBody = z.infer<typeof CompleteRunBodySchema>;
 
 // ─── Service functions ────────────────────────────────────────────────────────
 
@@ -130,7 +109,7 @@ export async function markFailed(id: number, error: string): Promise<CronRunDTO>
  */
 export async function completeRun(
   id: number,
-  body: CompleteRunBody,
+  body: RequestBody<'completeCronRun'>,
 ): Promise<CronRunDTO> {
   const now = new Date().toISOString();
   const { status, tasksSolved, tasksRejected, githubRunUrl } = body;
@@ -248,13 +227,7 @@ export async function listRuns(
 
 // ─── Job-level view ───────────────────────────────────────────────────────────
 
-export interface CronJobWithLastRun {
-  name: string;
-  schedule: string;
-  description: string;
-  dispatchEventType: string;
-  lastRun: CronRunDTO | null;
-}
+export type CronJobWithLastRun = Schema<'CronJob'>;
 
 /**
  * For each entry in CRON_JOBS, fetch the newest cron_run row (or null).

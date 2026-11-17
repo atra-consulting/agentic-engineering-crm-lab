@@ -1,47 +1,34 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiClient } from '../api/api-client';
 import { Page } from '../models/page.model';
 import { Person, PersonCreate } from '../models/person.model';
 
 @Injectable({ providedIn: 'root' })
 export class PersonService {
-  private http = inject(HttpClient);
-  private baseUrl = '/api/personen';
+  private api = inject(ApiClient);
 
   getAll(page = 0, size = 10, sort = 'lastName,asc', search = '', abteilungId?: number): Observable<Page<Person>> {
-    let params = new HttpParams()
-      .set('page', page)
-      .set('size', size)
-      .set('sort', sort)
-      .set('search', search);
-    if (abteilungId != null) {
-      params = params.set('abteilungId', abteilungId);
-    }
-    return this.http.get<Page<Person>>(this.baseUrl, { params });
+    return this.api.get('/personen', { query: { page, size, sort, search, abteilungId } });
   }
 
   listAll(abteilungId?: number): Observable<Person[]> {
-    if (abteilungId !== undefined) {
-      const params = new HttpParams().set('abteilungId', abteilungId);
-      return this.http.get<Person[]>(`${this.baseUrl}/all`, { params });
-    }
-    return this.http.get<Person[]>(`${this.baseUrl}/all`);
+    return this.api.get('/personen/all', { query: { abteilungId } });
   }
 
   getById(id: number): Observable<Person> {
-    return this.http.get<Person>(`${this.baseUrl}/${id}`);
+    return this.api.get('/personen/{id}', { path: { id } });
   }
 
   create(person: PersonCreate): Observable<Person> {
-    return this.http.post<Person>(this.baseUrl, person);
+    return this.api.post('/personen', { body: person });
   }
 
   update(id: number, person: PersonCreate): Observable<Person> {
-    return this.http.put<Person>(`${this.baseUrl}/${id}`, person);
+    return this.api.put('/personen/{id}', { path: { id }, body: person });
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.api.delete('/personen/{id}', { path: { id } });
   }
 }

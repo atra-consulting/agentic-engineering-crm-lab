@@ -17,4 +17,8 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
   },
   reporter: [['list']],
+  projects: [
+    { name: 'api', testIgnore: /contract-coverage\.spec\.ts$/ },
+    { name: 'contract-coverage', testMatch: /contract-coverage\.spec\.ts$/, dependencies: ['api'] },
+  ],
 });

@@ -1,0 +1,17 @@
+# Area: health. Source: backend/src/app.ts (inline route).
+/health:
+  get:
+    operationId: getHealth
+    summary: Liveness probe
+    description: |
+      Public. Answers 200 while the process runs. The route lives inline in
+      `app.ts`, not in a router file.
+    tags: [health]
+    security: []
+    responses:
+      '200':
+        description: Service is up.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/health.yaml#/Health'

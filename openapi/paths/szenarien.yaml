@@ -1,0 +1,115 @@
+# Area: szenarien. Source: backend/src/routes/szenario.ts, backend/src/services/szenarioService.ts.
+
+/szenarien:
+  get:
+    operationId: listSzenarien
+    summary: List scenarios
+    description: Plain array (not paged), newest `createdAt` first.
+    tags: [szenarien]
+    security:
+      - sessionCookie: []
+    responses:
+      '200':
+        description: All scenarios.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/szenarien.yaml#/Szenario'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+  post:
+    operationId: createSzenario
+    summary: Create a scenario
+    tags: [szenarien]
+    security:
+      - sessionCookie: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/szenarien.yaml#/SzenarioInput'
+    responses:
+      '201':
+        description: Created.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/szenarien.yaml#/Szenario'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'
+
+/szenarien/{id}:
+  get:
+    operationId: getSzenario
+    summary: Get one scenario
+    tags: [szenarien]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '200':
+        description: The scenario.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/szenarien.yaml#/Szenario'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  put:
+    operationId: updateSzenario
+    summary: Update a scenario (full replace)
+    tags: [szenarien]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/szenarien.yaml#/SzenarioInput'
+    responses:
+      '200':
+        description: Updated.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/szenarien.yaml#/Szenario'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'
+  delete:
+    operationId: deleteSzenario
+    summary: Delete a scenario
+    tags: [szenarien]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '204':
+        description: Deleted.
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'

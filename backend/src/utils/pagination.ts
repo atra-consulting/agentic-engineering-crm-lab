@@ -1,4 +1,5 @@
 import { ValidationError } from './errors.js';
+import type { Schema } from '../openapi/types.js';
 
 export interface PageResult<T> {
   content: T[];
@@ -9,6 +10,13 @@ export interface PageResult<T> {
   first: boolean;
   last: boolean;
 }
+
+// Compile-time check: PageResult keys = contract PageMeta keys + `content`.
+type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+type AssertTrue<T extends true> = T;
+export type PageResultMatchesContract = AssertTrue<
+  Equal<keyof PageResult<unknown>, keyof Schema<'PageMeta'> | 'content'>
+>;
 
 export interface PaginationParams {
   page: number;
@@ -21,7 +29,7 @@ export interface SortParams {
 }
 
 // Per-entity allowed sort fields (camelCase as in query param → DB column name)
-const ALLOWED_SORT_FIELDS: Record<string, Record<string, string>> = {
+export const ALLOWED_SORT_FIELDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   firma: {
     name: 'name',
     industry: 'industry',

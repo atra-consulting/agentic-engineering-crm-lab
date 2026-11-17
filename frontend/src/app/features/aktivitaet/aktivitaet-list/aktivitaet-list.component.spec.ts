@@ -6,6 +6,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { AktivitaetListComponent } from './aktivitaet-list.component';
 import { AktivitaetService } from '../../../core/services/aktivitaet.service';
 import { Aktivitaet } from '../../../core/models/aktivitaet.model';
+import { makeAktivitaet } from '../../../core/testing/model-factories';
 
 describe('AktivitaetListComponent', () => {
   let fixture: ComponentFixture<AktivitaetListComponent>;
@@ -14,7 +15,7 @@ describe('AktivitaetListComponent', () => {
   let httpMock: HttpTestingController;
 
   const sampleAktivitaeten: Aktivitaet[] = [
-    {
+    makeAktivitaet({
       id: 1,
       typ: 'ANRUF',
       subject: 'Test Anruf',
@@ -25,8 +26,8 @@ describe('AktivitaetListComponent', () => {
       firmaName: 'Test GmbH',
       personId: null,
       personName: null,
-    },
-    {
+    }),
+    makeAktivitaet({
       id: 2,
       typ: 'EMAIL',
       subject: 'Test E-Mail',
@@ -37,7 +38,7 @@ describe('AktivitaetListComponent', () => {
       firmaName: null,
       personId: 5,
       personName: 'Max Mustermann',
-    },
+    }),
   ];
 
   beforeEach(async () => {

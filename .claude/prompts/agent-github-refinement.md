@@ -14,6 +14,7 @@ You work against **real GitHub issues** (not the in-app `agent_task` table). The
 - `gh` is already authenticated (env `GH_TOKEN`, a PAT with `repo` + `project` scope). git push uses the same credentials.
 - Maintainer to @-mention when asking a question: **`@dave0688`**
 - Label to add when you need input: **`Input needed`**
+- Signatures: `openapi/` (contract wins). After changing an endpoint: `cd backend && npm run api:generate && npm run api:check`.
 
 Set this once at the top of your run so commands are copy-paste safe:
 

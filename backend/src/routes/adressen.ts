@@ -1,8 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { adresseService } from '../services/adresseService.js';
 import { parsePaginationParams, parseSort } from '../utils/pagination.js';
-import { validate, AdresseCreateSchema } from '../utils/validation.js';
+import { specValidate } from '../openapi/specValidate.js';
+import type { RequestBody } from '../openapi/types.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = Router();
@@ -11,6 +12,7 @@ const router = Router();
 router.get(
   '/all',
   requireAuth,
+  specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     res.json(await adresseService.listAll());
   }),
@@ -20,6 +22,7 @@ router.get(
 router.get(
   '/',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const { page, size } = parsePaginationParams(req.query as Record<string, unknown>);
     const sort = parseSort(
@@ -37,6 +40,7 @@ router.get(
 router.get(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     res.json(await adresseService.findById(id));
@@ -47,8 +51,9 @@ router.get(
 router.post(
   '/',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
-    const dto = validate(AdresseCreateSchema, req.body);
+    const dto: RequestBody<'createAdresse'> = req.body;
     res.status(201).json(await adresseService.create(dto));
   }),
 );
@@ -57,9 +62,10 @@ router.post(
 router.put(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(AdresseCreateSchema, req.body);
+    const dto: RequestBody<'updateAdresse'> = req.body;
     res.json(await adresseService.update(id, dto));
   }),
 );
@@ -68,6 +74,7 @@ router.put(
 router.delete(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     await adresseService.delete(id);

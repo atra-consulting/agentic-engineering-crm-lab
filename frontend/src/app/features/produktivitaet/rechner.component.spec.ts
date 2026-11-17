@@ -16,6 +16,7 @@ import {
   PROZESSE,
   ProzessKey,
 } from '../../core/models/prozess-defaults';
+import { makeSzenario } from '../../core/testing/model-factories';
 
 // ─── Test-data factories ───────────────────────────────────────────────────
 
@@ -70,7 +71,7 @@ function makeProzessDauer(workLen: number, waitLen: number, workVal: number, wai
  *   automatedSteps:      2 works * 30,   1 wait  * 5   → total    65
  */
 function makeFullSzenario(overrides: Partial<Szenario> = {}): Szenario {
-  return {
+  return makeSzenario({
     id: 1,
     name: 'Test-Szenario',
     humanSteps: makeProzessDauer(19, 18, 100, 50),
@@ -80,7 +81,7 @@ function makeFullSzenario(overrides: Partial<Szenario> = {}): Szenario {
     createdAt: '2024-01-01T00:00:00.000Z',
     updatedAt: '2024-01-01T00:00:00.000Z',
     ...overrides,
-  };
+  });
 }
 
 /** Reaches into the form to grab a step group's value/unit controls (works array, by process key + index). */

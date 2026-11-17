@@ -1,0 +1,127 @@
+# Area: personen. Source of response shapes: backend/src/services/personService.ts (PersonDTO, toDTO).
+# This file is the source of truth for input validation.
+
+Person:
+  type: object
+  description: A contact person. `firmaName` and `abteilungName` come from a join.
+  additionalProperties: false
+  required:
+    - id
+    - firstName
+    - lastName
+    - email
+    - phone
+    - position
+    - notes
+    - firmaId
+    - firmaName
+    - abteilungId
+    - abteilungName
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: integer
+    firstName:
+      type: string
+    lastName:
+      type: string
+    email:
+      type: [string, 'null']
+    phone:
+      type: [string, 'null']
+    position:
+      type: [string, 'null']
+    notes:
+      type: [string, 'null']
+    firmaId:
+      type: integer
+    firmaName:
+      type: [string, 'null']
+    abteilungId:
+      type: [integer, 'null']
+    abteilungName:
+      type: [string, 'null']
+    createdAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+    updatedAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+
+PersonPage:
+  type: object
+  description: One page of contacts.
+  allOf:
+    - $ref: '../common.yaml#/schemas/PageMeta'
+    - type: object
+      required: [content]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/Person'
+  unevaluatedProperties: false
+
+PersonInput:
+  type: object
+  description: |
+    Body for create and full update. Required: `firstName`, `lastName`, `firmaId`.
+    A left-out optional field is stored as null. Unknown fields are stripped.
+  required: [firstName, lastName, firmaId]
+  properties:
+    firstName:
+      type: string
+      minLength: 1
+      maxLength: 100
+      x-error-messages:
+        required: Vorname ist erforderlich
+        type: Vorname ist erforderlich
+        minLength: Vorname ist erforderlich
+    lastName:
+      type: string
+      minLength: 1
+      maxLength: 100
+      x-error-messages:
+        required: Nachname ist erforderlich
+        type: Nachname ist erforderlich
+        minLength: Nachname ist erforderlich
+    email:
+      type: [string, 'null']
+      description: A valid email address, the empty string, or null.
+      anyOf:
+        - type: string
+          format: email
+        - type: string
+          const: ''
+        - type: 'null'
+      x-error-messages:
+        type: Ungültige E-Mail-Adresse
+        anyOf: Ungültige E-Mail-Adresse
+        format: Ungültige E-Mail-Adresse
+        const: Ungültige E-Mail-Adresse
+    phone:
+      type: [string, 'null']
+      maxLength: 50
+    position:
+      type: [string, 'null']
+      maxLength: 255
+    notes:
+      type: [string, 'null']
+    firmaId:
+      type: integer
+      minimum: 1
+      maximum: 9007199254740991
+      x-error-messages:
+        required: Firma ist erforderlich
+        type: Firma ist erforderlich
+        minimum: Firma ist erforderlich
+        maximum: Firma ist erforderlich
+    abteilungId:
+      type: [integer, 'null']
+      minimum: 1
+      maximum: 9007199254740991
+      x-error-messages:
+        type: Ungültige ID
+        minimum: Ungültige ID
+        maximum: Ungültige ID

@@ -6,6 +6,7 @@ You are an autonomous software engineer. You run **headless** (`claude -p` or `c
 
 - API base URL: the `APP_BASE_URL` environment variable, or `http://localhost:7070` if unset.
 - Auth header for every agent API call: `Authorization: Bearer $AGENT_API_TOKEN`.
+- Signatures: `openapi/` (contract wins). After changing an endpoint: `cd backend && npm run api:generate && npm run api:check`.
 - Source for this prompt: **`GITHUB_ISSUE`**.
 
 ## Step 1 — Fetch the next task

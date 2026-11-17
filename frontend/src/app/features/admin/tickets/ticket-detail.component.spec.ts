@@ -11,6 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { BenutzerInfo } from '../../../core/models/auth.model';
 import { Ticket, TicketComment } from '../../../core/models/ticket.model';
+import { makeTicketDetail } from '../../../core/testing/model-factories';
 
 // ─── Test-data factories ──────────────────────────────────────────────────────
 
@@ -26,7 +27,7 @@ function makeComment(id: number, author: TicketComment['author'] = 'AGENT'): Tic
 }
 
 function makeTicket(overrides: Partial<Ticket> = {}): Ticket {
-  return {
+  return makeTicketDetail({
     id: 10,
     owner: 'HUMAN',
     type: 'FEATURE',
@@ -35,14 +36,13 @@ function makeTicket(overrides: Partial<Ticket> = {}): Ticket {
     status: 'ON_HOLD',
     solution: null,
     agentTaskId: null,
-    commentCount: 2,
     comments: [makeComment(1, 'AGENT'), makeComment(2, 'HUMAN')],
     pickedUpAt: null,
     resolvedAt: null,
     createdAt: '2024-06-01T07:00:00.000Z',
     updatedAt: '2024-06-01T09:00:00.000Z',
     ...overrides,
-  };
+  });
 }
 
 const MOCK_TICKET = makeTicket();
@@ -322,7 +322,7 @@ describe('TicketDetailComponent — no comments', () => {
   let fixture: ComponentFixture<TicketDetailComponent>;
 
   beforeEach(async () => {
-    const ticketNoComments = makeTicket({ comments: [], commentCount: 0 });
+    const ticketNoComments = makeTicket({ comments: [] });
     const mockService = makeMockTicketService();
     mockService.getById.and.returnValue(of(ticketNoComments));
 

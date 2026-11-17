@@ -213,7 +213,8 @@ cd "${ROOT_DIR}/backend"
 ensure_node_modules "Backend" "tsx"
 
 
-npx tsx --watch src/index.ts &
+# Development mode turns on test-login, contract answer checks and /api/docs.
+NODE_ENV=development npx tsx --watch src/index.ts &
 BACKEND_PID=$!
 cd "${ROOT_DIR}"
 

@@ -1,36 +1,12 @@
 import { client } from '../config/db.js';
-import type { ChancePhase, AktivitaetTyp } from '../db/schema/enums.js';
+import { CHANCE_PHASE, AKTIVITAET_TYP, asEnum } from '../db/schema/enums.js';
+import type { Schema } from '../openapi/types.js';
 
 // ─── DTOs ─────────────────────────────────────────────────────────────────────
 
-interface RecentChance {
-  id: number;
-  titel: string;
-  wert: number | null;
-  currency: string;
-  phase: ChancePhase;
-  firmaName: string;
-  createdAt: string;
-}
-
-interface RecentAktivitaet {
-  id: number;
-  typ: AktivitaetTyp;
-  subject: string;
-  datum: string;
-  firmaName: string | null;
-  personName: string | null;
-  createdAt: string;
-}
-
-export interface DashboardData {
-  firmenCount: number;
-  personenCount: number;
-  offeneChancenCount: number;
-  gewonneneChancenSumme: number;
-  recentChancen: RecentChance[];
-  recentAktivitaeten: RecentAktivitaet[];
-}
+export type DashboardData = Schema<'DashboardData'>;
+type RecentChance = Schema<'RecentChance'>;
+type RecentAktivitaet = Schema<'RecentAktivitaet'>;
 
 // ─── Raw row shapes returned by libsql ────────────────────────────────────────
 
@@ -60,6 +36,31 @@ interface RecentAktivitaetRow {
   firmaName: string | null;
   personName: string | null;
   createdAt: string;
+}
+
+function toRecentChance(row: RecentChanceRow): RecentChance {
+  return {
+    id: row.id,
+    titel: row.titel,
+    wert: row.wert,
+    currency: row.currency,
+    phase: asEnum(CHANCE_PHASE, row.phase, 'chance.phase'),
+    firmaName: row.firmaName,
+    createdAt: row.createdAt,
+  };
+}
+
+function toRecentAktivitaet(row: RecentAktivitaetRow): RecentAktivitaet {
+  return {
+    id: row.id,
+    typ: asEnum(AKTIVITAET_TYP, row.typ, 'aktivitaet.typ'),
+    subject: row.subject,
+    datum: row.datum,
+    // personName is NULL when no person is linked — LEFT JOIN miss returns null
+    firmaName: row.firmaName,
+    personName: row.personName,
+    createdAt: row.createdAt,
+  };
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────
@@ -118,24 +119,7 @@ export async function getDashboard(): Promise<DashboardData> {
     personenCount: Number(personenRow.cnt),
     offeneChancenCount: Number(offeneRow.cnt),
     gewonneneChancenSumme: sumRow.total,
-    recentChancen: recentChancenRows.map((row) => ({
-      id: row.id,
-      titel: row.titel,
-      wert: row.wert,
-      currency: row.currency,
-      phase: row.phase as ChancePhase,
-      firmaName: row.firmaName,
-      createdAt: row.createdAt,
-    })),
-    recentAktivitaeten: recentAktivitaetenRows.map((row) => ({
-      id: row.id,
-      typ: row.typ as AktivitaetTyp,
-      subject: row.subject,
-      datum: row.datum,
-      // personName is NULL when no person is linked — LEFT JOIN miss returns null
-      firmaName: row.firmaName,
-      personName: row.personName,
-      createdAt: row.createdAt,
-    })),
+    recentChancen: recentChancenRows.map(toRecentChance),
+    recentAktivitaeten: recentAktivitaetenRows.map(toRecentAktivitaet),
   };
 }

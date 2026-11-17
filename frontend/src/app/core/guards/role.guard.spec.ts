@@ -4,11 +4,12 @@ import { signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { makeBenutzerInfo } from '../testing/model-factories';
 import { BenutzerInfo } from '../models/auth.model';
 import { roleGuard } from './role.guard';
 
 describe('roleGuard', () => {
-  const adminUser: BenutzerInfo = {
+  const adminUser: BenutzerInfo = makeBenutzerInfo({
     id: 1,
     benutzername: 'admin',
     vorname: 'Admin',
@@ -16,9 +17,9 @@ describe('roleGuard', () => {
     email: 'admin@test.de',
     rollen: ['ROLE_ADMIN', 'ROLE_USER'],
     permissions: [],
-  };
+  });
 
-  const regularUser: BenutzerInfo = {
+  const regularUser: BenutzerInfo = makeBenutzerInfo({
     id: 2,
     benutzername: 'user',
     vorname: 'Regular',
@@ -26,7 +27,7 @@ describe('roleGuard', () => {
     email: 'user@test.de',
     rollen: ['ROLE_USER'],
     permissions: [],
-  };
+  });
 
   let mockAuthService: { currentUser: ReturnType<typeof signal<BenutzerInfo | null>> };
   let router: Router;

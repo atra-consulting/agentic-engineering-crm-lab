@@ -1,0 +1,116 @@
+# Area: auth. Source: backend/src/routes/auth.ts, backend/src/config/users.ts.
+
+/auth/login:
+  post:
+    operationId: login
+    summary: Log in with user name and password
+    description: |
+      Starts a new session (the old session id is replaced) and sets the
+      cookie `JSESSIONID` (httpOnly). Missing, empty or unknown credentials
+      answer 401 `Ungültige Anmeldedaten`. The contract does not validate the
+      body.
+    tags: [auth]
+    security: []
+    x-skip-request-validation: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/auth.yaml#/LoginRequest'
+    responses:
+      '200':
+        description: Logged in.
+        headers:
+          Set-Cookie:
+            description: >-
+              Session cookie `JSESSIONID`: HttpOnly, Path=/, Expires (24 h maxAge),
+              SameSite=Lax, plus Secure when NODE_ENV=production.
+            schema:
+              type: string
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/auth.yaml#/LoginResponse'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/auth/logout:
+  post:
+    operationId: logout
+    summary: Log out
+    description: |
+      Destroys the session and clears the cookie `JSESSIONID`. Always answers
+      200 `{}`, also without a session.
+    tags: [auth]
+    security: []
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '../common.yaml#/schemas/EmptyObject'
+    responses:
+      '200':
+        description: Logged out. Empty object.
+        content:
+          application/json:
+            schema:
+              $ref: '../common.yaml#/schemas/EmptyObject'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+
+/auth/me:
+  get:
+    operationId: getCurrentUser
+    summary: Get the session user
+    tags: [auth]
+    security:
+      - sessionCookie: []
+    responses:
+      '200':
+        description: The session user.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/auth.yaml#/BenutzerInfo'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/auth/test-login:
+  post:
+    operationId: testLogin
+    summary: Log in by user name only (test helper)
+    description: |
+      Exists only in development and test. Outside them the route is not
+      registered; the request hits the JSON catch-all and answers the standard
+      `ErrorResponse` 404 `Ressource nicht gefunden`. No password check. A missing `benutzername` answers
+      401 `benutzername required`; an unknown user answers 401
+      `Benutzer nicht gefunden`. Sets the cookie `JSESSIONID`. The contract does
+      not validate the body.
+    tags: [auth]
+    security: []
+    x-environments: [development, test]
+    x-skip-request-validation: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/auth.yaml#/TestLoginRequest'
+    responses:
+      '200':
+        description: Logged in.
+        headers:
+          Set-Cookie:
+            description: >-
+              Session cookie `JSESSIONID`: HttpOnly, Path=/, Expires (24 h maxAge),
+              SameSite=Lax, plus Secure when NODE_ENV=production.
+            schema:
+              type: string
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/auth.yaml#/LoginResponse'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'

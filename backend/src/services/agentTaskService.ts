@@ -1,22 +1,10 @@
 import { client } from '../config/db.js';
 import { NotFoundError, ConflictError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import { AGENT_TASK_SOURCE, type AgentTaskSource, type AgentTaskStatus } from '../db/schema/enums.js';
+import { AGENT_TASK_SOURCE, AGENT_TASK_STATUS, asEnum, isAgentTaskSource, warnEnumOnce, type AgentTaskSource, type AgentTaskStatus } from '../db/schema/enums.js';
+import type { Schema } from '../openapi/types.js';
 
-export interface AgentTaskDTO {
-  id: number;
-  source: string;
-  title: string;
-  body: string;
-  status: string;
-  comment: string | null;
-  metadata: string | null;
-  pickedUpAt: string | null;
-  resolvedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-  ticketId: number | null;
-}
+export type AgentTaskDTO = Schema<'AgentTask'>;
 
 interface AgentTaskRow {
   id: number;
@@ -33,21 +21,15 @@ interface AgentTaskRow {
   ticketId?: number | null;
 }
 
-export interface AgentTaskSummaryDTO {
-  source: string;
-  openCount: number;
-  inProgressCount: number;
-  doneCount: number;
-  rejectedCount: number;
-}
+export type AgentTaskSummaryDTO = Schema<'AgentTaskSummary'>;
 
 function toDTO(row: AgentTaskRow): AgentTaskDTO {
   return {
     id: row.id,
-    source: row.source,
+    source: asEnum(AGENT_TASK_SOURCE, row.source, 'agent_task.source'),
     title: row.title,
     body: row.body,
-    status: row.status,
+    status: asEnum(AGENT_TASK_STATUS, row.status, 'agent_task.status'),
     comment: row.comment,
     metadata: row.metadata,
     pickedUpAt: row.pickedUpAt,
@@ -213,6 +195,10 @@ export const agentTaskService = {
     const rows = result.rows as unknown as SummaryRow[];
     const summaryMap = new Map<string, AgentTaskSummaryDTO>();
     for (const row of rows) {
+      if (!isAgentTaskSource(row.source)) {
+        warnEnumOnce('agent_task.source', row.source);
+        continue;
+      }
       summaryMap.set(row.source, {
         source: row.source,
         openCount: Number(row.openCount),

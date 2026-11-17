@@ -9,7 +9,10 @@ coding-with-ai-lab/
 │   ├── data/                   # SQLite database file(s) (gitignored; local dev only)
 │   │   ├── crmdb.sqlite        # Dev database
 │   │   └── crmdb.test.sqlite   # Playwright test DB (NODE_ENV=test, no TURSO_DATABASE_URL); wiped + recreated each test run
+│   ├── scripts/                # api-generate.ts, api-check.ts, bench-api.mjs (contract tooling)
 │   └── src/
+│       ├── generated/          # Generated from openapi/ (do not edit)
+│       ├── openapi/            # Contract runtime: Ajv factory, contract lookup, specValidate, response check, runtime mode, error mapper, type helpers
 │       ├── index.ts            # Entry point — loads env, runs migrations, seeds, starts server
 │       ├── app.ts              # Express app setup
 │       ├── config/
@@ -33,20 +36,21 @@ coding-with-ai-lab/
 │       ├── seed/
 │       │   ├── dataMigration.ts  # Loads fixture.json into the DB when empty (CRM entities)
 │       │   ├── fixture.json      # Fixed seed data (390 rows total, CRM entities only)
-│       │   ├── agentTaskSeed.ts  # Idempotent agent_task seeding (INSERT OR IGNORE, ids 1–16)
+│       │   ├── agentTaskSeed.ts  # Idempotent agent_task seeding (INSERT OR IGNORE, ids 1–23)
 │       │   └── build-fixture.ts  # Dev tool: regenerates fixture.json after schema changes
 │       └── utils/
 │           ├── asyncHandler.ts # Wraps async route handlers; forwards errors to Express error handler
 │           ├── errors.ts       # Error types
 │           ├── githubDispatch.ts  # Fires GitHub repository_dispatch events (for cron/agent workflows)
-│           ├── pagination.ts   # Spring-Data-style page format helper (naming only; backend is Node)
-│           └── validation.ts   # Zod validation helpers
+│           └── pagination.ts   # Spring-Data-style page format helper (naming only; backend is Node)
+├── openapi/                    # Hand-written OpenAPI 3.1 contract — API source of truth
 ├── frontend/                   # Angular 21 SPA
 │   ├── package.json
 │   ├── angular.json
 │   ├── proxy.conf.json
 │   └── src/app/
 │       ├── core/               # Services, models, guards, interceptors
+│       │   └── api/            # api-types.ts (generated), ApiClient, type checks
 │       ├── features/           # Feature components (one per entity)
 │       ├── shared/             # Shared components (loading-spinner, notification, confirm-dialog) and pipes
 │       └── layout/             # Navbar, sidebar
@@ -56,7 +60,6 @@ coding-with-ai-lab/
 │   └── workflows/
 │       ├── deploy.yml                 # Tests + builds on PRs and pushes to main
 │       ├── agent-task-runner.yml      # Autonomous agent for OPEN agent_task rows
-│       ├── do-factory-automatic.yml   # /do-factory-automatic skill — one agent_task per run, opens a PR
 │       └── github-issue-agent.yml     # GitHub-issue refinement agent
 ├── docs/
 │   ├── adr/                    # Architecture Decision Records
@@ -70,7 +73,9 @@ coding-with-ai-lab/
 │   ├── prompts/                # Headless prompts for the CI agents
 │   └── settings.json           # Claude Code hook: re-sync agents after edits
 ├── scripts/sync-agents.mjs     # Generates .github/agents/ from .claude/agents/
-├── start.sh                    # Full-stack launcher
+├── .gitattributes              # Marks generated files (linguist-generated)
+├── start.sh                    # Full-stack launcher (macOS/Linux)
+├── start.bat                   # Full-stack launcher (Windows)
 ├── AGENTS.md                   # Only points to CLAUDE.md
 ├── CLAUDE.md                   # AI coding instructions (read by Claude Code and Copilot CLI)
 └── README.MD                   # Project overview
@@ -90,13 +95,18 @@ Runtime: Node.js 20.19+. Language: TypeScript. Executed via `tsx`.
 | drizzle-orm | ^0.45.4 | Type-safe ORM for libSQL/SQLite |
 | bcryptjs | ^2.4.3 | Password hashing |
 | cors | ^2.8.5 | CORS middleware |
-| zod | ^4.6.7 | Runtime input validation |
+| ajv | ^8.20.0 | Contract-driven request validation and response check |
+| swagger-ui-dist | ^5.35.0 | Interactive API docs at `/api/docs` (development and test only) |
+
+`zod` is gone. No `ajv-formats`: the contract's `email` and `uri` formats are custom.
 
 Dev dependencies:
 
 | Dependency | Version | Purpose |
 |-----------|---------|---------|
 | tsx | ^4.19.4 | TypeScript execution + hot reload |
+| @redocly/cli | ^2.79.0 | Lint and bundle the contract |
+| openapi-typescript | ^7.13.0 | Generate frontend and backend types from the contract |
 | typescript | ^5.8.3 | TypeScript compiler |
 | @playwright/test | ^1.52.0 | End-to-end tests |
 | @types/* | various | TypeScript type definitions |
@@ -154,9 +164,11 @@ Sessions stored in the `sessions` table via `LibsqlSessionStore` (`backend/src/m
 
 Launches full stack in order:
 
-1. **Backend** (Port 7070) — installs npm dependencies if missing, starts with `npx tsx --watch`
+1. **Backend** (Port 7070) — installs npm dependencies if missing, starts with `npx tsx --watch`. Sets `NODE_ENV=development` for the backend only
 2. Waits for `GET /api/health` to return HTTP 200
 3. **Frontend** (Port 7200) — installs npm dependencies if missing, starts with `npx ng serve`
+
+`start.bat` (Windows) does the same, including `NODE_ENV=development` for the backend only.
 
 Flags:
 - `--reset-db` — Delete `backend/data/` before starting. Database recreates with seed data on next startup.
@@ -165,7 +177,9 @@ Flags:
 
 ```bash
 # Backend only (with hot reload)
-cd backend && npx tsx --watch src/index.ts
+# NODE_ENV=development is required. Without a mode the backend runs as production:
+# no test-login, no /api/docs, no response check.
+cd backend && NODE_ENV=development npx tsx --watch src/index.ts
 
 # Frontend only
 cd frontend && npx ng serve --port 7200 --proxy-config proxy.conf.json
@@ -176,7 +190,7 @@ cd frontend && npx ng build
 
 ### Startup Sequence (index.ts)
 
-1. `runMigrations()` — creates tables if they do not exist; also calls `seedAgentTasks()` (INSERT OR IGNORE, ids 1–16) so `agent_task` rows exist on every startup
+1. `runMigrations()` — creates tables if they do not exist; also calls `seedAgentTasks()` (INSERT OR IGNORE, ids 1–23) so `agent_task` rows exist on every startup
 2. `runDataMigration()` — inserts CRM fixture data from `backend/src/seed/fixture.json` if database is empty; skipped if rows exist
 3. `app.listen(7070)` — starts the HTTP server
 
@@ -214,13 +228,26 @@ Loaded from `backend/.env` (local dev) or set as real env vars (CI/production). 
 | PORT | 7070 | No | Backend HTTP port |
 | SESSION_SECRET | `crm-dev-secret-key` | No | express-session signing secret |
 | CORS_ORIGINS | `http://localhost:7200` | No | Allowed CORS origins (comma-separated) |
-| NODE_ENV | (unset) | No | `production` disables the `/api/auth/test-login` helper. `test` (set by `backend/playwright.config.ts`) routes the local SQLite connection to `backend/data/crmdb.test.sqlite` instead of `crmdb.sqlite` — only when `TURSO_DATABASE_URL` is unset; see Database section |
+| NODE_ENV | (unset) | No | `development`, `test`, or anything else. Unset counts as production. See the NODE_ENV modes table. `test` also routes the local SQLite connection to `backend/data/crmdb.test.sqlite` — only when `TURSO_DATABASE_URL` is unset; see Database section |
+| CONTRACT_RESPONSE_CHECK | (unset) | No | `off` turns the response check off. Works only when `NODE_ENV=test`. Ignored elsewhere. |
 | TURSO_DATABASE_URL | (unset) | No | libSQL/Turso remote URL. When set, uses Turso instead of the local SQLite file. |
 | TURSO_AUTH_TOKEN | (unset) | No | Auth token for Turso. Required when `TURSO_DATABASE_URL` is set. |
 | AGENT_API_TOKEN | (unset) | Yes (app + GitHub Actions) | Shared secret for the `/api/agent-tasks` endpoints. Verified via SHA-256 + `timingSafeEqual`. |
 | CRON_SECRET | (unset) | No | Bearer token an external cron scheduler sends in the `Authorization` header when calling `/api/cron/agent-tasks`. When unset, the cron bearer path is disabled; admin session still works. |
 
 No JWT secrets. No RSA key paths. No cookie-flag overrides.
+
+### NODE_ENV modes
+
+| Mode | `/api/auth/test-login` | Response check | `/api/docs` |
+|------|------------------------|----------------|-------------|
+| `development` | on | on (logs `[contract]` lines, sets `X-Contract-Violation` header, answer unchanged) | on |
+| `test` | on | on (500 on violation; `CONTRACT_RESPONSE_CHECK=off` disables) | on |
+| anything else, incl. unset (production) | off (404) | off | off |
+
+- `start.sh` and `start.bat` set `development` for the backend only. The frontend does not get it.
+- `backend/playwright.config.ts` sets `test`.
+- Safe default: forgetting `NODE_ENV` gives production behavior.
 
 ## Documentation
 
@@ -234,14 +261,17 @@ No JWT secrets. No RSA key paths. No cookie-flag overrides.
 
 ## CI/CD
 
-Five GitHub Actions workflows in `.github/workflows/`:
+Three GitHub Actions workflows in `.github/workflows/`:
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `deploy.yml` | Pull request; push to `main` | Runs backend type-check + Playwright tests, frontend unit tests + build. No deployment. |
+| `deploy.yml` | Pull request; push to `main` | Runs the contract check, backend type-check + Playwright tests, frontend unit tests + build. No deployment. |
 | `agent-task-runner.yml` | `repository_dispatch` event `solve-agent-tasks` | Runs the autonomous agent against OPEN `agent_task` rows |
-| `do-factory-automatic.yml` | `repository_dispatch` event `solve-agent-tasks`; also `workflow_dispatch`, daily `schedule` | Runs the `/do-factory-automatic` skill against one OPEN `agent_task`; pushes a branch and opens a PR (never merges) |
 | `github-issue-agent.yml` | `repository_dispatch` event `solve-github-issues` | Runs the GitHub-issue refinement agent against one labelled issue |
+
+### Contract check step
+
+`deploy.yml` runs the step "Backend — API contract check" (`npm run api:check`) before `tsc`. It lints the contract and fails when generated files drift from `openapi/`. Fix: run `npm run api:generate`, commit the result.
 
 ### Deployment
 

@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { makeChance as makeChanceFactory } from '../../../core/testing/model-factories';
 import { ChanceListComponent } from './chance-list.component';
 import { ChanceService } from '../../../core/services/chance.service';
 import { Chance } from '../../../core/models/chance.model';
@@ -14,23 +15,21 @@ describe('ChanceListComponent', () => {
   let mockChanceService: jasmine.SpyObj<ChanceService>;
   let httpMock: HttpTestingController;
 
-  const makeChance = (overrides: Partial<Chance> = {}): Chance => ({
-    id: 1,
-    titel: 'Test Chance',
-    beschreibung: 'Beschreibung',
-    wert: 1000,
-    currency: 'EUR',
-    phase: 'NEU',
-    wahrscheinlichkeit: 50,
-    erwartetesDatum: '2025-12-31',
-    createdAt: '2024-01-01T00:00:00.000Z',
-    updatedAt: '2024-01-01T00:00:00.000Z',
-    firmaId: 1,
-    firmaName: 'Test GmbH',
-    kontaktPersonId: null,
-    kontaktPersonName: null,
-    ...overrides,
-  });
+  const makeChance = (overrides: Partial<Chance> = {}): Chance =>
+    makeChanceFactory({
+      titel: 'Test Chance',
+      beschreibung: 'Beschreibung',
+      wert: 1000,
+      phase: 'NEU',
+      wahrscheinlichkeit: 50,
+      erwartetesDatum: '2025-12-31',
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+      firmaName: 'Test GmbH',
+      kontaktPersonId: null,
+      kontaktPersonName: null,
+      ...overrides,
+    });
 
   beforeEach(async () => {
     mockChanceService = jasmine.createSpyObj('ChanceService', ['listAll']);

@@ -8,6 +8,7 @@ import { PersonService } from '../../../core/services/person.service';
 import { AbteilungService } from '../../../core/services/abteilung.service';
 import { Abteilung } from '../../../core/models/abteilung.model';
 import { Person } from '../../../core/models/person.model';
+import { makeAbteilung } from '../../../core/testing/model-factories';
 
 describe('PersonListComponent', () => {
   let fixture: ComponentFixture<PersonListComponent>;
@@ -19,8 +20,8 @@ describe('PersonListComponent', () => {
   const mockPersons: Person[] = [];
 
   const mockAbteilungen: Abteilung[] = [
-    { id: 1, name: 'Engineering', description: '', firmaId: 1, firmaName: 'Acme GmbH', personenCount: 5 },
-    { id: 5, name: 'Sales', description: '', firmaId: 1, firmaName: 'Acme GmbH', personenCount: 3 },
+    makeAbteilung({ id: 1, name: 'Engineering', description: '', firmaId: 1, firmaName: 'Acme GmbH', personenCount: 5 }),
+    makeAbteilung({ id: 5, name: 'Sales', description: '', firmaId: 1, firmaName: 'Acme GmbH', personenCount: 3 }),
   ];
 
   beforeEach(async () => {

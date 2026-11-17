@@ -1,4 +1,4 @@
-import { Store, SessionData } from 'express-session';
+import { Store, type SessionData } from 'express-session';
 import { client } from '../config/db.js';
 
 // TTL fallback: 24 hours in milliseconds, matching the memorystore default.

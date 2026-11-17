@@ -1,0 +1,200 @@
+# Area: firmen. Source: backend/src/routes/firmen.ts,
+# backend/src/services/firmaService.ts (sub-lists: personService, abteilungService).
+# Template for every other area: see README.md.
+
+/firmen:
+  get:
+    operationId: listFirmen
+    summary: List companies (paged)
+    description: |
+      Paged list without `adressen`. `search` matches `name`
+      (case-insensitive substring).
+    tags: [firmen]
+    security:
+      - sessionCookie: []
+    x-sort-fields: [name, industry, createdAt, updatedAt]
+    x-default-sort: name,ASC
+    parameters:
+      - $ref: '../common.yaml#/parameters/SearchQuery'
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+      - $ref: '../common.yaml#/parameters/SortQuery'
+    responses:
+      '200':
+        description: One page of companies.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/firmen.yaml#/FirmaPage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+  post:
+    operationId: createFirma
+    summary: Create a company
+    description: Answers the new record, read back with `adressen` (empty for a new company).
+    tags: [firmen]
+    security:
+      - sessionCookie: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/firmen.yaml#/FirmaInput'
+    responses:
+      '201':
+        description: Created.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/firmen.yaml#/Firma'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/firmen/all:
+  get:
+    operationId: listAllFirmen
+    summary: List all companies (not paged)
+    description: Every company without `adressen`, sorted by `name` ascending.
+    tags: [firmen]
+    security:
+      - sessionCookie: []
+    responses:
+      '200':
+        description: All companies.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/firmen.yaml#/Firma'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/firmen/{id}:
+  get:
+    operationId: getFirma
+    summary: Get one company
+    description: Includes `adressen`.
+    tags: [firmen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '200':
+        description: The company.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/firmen.yaml#/Firma'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  put:
+    operationId: updateFirma
+    summary: Update a company (full replace)
+    description: |
+      Overwrites every field. Optional fields left out are stored as null.
+      Answers the record read back with `adressen`.
+    tags: [firmen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/firmen.yaml#/FirmaInput'
+    responses:
+      '200':
+        description: Updated.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/firmen.yaml#/Firma'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  delete:
+    operationId: deleteFirma
+    summary: Delete a company
+    description: Cascades to its contacts, departments, addresses, activities and opportunities.
+    tags: [firmen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '204':
+        description: Deleted. No body.
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+
+/firmen/{id}/personen:
+  get:
+    operationId: listFirmaPersonen
+    summary: List the contacts of a company (paged)
+    description: |
+      Fixed order: `lastName`, then `firstName`, ascending. No `sort` and no
+      `search`. An unknown company id answers an empty page, not 404.
+    tags: [firmen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+    responses:
+      '200':
+        description: One page of contacts.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/personen.yaml#/PersonPage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/firmen/{id}/abteilungen:
+  get:
+    operationId: listFirmaAbteilungen
+    summary: List the departments of a company (paged)
+    description: |
+      Fixed order: `name` ascending. No `sort` and no `search`. An unknown
+      company id answers an empty page, not 404.
+    tags: [firmen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+    responses:
+      '200':
+        description: One page of departments.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/abteilungen.yaml#/AbteilungPage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'

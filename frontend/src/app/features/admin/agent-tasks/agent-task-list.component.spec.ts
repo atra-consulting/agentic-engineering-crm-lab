@@ -7,31 +7,26 @@ import { AgentTaskListComponent } from './agent-task-list.component';
 import { AgentTaskService } from '../../../core/services/agent-task.service';
 import { AgentTask } from '../../../core/models/agent-task.model';
 import { Page } from '../../../core/models/page.model';
+import { makeAgentTask, makePage as makePageOf } from '../../../core/testing/model-factories';
 
-const makeTask = (id: number, source: AgentTask['source'] = 'EMAIL'): AgentTask => ({
-  id,
-  source,
-  title: `Task ${id}`,
-  body: `Body of task ${id}`,
-  status: 'OPEN',
-  comment: null,
-  metadata: null,
-  ticketId: null,
-  pickedUpAt: null,
-  resolvedAt: null,
-  createdAt: '2024-01-01T10:00:00.000Z',
-  updatedAt: '2024-01-01T10:00:00.000Z',
-});
+const makeTask = (id: number, source: AgentTask['source'] = 'EMAIL'): AgentTask =>
+  makeAgentTask({
+    id,
+    source,
+    title: `Task ${id}`,
+    body: `Body of task ${id}`,
+    status: 'OPEN',
+    comment: null,
+    metadata: null,
+    ticketId: null,
+    pickedUpAt: null,
+    resolvedAt: null,
+    createdAt: '2024-01-01T10:00:00.000Z',
+    updatedAt: '2024-01-01T10:00:00.000Z',
+  });
 
-const makePage = (tasks: AgentTask[], page = 0): Page<AgentTask> => ({
-  content: tasks,
-  totalElements: tasks.length,
-  totalPages: 1,
-  size: 20,
-  number: page,
-  first: true,
-  last: true,
-});
+const makePage = (tasks: AgentTask[], page = 0): Page<AgentTask> =>
+  makePageOf(tasks, { size: 20, number: page, totalPages: 1 });
 
 function makeRoute(queryParams: Record<string, string> = {}): Partial<ActivatedRoute> {
   return { queryParams: of(queryParams) };

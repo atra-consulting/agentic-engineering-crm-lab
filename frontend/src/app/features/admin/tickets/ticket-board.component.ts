@@ -24,7 +24,7 @@ import {
   faUser,
   faGripVertical,
 } from '@fortawesome/free-solid-svg-icons';
-import { Ticket, TicketStatus, TicketSummary } from '../../../core/models/ticket.model';
+import { TicketListItem, TicketStatus, TicketSummary } from '../../../core/models/ticket.model';
 import { TicketService } from '../../../core/services/ticket.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -234,7 +234,7 @@ import { TicketCreateComponent } from './ticket-create.component';
                       <fa-icon [icon]="ticket.owner === 'AI' ? faRobot : faUser" class="me-1" />{{ ownerLabel(ticket.owner) }}
                     </span>
                   </div>
-                  @if ((ticket.commentCount ?? 0) > 0) {
+                  @if (ticket.commentCount > 0) {
                     <div class="ticket-comment-count mt-1">
                       <fa-icon [icon]="faComment" class="me-1 text-muted" />
                       <span class="small text-muted">{{ ticket.commentCount }}</span>
@@ -279,7 +279,7 @@ import { TicketCreateComponent } from './ticket-create.component';
                       <fa-icon [icon]="ticket.owner === 'AI' ? faRobot : faUser" class="me-1" />{{ ownerLabel(ticket.owner) }}
                     </span>
                   </div>
-                  @if ((ticket.commentCount ?? 0) > 0) {
+                  @if (ticket.commentCount > 0) {
                     <div class="ticket-comment-count mt-1">
                       <fa-icon [icon]="faComment" class="me-1 text-muted" />
                       <span class="small text-muted">{{ ticket.commentCount }}</span>
@@ -324,7 +324,7 @@ import { TicketCreateComponent } from './ticket-create.component';
                       <fa-icon [icon]="ticket.owner === 'AI' ? faRobot : faUser" class="me-1" />{{ ownerLabel(ticket.owner) }}
                     </span>
                   </div>
-                  @if ((ticket.commentCount ?? 0) > 0) {
+                  @if (ticket.commentCount > 0) {
                     <div class="ticket-comment-count mt-1">
                       <fa-icon [icon]="faComment" class="me-1 text-muted" />
                       <span class="small text-muted">{{ ticket.commentCount }}</span>
@@ -369,7 +369,7 @@ import { TicketCreateComponent } from './ticket-create.component';
                       <fa-icon [icon]="ticket.owner === 'AI' ? faRobot : faUser" class="me-1" />{{ ownerLabel(ticket.owner) }}
                     </span>
                   </div>
-                  @if ((ticket.commentCount ?? 0) > 0) {
+                  @if (ticket.commentCount > 0) {
                     <div class="ticket-comment-count mt-1">
                       <fa-icon [icon]="faComment" class="me-1 text-muted" />
                       <span class="small text-muted">{{ ticket.commentCount }}</span>
@@ -419,7 +419,7 @@ import { TicketCreateComponent } from './ticket-create.component';
                       </span>
                     }
                   </div>
-                  @if ((ticket.commentCount ?? 0) > 0) {
+                  @if (ticket.commentCount > 0) {
                     <div class="ticket-comment-count mt-1">
                       <fa-icon [icon]="faComment" class="me-1 text-muted" />
                       <span class="small text-muted">{{ ticket.commentCount }}</span>
@@ -746,11 +746,11 @@ export class TicketBoardComponent implements OnInit {
     () => this.authService.currentUser()?.rollen.includes('ROLE_ADMIN') ?? false,
   );
 
-  definition: Ticket[] = [];
-  todo: Ticket[] = [];
-  inProgress: Ticket[] = [];
-  onHold: Ticket[] = [];
-  done: Ticket[] = [];
+  definition: TicketListItem[] = [];
+  todo: TicketListItem[] = [];
+  inProgress: TicketListItem[] = [];
+  onHold: TicketListItem[] = [];
+  done: TicketListItem[] = [];
   summary: TicketSummary | null = null;
   loading = true;
   errorMessage: string | null = null;
@@ -760,11 +760,11 @@ export class TicketBoardComponent implements OnInit {
   private readonly RECENT_WINDOW_MS = 60 * 60 * 1000;
   private readonly RECENT_ONLY_STORAGE_KEY = 'ticketBoard.recentOnly';
 
-  viewDefinition: Ticket[] = [];
-  viewTodo: Ticket[] = [];
-  viewInProgress: Ticket[] = [];
-  viewOnHold: Ticket[] = [];
-  viewDone: Ticket[] = [];
+  viewDefinition: TicketListItem[] = [];
+  viewTodo: TicketListItem[] = [];
+  viewInProgress: TicketListItem[] = [];
+  viewOnHold: TicketListItem[] = [];
+  viewDone: TicketListItem[] = [];
 
   readonly faPlus = faPlus;
   readonly faClipboardList = faClipboardList;
@@ -819,7 +819,7 @@ export class TicketBoardComponent implements OnInit {
       });
   }
 
-  isRecent(ticket: Ticket): boolean {
+  isRecent(ticket: TicketListItem): boolean {
     const now = Date.now();
     return (
       now - Date.parse(ticket.updatedAt) <= this.RECENT_WINDOW_MS ||
@@ -861,12 +861,12 @@ export class TicketBoardComponent implements OnInit {
     }
   }
 
-  onDrop(event: CdkDragDrop<Ticket[]>, targetStatus: TicketStatus): void {
+  onDrop(event: CdkDragDrop<TicketListItem[]>, targetStatus: TicketStatus): void {
     if (event.previousContainer === event.container) {
       return;
     }
 
-    const ticket: Ticket = event.item.data;
+    const ticket: TicketListItem = event.item.data;
     const originalStatus = ticket.status;
     const originalSolution = ticket.solution;
     const sourceArray = event.previousContainer.data;

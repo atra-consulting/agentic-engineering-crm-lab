@@ -6,17 +6,21 @@
 // These were generated with: bcrypt.hashSync('password', 10)
 // Hardcoded for zero startup cost and stable reproducibility.
 
+import type { Schema } from '../openapi/types.js';
+
+type RoleSuffix = Schema<'Rolle'> extends `ROLE_${infer R}` ? R : never;
+
 export interface CrmUser {
   id: number;
   benutzername: string;
   vorname: string;
   nachname: string;
   passwordHash: string;
-  roles: string[];
-  permissions: string[];
+  roles: RoleSuffix[];
+  permissions: Schema<'Permission'>[];
 }
 
-const ALL_PERMISSIONS = [
+const ALL_PERMISSIONS: Schema<'Permission'>[] = [
   'FIRMEN',
   'PERSONEN',
   'ABTEILUNGEN',

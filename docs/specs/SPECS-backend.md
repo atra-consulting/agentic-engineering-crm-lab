@@ -1,5 +1,7 @@
 # CRM Backend Specification
 
+For signatures, the API contract (`openapi/`) wins.
+
 Node.js/TypeScript backend. Express 4.21 on port 7070. SQLite file database via Drizzle ORM + `@libsql/client`. Session-based authentication.
 
 ## Stack
@@ -11,10 +13,12 @@ Node.js/TypeScript backend. Express 4.21 on port 7070. SQLite file database via 
 | Framework | Express | 4.21 |
 | ORM | Drizzle ORM | 0.45 |
 | Database driver | @libsql/client (async, promise-based) | 0.17.3 |
-| Validation | Zod | 4.6 |
+| Validation | Ajv 2020 (contract schemas; one factory, `unicode: false`, custom `email`/`uri` formats, no `ajv-formats`) | — |
 | Auth | express-session + bcryptjs | 1.18 / 2.4 |
 | Session store | LibsqlSessionStore (custom, persists to `sessions` table) | — |
 | Dev runner | tsx --watch | 4.19 |
+
+Ajv factory: `backend/src/openapi/ajv.ts`. The custom `email` and `uri` formats reproduce the verdicts of the former Zod 4 checks.
 
 Database file: `backend/data/crmdb.sqlite`. Created on first startup. When `TURSO_DATABASE_URL` is set the remote Turso URL is used instead.
 
@@ -32,204 +36,81 @@ Computed DTO fields (not stored in DB):
 
 ## API Endpoints
 
-All routes require authentication. `requireAuth` middleware checks `req.session.userId`. Unauthenticated requests get `401`. See the [Auth middleware](#auth-middleware) section for the full authorization note.
+The contract in `openapi/` lists every route: method, path, params, bodies, answers, errors, guards. This file does not repeat them.
 
 Base URL: `http://localhost:7070/api`
 
-### Auth (`/api/auth`)
+| Area | Contract file | Covers |
+|------|---------------|--------|
+| Auth | [`openapi/paths/auth.yaml`](../../openapi/paths/auth.yaml) | Login, logout, current user, test-login (development/test only) |
+| Health | [`openapi/paths/health.yaml`](../../openapi/paths/health.yaml) | Public health check |
+| Firmen | [`openapi/paths/firmen.yaml`](../../openapi/paths/firmen.yaml) | CRUD, plus Personen and Abteilungen per Firma |
+| Personen | [`openapi/paths/personen.yaml`](../../openapi/paths/personen.yaml) | CRUD, `abteilungId` filter |
+| Abteilungen | [`openapi/paths/abteilungen.yaml`](../../openapi/paths/abteilungen.yaml) | CRUD, per-Firma list, Personen per Abteilung |
+| Adressen | [`openapi/paths/adressen.yaml`](../../openapi/paths/adressen.yaml) | CRUD, `search` on city |
+| Aktivitaeten | [`openapi/paths/aktivitaeten.yaml`](../../openapi/paths/aktivitaeten.yaml) | CRUD |
+| Chancen | [`openapi/paths/chancen.yaml`](../../openapi/paths/chancen.yaml) | CRUD, `search` and `phase` filter |
+| Dashboard | [`openapi/paths/dashboard.yaml`](../../openapi/paths/dashboard.yaml) | Dashboard numbers |
+| Szenarien | [`openapi/paths/szenarien.yaml`](../../openapi/paths/szenarien.yaml) | Saved Produktivität-Rechner scenarios. Array lengths live in the contract |
+| Agent tasks | [`openapi/paths/agent-tasks.yaml`](../../openapi/paths/agent-tasks.yaml) | Agent work queue. Lifecycle `OPEN → IN_PROGRESS → DONE \| REJECTED` |
+| Tickets | [`openapi/paths/tickets.yaml`](../../openapi/paths/tickets.yaml) | Kanban board. Status `DEFINITION → TODO → IN_PROGRESS → ON_HOLD → DONE` |
+| Cron | [`openapi/paths/cron.yaml`](../../openapi/paths/cron.yaml) | Cron triggers and run history |
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| POST | `/api/auth/login` | Public | Credentials → session cookie |
-| POST | `/api/auth/logout` | Public | Destroy session |
-| GET | `/api/auth/me` | requireAuth | Current user profile |
-| POST | `/api/auth/test-login` | Public (non-prod only) | Passwordless login for Playwright tests |
+Standard CRUD resources (Firmen, Personen, Abteilungen, Adressen, Aktivitaeten, Chancen) share one shape: paginated list, `/all`, single read, create (201), update, delete (204). Unknown id → 404. Details per area: the files above.
 
-Login request body:
-```json
-{ "benutzername": "admin", "passwort": "admin123" }
-```
+More background:
 
-Login response:
-```json
-{ "benutzername": "admin", "vorname": "Admin", "nachname": "User", "rollen": ["ROLE_ADMIN"] }
-```
+- Ticket board mechanics: [SPEC-API-TICKETS.md](SPEC-API-TICKETS.md).
+- Agent task lifecycle: [SPEC-API-TASKS.md](SPEC-API-TASKS.md).
+- `AgentTaskDTO.ticketId` is derived. Never stored. The newest ticket that points back at the task. The list query pages first, then computes `ticketId` for the page rows only.
 
-`/me` response adds `id`, `email`, and `permissions` array.
+### Access rules
 
-### Health
+| Who | Routes |
+|-----|--------|
+| Public | `GET /api/health`, `POST /api/auth/login`, `POST /api/auth/logout`, `POST /api/auth/test-login` (development/test only) |
+| Any logged-in user | CRM entities, Dashboard, Szenarien, `GET /api/auth/me`, `GET /api/tickets/summary` |
+| Agent token or any logged-in user | `GET /api/tickets/board`, `GET /api/tickets/:id` |
+| Agent token or admin session | `GET /api/agent-tasks/:id`, ticket create, status, owner, start, done, ask, comments |
+| Agent token only | `GET /api/agent-tasks/next`, `GET /api/tickets/next`, agent-task start/reject/done, `POST /api/cron/runs/:id/complete` |
+| Admin only | Agent-task list, summary and reset; ticket list, reset, wont-do, hand-to-ai; cron runs and jobs |
+| Cron secret or admin session | `GET /api/cron/agent-tasks`, `GET /api/cron/github-issues` |
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/health` | Public | Returns `{ status: "ok", timestamp, version }` |
-
-### Firmen (`/api/firmen`)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/firmen` | Paginated list. Params: `search`, `page`, `size`, `sort`. Default sort: `name,ASC` |
-| GET | `/api/firmen/all` | Full list, no pagination |
-| GET | `/api/firmen/:id` | Single record |
-| GET | `/api/firmen/:id/personen` | Paginated persons for this Firma |
-| GET | `/api/firmen/:id/abteilungen` | Paginated Abteilungen for this Firma (per-firma listing) |
-| POST | `/api/firmen` | Create → 201 |
-| PUT | `/api/firmen/:id` | Full update |
-| DELETE | `/api/firmen/:id` | Delete → 204 |
-
-Allowed sort fields: `name`, `industry`, `createdAt`, `updatedAt`.
-
-### Personen (`/api/personen`)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/personen` | Paginated list. Params: `search`, `page`, `size`, `sort`, `abteilungId` (optional filter). Default: `lastName,ASC` |
-| GET | `/api/personen/all` | Full list, no pagination. Optional param: `abteilungId` to filter by department |
-| GET | `/api/personen/:id` | Single record |
-| POST | `/api/personen` | Create → 201 |
-| PUT | `/api/personen/:id` | Full update |
-| DELETE | `/api/personen/:id` | Delete → 204 |
-
-Allowed sort fields: `firstName`, `lastName`, `email`, `position`, `createdAt`, `updatedAt`.
-
-### Abteilungen (`/api/abteilungen`)
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/abteilungen` | Paginated list. Params: `page`, `size`, `sort`. Default: `name,ASC` |
-| GET | `/api/abteilungen/all` | Full list, no pagination |
-| GET | `/api/abteilungen/firma/:firmaId` | Non-paginated list for a single Firma (must be before `/:id`) |
-| GET | `/api/abteilungen/:id` | Single record |
-| GET | `/api/abteilungen/:id/personen` | Paginated persons for this Abteilung |
-| POST | `/api/abteilungen` | Create → 201 |
-| PUT | `/api/abteilungen/:id` | Full update |
-| DELETE | `/api/abteilungen/:id` | Delete → 204 |
-
-Allowed sort fields: `name`, `firmaId`, `createdAt`, `updatedAt`.
-
-### Adressen (`/api/adressen`)
-
-Standard CRUD. Default sort: `city,ASC`. Allowed sort fields: `city`, `postalCode`, `street`, `createdAt`, `updatedAt`. Params: `search` (optional, case-insensitive substring match on `city`), `page`, `size`, `sort`.
-
-### Aktivitaeten (`/api/aktivitaeten`)
-
-Standard CRUD. Default sort: `datum,DESC`. Allowed sort fields: `datum`, `typ`, `subject`, `createdAt`, `updatedAt`.
-
-### Chancen (`/api/chancen`)
-
-Standard CRUD. Default sort: `createdAt,DESC`. Allowed sort fields: `titel`, `wert`, `phase`, `wahrscheinlichkeit`, `erwartetesDatum`, `createdAt`, `updatedAt`. Params: `search` (optional, case-insensitive substring match on `titel`), `phase` (optional enum filter), `page`, `size`, `sort`.
-
-### Szenarien (`/api/szenarien`)
-
-Saved scenarios for the Produktivität-Rechner cycle-time calculator. All routes `requireAuth` (any logged-in user). Each body has four named process fields: `humanSteps` (19 steps), `agileKiSteps` (19 steps), `semiAutomatedSteps` (11 steps), `automatedSteps` (2 steps). Each process is `{ works: number[], waits: number[] }` (waits length = works length − 1); durations are integer minutes. Step counts enforced by `PROCESS_STEP_COUNTS` in `utils/validation.ts`; validated by `SzenarioSchema` (Zod). Omitting `agileKiSteps` fails validation → 400.
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/szenarien` | requireAuth | List all scenarios (`createdAt DESC`) |
-| GET | `/api/szenarien/:id` | requireAuth | Single scenario (404 if missing) |
-| POST | `/api/szenarien` | requireAuth | Create → 201. Duplicate `name` → 409 |
-| PUT | `/api/szenarien/:id` | requireAuth | Update (404 if missing; duplicate name → 409) |
-| DELETE | `/api/szenarien/:id` | requireAuth | Delete → 204 |
-
-### Agent Tasks (`/api/agent-tasks`)
-
-Manages the autonomous-agent work queue. Lifecycle: `OPEN → IN_PROGRESS → DONE | REJECTED`.
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/agent-tasks/next?source=X` | requireAgentToken | Claim next OPEN task → IN_PROGRESS. Returns 204 when none exist |
-| GET | `/api/agent-tasks/summary` | requireAuth + requireRole('ADMIN') | Per-source open/done/rejected counts |
-| POST | `/api/agent-tasks/reset` | requireAuth + requireRole('ADMIN') | Reset all tasks back to OPEN |
-| POST | `/api/agent-tasks/:id/start` | requireAgentToken | Claim a specific task by id → IN_PROGRESS (skips `/next`) |
-| POST | `/api/agent-tasks/:id/reject` | requireAgentToken | Mark task REJECTED (comment required) |
-| POST | `/api/agent-tasks/:id/done` | requireAgentToken | Mark task DONE |
-| GET | `/api/agent-tasks/:id` | requireAgentTokenOrAdminSession | Single task. Accepts agent token, loopback bypass, or admin session — see [Agent token auth](#agent-token-auth) |
-| GET | `/api/agent-tasks` | requireAuth + requireRole('ADMIN') | Paginated list; filter by `source`, `status` |
-
-Agent endpoints are authenticated via `requireAgentToken` (see [agentAuth.ts](#agent-token-auth)). Admin endpoints require a valid admin session.
-
-`AgentTaskDTO` also carries a derived, **never stored** `ticketId` field — the newest ticket (if any) whose `agentTaskId` points back at this task. It is computed on every read: the single-item read, the paginated list, and the claim (`/next`) endpoint. The list-endpoint query pages the result first, then computes `ticketId` only for the rows on that page — not for every row scanned to build the sort — so list performance does not degrade as the table grows.
-
-### Tickets (`/api/tickets`)
-
-Fake Kanban ticket system for the software-factory training. Board mechanics and full contract: see [docs/specs/SPEC-API-TICKETS.md](SPEC-API-TICKETS.md). Status enum: `DEFINITION → TODO → IN_PROGRESS → ON_HOLD → DONE`. Owner: `AI` or `HUMAN`. New tickets start `owner=HUMAN`, `status=DEFINITION`.
-
-The create request (`POST /`) accepts two optional fields beyond `type`/`title`/`body`: `agentTaskId` (nullable integer, links the ticket to the app-feedback item that spawned it) and `fullyReady` (boolean, "ready to build without further human input", defaults to `false`, never shown in the admin UI). The comment request (`POST /:id/comments`) accepts an optional `clearFullyReady` (boolean) that resets the `fullyReady` marker back to `false`, independent of `handBackToAi`. Full contract: [SPEC-API-TICKETS.md](SPEC-API-TICKETS.md).
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/tickets/next?type=X` | requireAgentToken | Claim oldest `TODO`+`AI` ticket → `IN_PROGRESS`. Optional `type` filter. 204 when none |
-| GET | `/api/tickets/board` | requireAgentTokenOrAdminSession | Full board, grouped by column (agent token, loopback, or admin session) |
-| GET | `/api/tickets/summary` | requireAuth + requireRole('ADMIN') | Per-column counts |
-| POST | `/api/tickets/reset` | requireAuth + requireRole('ADMIN') | Re-seed the 12 workshop tickets |
-| GET | `/api/tickets` | requireAuth + requireRole('ADMIN') | Paginated list; filter by `type`, `status`, `owner` |
-| POST | `/api/tickets` | requireAgentTokenOrAdminSession | Create → 201 (`owner=HUMAN`, `status=DEFINITION`; agent token, loopback, or admin session) |
-| GET | `/api/tickets/:id` | requireAgentTokenOrAdminSession | Single ticket (agent token, loopback, or admin session) |
-| PATCH | `/api/tickets/:id/status` | requireAgentTokenOrAdminSession | Move to another column (agent token, loopback, or admin session) |
-| PATCH | `/api/tickets/:id/owner` | requireAgentTokenOrAdminSession | Reassign owner (agent token, loopback, or admin session). `{owner:AI}` = "An KI übergeben" (stays `DEFINITION`) |
-| POST | `/api/tickets/:id/start` | requireAgentTokenOrAdminSession | Claim a specific ticket by id → `IN_PROGRESS` (agent token, loopback, or admin session) |
-| POST | `/api/tickets/:id/done` | requireAgentTokenOrAdminSession | Finish → `solution=DONE` (agent token, loopback, or admin session) |
-| POST | `/api/tickets/:id/ask` | requireAgentTokenOrAdminSession | Ask a question → `ON_HOLD`, owner back to `HUMAN` (agent token, loopback, or admin session) |
-| POST | `/api/tickets/:id/wont-do` | requireAuth + requireRole('ADMIN') | Set `solution=WONT_DO` (only on `owner=HUMAN`) |
-| POST | `/api/tickets/:id/hand-to-ai` | requireAuth + requireRole('ADMIN') | "Nach Bereit": owner=AI, → `TODO` |
-| POST | `/api/tickets/:id/comments` | requireAgentTokenOrAdminSession | Add comment (agent token, loopback, or admin session); `handBackToAi` returns ticket to `TODO`+`AI` |
-
-### Cron (`/api/cron`)
-
-Triggers and records scheduled/manual CI workflow dispatches. Backed by the `cron_run` table and `cronService.ts`.
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/cron/agent-tasks` | requireCronAuth | Drain agent_task queue (external cron or admin manual trigger) |
-| GET | `/api/cron/github-issues` | requireCronAuth | Trigger GitHub-issue agent (manual only) |
-| POST | `/api/cron/runs/:id/complete` | requireAgentToken | Called by GitHub Actions to record run result |
-| GET | `/api/cron/runs` | requireAuth + requireRole('ADMIN') | Paginated cron run history; filter by `job` |
-| GET | `/api/cron/jobs` | requireAuth + requireRole('ADMIN') | All configured jobs with their latest run |
-
-`requireCronAuth` (defined inline in `routes/cron.ts`) accepts either a `CRON_SECRET` bearer token (external cron) or a valid admin session. It sets `req.cronTrigger` to `'CRON'` or `'MANUAL'` accordingly.
-
-### Standard CRUD pattern
-
-Every standard CRUD resource exposes:
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/{resource}` | Paginated list |
-| GET | `/api/{resource}/all` | Full unpaginated list |
-| GET | `/api/{resource}/:id` | Single record or 404 |
-| POST | `/api/{resource}` | Create → 201 |
-| PUT | `/api/{resource}/:id` | Full update or 404 |
-| DELETE | `/api/{resource}/:id` | Delete → 204 or 404 |
+Unauthenticated requests get `401`. Wrong role gets `403`, except cron triggers: a non-admin session gets `401`. The contract names the exact guard per operation.
 
 ## Pagination
 
 All paginated endpoints use the Spring Data Page response format for frontend compatibility.
 
-Response shape:
-```json
-{
-  "content": [...],
-  "totalElements": 42,
-  "totalPages": 5,
-  "size": 10,
-  "number": 0,
-  "first": true,
-  "last": false
-}
-```
+Response shape: `PageMeta` in [`openapi/common.yaml`](../../openapi/common.yaml). `number` is 0-based.
 
-`number` is 0-indexed. `size` defaults to 10, max 200.
+`size` defaults to 10, max 200.
 
 Sort query param format: `sort=field,asc` or `sort=field,desc`.
 
-Sort fields are validated against a per-entity whitelist in `src/utils/pagination.ts`. Invalid field names return `400`.
+The code checks sort fields against a per-entity whitelist in `src/utils/pagination.ts`. Invalid field names return `400`. Defaults and allowed fields per area: see the contract.
 
 ## Security
+
+### Runtime modes
+
+`NODE_ENV` picks the mode. Allow-list: only the exact values `development` and `test` count. Anything else is production. That includes unset, empty, `Development`, and `staging`.
+
+| Feature | development | test | production |
+|---------|-------------|------|------------|
+| `POST /api/auth/test-login` | yes | yes | no |
+| `/api/docs` + `/api/openapi.json` | yes | yes | no |
+| Response check against the contract | Logs. Adds `X-Contract-Violation` header | Rewrites the answer to 500 `Antwort verletzt API-Vertrag …` | off |
+| `CONTRACT_RESPONSE_CHECK=off` | ignored | switches check off (benchmarks only) | ignored |
+
+`createApp(mode)` in `src/app.ts` takes the mode. Default: read from `NODE_ENV`. Start scripts set `development`.
 
 ### Session auth
 
 - `express-session` with `LibsqlSessionStore` — a custom `express-session` Store subclass that persists sessions to the `sessions` table in the same libsql/Turso database. Expired rows are swept lazily on first request per process lifetime.
-- Cookie name: `JSESSIONID`. HttpOnly. SameSite: lax. MaxAge: 24 hours. `secure: true` in production.
-- Session secret from env var `SESSION_SECRET`. Falls back to `crm-dev-secret-key` in development (prints a warning in production).
+- Cookie name: `JSESSIONID`. HttpOnly. SameSite: lax. MaxAge: 24 hours. `secure: true` only when `NODE_ENV` is exactly `production`.
+- Session secret from env var `SESSION_SECRET`. Falls back to `crm-dev-secret-key` whenever `SESSION_SECRET` is unset. The missing-secret warning prints only when `NODE_ENV` is exactly `production`.
+- This check is literal `production`; it does not follow the contract mode allow-list (known gap, see PRD Decisions).
 - Login: `bcryptjs.compareSync()` compares submitted password to stored hash.
 - Session fixation protection: `req.session.regenerate()` on successful login.
 - Logout: `req.session.destroy()` + clear cookie.
@@ -245,7 +126,7 @@ Hardcoded in `src/config/users.ts`. No database table. No user management API.
 | user | test123 | USER | All |
 | demo | demo1234 | ADMIN | All |
 
-Passwords stored as bcrypt hashes (cost factor 10). Generated once at build time.
+Passwords stored as bcrypt hashes (cost factor 10). Generated once and hardcoded, for zero startup cost and stable reproducibility.
 
 All 3 users currently hold all 7 permissions: `FIRMEN`, `PERSONEN`, `ABTEILUNGEN`, `ADRESSEN`, `AKTIVITAETEN`, `CHANCEN`, `BENUTZERVERWALTUNG`.
 
@@ -263,7 +144,7 @@ All 3 users currently hold all 7 permissions: `FIRMEN`, `PERSONEN`, `ABTEILUNGEN
 
 `requireRole(...roles)` (in `src/middleware/auth.ts`): checks that `req.currentUser` exists and that at least one of the user's roles matches. Returns 403 otherwise.
 
-`requireAuth` exports only these two functions. There is no `requirePermission` function in `auth.ts`.
+`auth.ts` exports only these two functions. There is no `requirePermission` function.
 
 ### Agent token auth
 
@@ -274,11 +155,24 @@ All 3 users currently hold all 7 permissions: `FIRMEN`, `PERSONEN`, `ABTEILUNGEN
 - Returns 401 if the env var is not set, the header is absent, or the token does not match.
 - **Loopback bypass (dev only).** When env var `AGENT_AUTH_ALLOW_LOOPBACK=1`, a request from `127.0.0.1` / `::1` / `::ffff:127.0.0.1` with **no** auth header and **no** proxy-forwarding header (`X-Forwarded-For`, `X-Real-IP`, `Forwarded`) skips the token check. Never set this in production. The forwarding-header refusal stops a same-host reverse proxy (which appears as `127.0.0.1` on the socket) from opening the bypass.
 
-`requireAgentTokenOrAdminSession` (in `src/middleware/agentAuth.ts`): guards endpoints that both agents and the admin UI use — `GET /api/agent-tasks/:id` plus nine Tickets endpoints (`GET /:id`, `GET /board`, `POST /` create, `PATCH /:id/status`, `PATCH /:id/owner`, `POST /:id/start`, `POST /:id/done`, `POST /:id/ask`, `POST /:id/comments`; see the Tickets table above). First match wins:
+Two more guards share one implementation in `src/middleware/agentAuth.ts`. Both check in this order. First match wins:
 
 1. Loopback bypass — same gating as above (also requires `AGENT_API_TOKEN` set).
-2. Agent token — if a token header is present, it must match; a wrong token is rejected (401), never falling through to the session.
-3. Admin session — `req.session.userId` must resolve to a user with the `ADMIN` role, else 403. No session → 401.
+2. Agent token — if a token header is present, it must match. A wrong token gets 401. It never falls through to the session.
+3. Session — see the table.
+
+| Guard | Session step | Used on |
+|-------|--------------|---------|
+| `requireAgentTokenOrAdminSession` | Session must resolve to a user with role `ADMIN`, else 403 | `GET /api/agent-tasks/:id`. Ticket write endpoints: create, status, owner, start, done, ask, comments |
+| `requireAgentTokenOrSession` | Any logged-in user passes | `GET /api/tickets/board`, `GET /api/tickets/:id`. Non-admin workshop participants follow the board |
+
+No session and no token: 401.
+
+`GET /api/tickets/summary` is different. It uses `requireAuth` only. It takes no agent token and needs no admin role.
+
+### Cron auth
+
+`requireCronAuth` (defined inline in `routes/cron.ts`) accepts either a `CRON_SECRET` bearer token (external cron) or a valid admin session. It sets `req.cronTrigger` to `'CRON'` or `'MANUAL'`. If the bearer token does not match the secret, the request falls through to the admin-session check.
 
 ### CORS
 
@@ -291,7 +185,7 @@ Table definitions and column specs: see [SPECS-database.md](SPECS-database.md).
 ```
 src/
   index.ts          — entry point: migrate → seed → listen
-  app.ts            — Express app wiring (middleware order, route mounting)
+  app.ts            — createApp(mode): Express wiring (middleware order, route mounting)
   config/
     db.ts           — @libsql/client setup; exports `client` and `db` (Drizzle)
     migrate.ts      — CREATE TABLE IF NOT EXISTS + PRAGMA foreign_keys = ON
@@ -300,9 +194,18 @@ src/
   db/schema/
     schema.ts       — Drizzle table definitions
     enums.ts        — TypeScript enum arrays and types
+  openapi/
+    ajv.ts          — single Ajv 2020 factory
+    contract.ts     — loads the contract, finds operations
+    specValidate.ts — request validation middleware
+    errorMapper.ts  — Ajv errors → fieldErrors, default German texts
+    responseCheck.ts — response check (development/test)
+    runtimeMode.ts  — NODE_ENV → development | test | production
+    types.ts        — RequestBody, JsonResponse, Schema helper types
+  generated/        — types generated from the contract
   middleware/
     auth.ts               — requireAuth, requireRole
-    agentAuth.ts          — requireAgentToken, requireAgentTokenOrAdminSession (+ AGENT_AUTH_ALLOW_LOOPBACK bypass)
+    agentAuth.ts          — requireAgentToken, requireAgentTokenOrAdminSession, requireAgentTokenOrSession (+ AGENT_AUTH_ALLOW_LOOPBACK bypass)
     cors.ts               — CORS config
     errorHandler.ts       — global error handler (last middleware)
     libsqlSessionStore.ts — custom express-session Store backed by `sessions` table
@@ -313,15 +216,14 @@ src/
     asyncHandler.ts  — wraps async route handlers; forwards rejected Promises to next()
     errors.ts        — typed error classes
     pagination.ts    — parsePaginationParams, parseSort, buildPage
-    validation.ts    — Zod schemas and validate() helper
   seed/
     dataMigration.ts  — loads fixture.json into the DB when empty (CRM entities only)
     fixture.json      — fixed seed data (25 Firmen, 50 Abteilungen, 100 Personen, 100 Adressen, 75 Aktivitaeten, 40 Chancen)
-    agentTaskSeed.ts  — idempotent agent_task seeding (INSERT OR IGNORE, ids 1–16); called at end of runMigrations()
+    agentTaskSeed.ts  — idempotent agent_task seeding (INSERT OR IGNORE, ids 1–23); called at end of runMigrations()
     build-fixture.ts  — dev tool to regenerate fixture.json after schema changes (not called at runtime)
 ```
 
-Middleware order in `app.ts`: CORS → JSON body parser → session → routes → error handler.
+Middleware order in `createApp`: CORS → JSON body parser (100 KB limit) → session → response check (development/test) → routes → unknown `/api` 404 → error handler.
 
 Mounted routers: `/api/auth`, `/api/firmen`, `/api/personen`, `/api/abteilungen`, `/api/adressen`, `/api/aktivitaeten`, `/api/chancen`, `/api/dashboard`, `/api/agent-tasks`, `/api/cron`, `/api/tickets`, `/api/szenarien`. Plus `/api/health` (inline, public).
 
@@ -338,30 +240,44 @@ Global error handler in `src/middleware/errorHandler.ts`. Must be the last `app.
 | ConflictError | 409 |
 | Unexpected Error | 500 |
 
-All error responses use this shape:
-```json
-{
-  "status": 404,
-  "message": "Firma mit ID 99 nicht gefunden",
-  "timestamp": "2026-04-15T10:30:00.123",
-  "fieldErrors": {}
-}
-```
+All error responses use `ErrorResponse` in [`openapi/common.yaml`](../../openapi/common.yaml).
 
 `ValidationError` populates `fieldErrors` as `{ "fieldName": "error message" }`. All other errors return an empty `fieldErrors` object.
 
 Timestamp is millisecond-precision ISO-8601 with no timezone suffix (no trailing `Z`).
+
+### Edge-case answers
+
+| Case | Answer |
+|------|--------|
+| Path id is not a positive integer (`^[1-9][0-9]*$`) | 400 `Validierungsfehler`, `fieldErrors.id` = `Ungültige ID` |
+| `phase` filter on Chancen is not a valid phase | 400 in the standard shape, `fieldErrors.phase` |
+| Malformed JSON body | 400 `Validierungsfehler`, `fieldErrors` = `{ "_": "Ungültige Anfrage" }` |
+| Body larger than 100 KB | 413 `Anfrage zu groß` |
+| Unknown `/api` path or method | 404 `Ressource nicht gefunden` (JSON, no 405) |
+
+Production has no `test-login` route. It falls through to the unknown-path 404.
+
+All validation texts are German. They replace the former English Zod defaults.
 
 ## Code Pattern
 
 Each entity follows this pattern:
 
 ```
+Contract (openapi/paths/<area>.yaml + schemas)  — source of truth
 Drizzle schema (schema.ts)
-  → Zod schema + CreateDTO (validation.ts)
   → Service (services/<entity>Service.ts)  — async functions, raw SQL via @libsql/client
-  → Route handler (routes/<entity>.ts)     — Express Router + asyncHandler
+  → Route handler (routes/<entity>.ts)     — Express Router: guard(s) → specValidate → asyncHandler
 ```
+
+Types come from the contract, not from hand-written schemas:
+
+| Helper (`src/openapi/types.ts`) | Use |
+|---------------------------------|-----|
+| `RequestBody<'opId'>` | Type of a request body |
+| `Schema<'X'>` | DTO alias for a contract schema |
+| `JsonResponse<'opId', 200>` | Type of an inline answer |
 
 ### Service pattern
 
@@ -378,37 +294,67 @@ export const firmaService = {
 };
 ```
 
+`FirmaDTO` and friends are aliases: `type FirmaDTO = Schema<'Firma'>`.
+
 `create()` and `update()` set `updatedAt` to `new Date().toISOString()`.
 
 `findById()` throws `NotFoundError` when the row does not exist. Routes do not check for null.
 
 ### Route pattern
 
-All route handlers are wrapped in `asyncHandler` from `src/utils/asyncHandler.ts`. This forwards any rejected Promise (including thrown errors) to Express's `next()` error chain so the global error handler can format the response. Manual try/catch blocks are not used.
+Order in every route: guard(s) → `specValidate` → `asyncHandler`.
+
+`asyncHandler` (`src/utils/asyncHandler.ts`) forwards any rejected Promise (including thrown errors) to Express's `next()` error chain so the global error handler can format the response. Manual try/catch blocks are not used.
 
 ```typescript
 router.get(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params['id'] as string, 10);
+    const id = Number(req.params['id']);
     res.json(await firmaService.findById(id));
   }),
 );
 ```
 
+`specValidate` comes after the guards. Unauthenticated callers never see validation errors.
+
 ### Validation pattern
 
-Request bodies are validated with Zod before passing to the service:
+`specValidate` (`src/openapi/specValidate.ts`) validates against the contract:
+
+- Path params must match `^[1-9][0-9]*$`. Else 400 `id` `Ungültige ID`.
+- Request body must match the operation's schema.
+- Unknown body fields get stripped. The handler sees the cleaned body in `req.body`.
+- Failures go to the error handler as `ValidationError` with `fieldErrors`.
+- Contract lookup ignores letter case, like Express routing. `/api/Firmen/1` finds the same operation as `/api/firmen/1` (`findOperation`, `matchOperation` in `src/openapi/contract.ts`).
+- Unknown enum values read from the database pass through unchanged. The service logs one `[enum] …` console warning per distinct value (`asEnum` in `src/db/schema/enums.ts`). The response check flags them in development and test.
+- Summaries (ticket, agent task) count only values that the contract lists. Unknown values get a warning, not a count.
 
 ```typescript
-const dto = validate(FirmaCreateSchema, req.body);
-res.status(201).json(await firmaService.create(dto));
+router.post(
+  '/',
+  requireAuth,
+  specValidate,
+  asyncHandler(async (req: Request, res: Response) => {
+    const dto = req.body as RequestBody<'createFirma'>;
+    res.status(201).json(await firmaService.create(dto));
+  }),
+);
 ```
 
-`validate()` throws `ValidationError` (→ 400) with `fieldErrors` populated from Zod issues.
+Error mapping:
 
-Enum values used in Zod schemas:
+- `src/openapi/errorMapper.ts` turns Ajv errors into `fieldErrors`.
+- German texts come from `x-error-messages` in the contract. Key = Ajv keyword (`required`, `minLength`, `enum` …).
+- Without an entry, `errorMapper.ts` supplies a German default.
+
+Contract values drive limits. Example: the four Szenario process arrays use `minItems`/`maxItems` in the contract. `PROCESS_STEP_COUNTS` no longer exists.
+
+Golden test: `backend/src/test/golden-errors.spec.ts` compares the recorded answers of the former Zod validation with today's answers. Intended changes (D1 to D6 below) show up as explicit differences.
+
+Enum values (canonical: contract and [SPECS-database.md](SPECS-database.md)):
 
 <!-- mirror: keep in sync with SPECS-database.md (canonical) -->
 
@@ -417,7 +363,16 @@ Enum values used in Zod schemas:
 | ChancePhase | NEU, QUALIFIZIERT, ANGEBOT, VERHANDLUNG, GEWONNEN, VERLOREN |
 | AktivitaetTyp | ANRUF, EMAIL, MEETING, NOTIZ, AUFGABE |
 
-Canonical enum definition: see [SPECS-database.md](SPECS-database.md).
+### Behavior changes from the contract move
+
+| ID | Change |
+|----|--------|
+| D1 | Invalid Chancen `phase` filter: standard error shape, `fieldErrors.phase` |
+| D2 | Bad path ids: 400 `id` `Ungültige ID` |
+| D3 | Unknown `/api` paths: JSON 404 `Ressource nicht gefunden`. Production `test-login` stub removed |
+| D4 | Malformed JSON: 400 `{ _: 'Ungültige Anfrage' }`. Body over 100 KB: 413 `Anfrage zu groß` |
+| D5 | Start scripts set `NODE_ENV=development` |
+| D6 | German texts replace former English Zod defaults |
 
 ### SQLite / libsql notes
 
@@ -428,8 +383,13 @@ Canonical enum definition: see [SPECS-database.md](SPECS-database.md).
 
 ### Adding a new entity
 
-Backend requires 3 changes:
+Backend changes:
 
-1. Add Drizzle table definition to `src/db/schema/schema.ts`.
-2. Add `CREATE TABLE IF NOT EXISTS` to `src/config/migrate.ts`.
-3. Add Zod schema + service + route file. Mount the router in `src/app.ts`.
+1. Add the paths and schemas to the contract (`openapi/paths/<area>.yaml`). Add `x-error-messages` for field texts. Regenerate: `cd backend && npm run api:generate`.
+2. Add Drizzle table definition to `src/db/schema/schema.ts`.
+3. Add `CREATE TABLE IF NOT EXISTS` to `src/config/migrate.ts`.
+4. Add service. DTOs are aliases: `Schema<'X'>`.
+5. Add route file: guard(s) → `specValidate` → `asyncHandler`. Type bodies `RequestBody<'opId'>`. Mount the router in `src/app.ts`.
+6. Run the tests. Response check: in test, an answer that breaks the contract becomes a 500. In development, it logs and sets `X-Contract-Violation`; the real answer stays.
+7. Every new operation must answer 2xx once in the suite. The `contract-coverage` project fails otherwise.
+8. Run `cd backend && npm run api:check`. Commit the contract and the generated files together.

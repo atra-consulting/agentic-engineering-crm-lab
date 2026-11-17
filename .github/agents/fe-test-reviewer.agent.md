@@ -17,6 +17,7 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-testing.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-frontend.md`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`, `openapi/common.yaml` (shared `ErrorResponse`, `PageMeta`, parameters, responses, shared `x-error-messages`)
 
 ## Review Checklist
 
@@ -24,7 +25,7 @@ Your spec reading list (paths are relative to the repo root):
 - [ ] Every new/changed component has a `.spec.ts` alongside
 - [ ] Every new/changed service has a `.spec.ts` alongside
 - [ ] New guards have tests for allow AND deny paths
-- [ ] Routing changes have a smoke test when `permissionGuard` is involved
+- [ ] Routing changes have a smoke test when `authGuard` or `roleGuard` is involved
 
 ### Assertion Quality
 - [ ] `toBeTruthy()`-only tests are flagged — they prove construction, not behavior
@@ -32,6 +33,10 @@ Your spec reading list (paths are relative to the repo root):
 - [ ] Service tests assert the exact URL, method, body, and headers via `HttpTestingController`
 - [ ] Error branches asserted: both the thrown/emitted error and the UI reaction to it
 - [ ] Pagination: tests verify 1→0 index conversion in service calls (NgbPagination is 1-indexed, backend 0-indexed)
+
+### Fixtures & ApiClient
+- [ ] Test data comes from typed model factories in `core/testing/model-factories.ts`
+- [ ] ApiClient specs exist and cover changes to `ApiClient`
 
 ### Angular 21 Patterns
 - [ ] Standalone components imported directly in `TestBed.configureTestingModule({ imports: [...] })` — no module shim

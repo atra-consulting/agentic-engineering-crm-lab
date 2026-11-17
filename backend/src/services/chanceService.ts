@@ -2,25 +2,13 @@ import { client } from '../config/db.js';
 import type { InValue } from '@libsql/client';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import { type ChancePhase } from '../db/schema/enums.js';
-import type { ChanceCreateDTO } from '../utils/validation.js';
+import { CHANCE_PHASE, asEnum, type ChancePhase } from '../db/schema/enums.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
-export interface ChanceDTO {
-  id: number;
-  titel: string;
-  beschreibung: string | null;
-  wert: number | null;
-  currency: string;
-  phase: string;
-  wahrscheinlichkeit: number | null;
-  erwartetesDatum: string | null;
-  firmaId: number;
-  firmaName: string | null;
-  kontaktPersonId: number | null;
-  kontaktPersonName: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+type ChanceCreateDTO = RequestBody<'createChance'>;
+type ChanceUpdateDTO = RequestBody<'updateChance'>;
+
+export type ChanceDTO = Schema<'Chance'>;
 
 interface ChanceRow {
   id: number;
@@ -52,7 +40,7 @@ function toDTO(row: ChanceRow): ChanceDTO {
     beschreibung: row.beschreibung,
     wert: row.wert,
     currency: row.currency,
-    phase: row.phase,
+    phase: asEnum(CHANCE_PHASE, row.phase, 'chance.phase'),
     wahrscheinlichkeit: row.wahrscheinlichkeit,
     erwartetesDatum: row.erwartetesDatum,
     firmaId: row.firmaId,
@@ -152,7 +140,7 @@ export const chanceService = {
     return this.findById(Number(result.lastInsertRowid));
   },
 
-  async update(id: number, dto: ChanceCreateDTO): Promise<ChanceDTO> {
+  async update(id: number, dto: ChanceUpdateDTO): Promise<ChanceDTO> {
     await this.findById(id);
     const now = new Date().toISOString();
     await client.execute({

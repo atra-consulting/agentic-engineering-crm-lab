@@ -17,6 +17,7 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-frontend.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-ui.md`, `docs/specs/SPECS-testing.md`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`, `openapi/common.yaml` (shared `ErrorResponse`, `PageMeta`, parameters, responses, shared `x-error-messages`)
 
 ## Review Checklist
 
@@ -35,7 +36,7 @@ Your spec reading list (paths are relative to the repo root):
 - [ ] Edit via route param + `patchValue()`
 
 ### Security
-- [ ] Routes guarded with `permissionGuard('PERMISSION')`
+- [ ] Routes use `authGuard`; admin-only routes add `roleGuard('ROLE_ADMIN')`; admin-only sidebar items set `requiredRole`
 - [ ] No XSS vulnerabilities
 - [ ] No secrets in frontend code
 - [ ] Secure API calls
@@ -44,7 +45,10 @@ Your spec reading list (paths are relative to the repo root):
 - [ ] No `any` types (strict TypeScript)
 - [ ] Proper error handling
 - [ ] No memory leaks (unsubscribed observables)
-- [ ] Models use separate interfaces (response vs input)
+- [ ] Models are aliases of generated types (no hand-written interfaces)
+- [ ] Services use `ApiClient` with literal spec paths
+- [ ] Forms keep `null` for empty values
+- [ ] No `!` or `as` casts for nullability
 
 ### Pagination
 - [ ] NgbPagination 1-indexed converted to 0-indexed for API calls

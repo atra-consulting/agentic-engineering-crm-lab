@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import { timingSafeEqual, createHash } from 'node:crypto';
 
 // Augment Express Request with cronTrigger so we can type it without casts
@@ -11,7 +11,8 @@ import { requireAgentToken } from '../middleware/agentAuth.js';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { findById } from '../config/users.js';
 import { UnauthorizedError } from '../utils/errors.js';
-import { validate } from '../utils/validation.js';
+import { specValidate } from '../openapi/specValidate.js';
+import type { RequestBody } from '../openapi/types.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { parsePaginationParams, parseSort } from '../utils/pagination.js';
 import {
@@ -22,7 +23,6 @@ import {
   isRunInProgress,
   listRuns,
   deriveJobsWithLastRun,
-  CompleteRunBodySchema,
 } from '../services/cronService.js';
 import { agentTaskService } from '../services/agentTaskService.js';
 import { dispatchWorkflow } from '../utils/githubDispatch.js';
@@ -107,6 +107,7 @@ async function createRunAndDispatch(
 router.get(
   '/agent-tasks',
   requireCronAuth as (req: Request, res: Response, next: NextFunction) => void,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const trigger = req.cronTrigger ?? 'MANUAL';
 
@@ -145,6 +146,7 @@ router.get(
 router.get(
   '/github-issues',
   requireCronAuth as (req: Request, res: Response, next: NextFunction) => void,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const trigger = req.cronTrigger ?? 'MANUAL';
 
@@ -167,9 +169,10 @@ router.get(
 router.post(
   '/runs/:id/complete',
   requireAgentToken,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const body = validate(CompleteRunBodySchema, req.body);
+    const body = req.body as RequestBody<'completeCronRun'>;
     const run = await completeRun(id, body);
     res.json(run);
   }),
@@ -184,6 +187,7 @@ router.get(
   '/runs',
   requireAuth,
   requireRole('ADMIN'),
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const { page, size } = parsePaginationParams(req.query as Record<string, unknown>);
     const sort = parseSort(
@@ -205,6 +209,7 @@ router.get(
   '/jobs',
   requireAuth,
   requireRole('ADMIN'),
+  specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     res.json(await deriveJobsWithLastRun());
   }),

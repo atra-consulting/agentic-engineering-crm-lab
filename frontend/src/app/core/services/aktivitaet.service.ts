@@ -1,36 +1,34 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiClient } from '../api/api-client';
 import { Aktivitaet, AktivitaetCreate } from '../models/aktivitaet.model';
 import { Page } from '../models/page.model';
 
 @Injectable({ providedIn: 'root' })
 export class AktivitaetService {
-  private http = inject(HttpClient);
-  private baseUrl = '/api/aktivitaeten';
+  private api = inject(ApiClient);
 
   getAll(page = 0, size = 10, sort = 'datum,desc'): Observable<Page<Aktivitaet>> {
-    const params = new HttpParams().set('page', page).set('size', size).set('sort', sort);
-    return this.http.get<Page<Aktivitaet>>(this.baseUrl, { params });
+    return this.api.get('/aktivitaeten', { query: { page, size, sort } });
   }
 
   listAll(): Observable<Aktivitaet[]> {
-    return this.http.get<Aktivitaet[]>(`${this.baseUrl}/all`);
+    return this.api.get('/aktivitaeten/all');
   }
 
   getById(id: number): Observable<Aktivitaet> {
-    return this.http.get<Aktivitaet>(`${this.baseUrl}/${id}`);
+    return this.api.get('/aktivitaeten/{id}', { path: { id } });
   }
 
   create(aktivitaet: AktivitaetCreate): Observable<Aktivitaet> {
-    return this.http.post<Aktivitaet>(this.baseUrl, aktivitaet);
+    return this.api.post('/aktivitaeten', { body: aktivitaet });
   }
 
   update(id: number, aktivitaet: AktivitaetCreate): Observable<Aktivitaet> {
-    return this.http.put<Aktivitaet>(`${this.baseUrl}/${id}`, aktivitaet);
+    return this.api.put('/aktivitaeten/{id}', { path: { id }, body: aktivitaet });
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.api.delete('/aktivitaeten/{id}', { path: { id } });
   }
 }

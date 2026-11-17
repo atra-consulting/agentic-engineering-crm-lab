@@ -1,21 +1,13 @@
 import { client } from '../config/db.js';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import type { AktivitaetCreateDTO } from '../utils/validation.js';
+import { AKTIVITAET_TYP, asEnum } from '../db/schema/enums.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
-export interface AktivitaetDTO {
-  id: number;
-  typ: string;
-  subject: string;
-  description: string | null;
-  datum: string;
-  firmaId: number | null;
-  firmaName: string | null;
-  personId: number | null;
-  personName: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+type AktivitaetCreateDTO = RequestBody<'createAktivitaet'>;
+type AktivitaetUpdateDTO = RequestBody<'updateAktivitaet'>;
+
+export type AktivitaetDTO = Schema<'Aktivitaet'>;
 
 interface AktivitaetRow {
   id: number;
@@ -40,7 +32,7 @@ function toDTO(row: AktivitaetRow): AktivitaetDTO {
 
   return {
     id: row.id,
-    typ: row.typ,
+    typ: asEnum(AKTIVITAET_TYP, row.typ, 'aktivitaet.typ'),
     subject: row.subject,
     description: row.description,
     datum: row.datum,
@@ -122,7 +114,7 @@ export const aktivitaetService = {
     return this.findById(Number(result.lastInsertRowid));
   },
 
-  async update(id: number, dto: AktivitaetCreateDTO): Promise<AktivitaetDTO> {
+  async update(id: number, dto: AktivitaetUpdateDTO): Promise<AktivitaetDTO> {
     await this.findById(id);
     const now = new Date().toISOString();
     await client.execute({

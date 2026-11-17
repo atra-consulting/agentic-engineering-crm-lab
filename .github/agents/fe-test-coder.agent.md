@@ -18,6 +18,7 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-testing.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-frontend.md`, `docs/specs/SPECS-ui.md`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`, `openapi/common.yaml` (shared `ErrorResponse`, `PageMeta`, parameters, responses, shared `x-error-messages`)
 
 ## Test Framework
 
@@ -41,8 +42,8 @@ For every new service:
 3. Error responses are surfaced/handled as documented
 
 For every guard:
-1. Returns `true` when permission matches
-2. Redirects when permission missing
+1. Returns `true` when the role matches
+2. Redirects when the role is missing
 
 ## Test File Conventions
 
@@ -77,6 +78,12 @@ NgbPagination is 1-indexed, backend is 0-indexed. A component calling `service.l
 - Models: `frontend/src/app/core/models/`
 - Services: `frontend/src/app/core/services/`
 - Guards: `frontend/src/app/core/guards/`
+
+## Fixtures & ApiClient
+
+- Build test data with the typed model factories in `core/testing/model-factories.ts`. No hand-written literals cast with `as`
+- Service tests go through `ApiClient`; assert the literal spec path
+- Add ApiClient specs when you change `ApiClient`
 
 ## Before Handing Off
 
