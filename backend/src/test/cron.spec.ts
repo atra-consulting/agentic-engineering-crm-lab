@@ -452,6 +452,23 @@ test.describe('POST /api/cron/runs/:id/complete', () => {
     expect(resp.status()).toBe(404);
   });
 
+  test('githubRunUrl with surrounding whitespace is stored trimmed (Zod url() parity)', async () => {
+    const newRun = await createRun('solve-tasks', 'CRON');
+
+    const resp = await agent.post(`/api/cron/runs/${newRun.id}/complete`, {
+      data: {
+        status: 'SUCCESS',
+        tasksSolved: 0,
+        tasksRejected: 0,
+        githubRunUrl: '  https://github.com/x/y/actions/runs/3  ',
+      },
+    });
+
+    expect(resp.status()).toBe(200);
+    const body = await resp.json() as CronRunDTO;
+    expect(body.githubRunUrl).toBe('https://github.com/x/y/actions/runs/3');
+  });
+
   test('missing required field githubRunUrl → 400', async () => {
     // Create a fresh run so we have a valid id; the validation failure happens
     // before the DB update so the run remains RUNNING after this call.
