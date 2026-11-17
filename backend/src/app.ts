@@ -6,7 +6,7 @@ import { corsMiddleware } from './middleware/cors.js';
 import { sessionMiddleware } from './middleware/session.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { NotFoundError } from './utils/errors.js';
-import { getContractMode, type ContractMode } from './openapi/runtimeMode.js';
+import { getContractMode, isDevOrTest, type ContractMode } from './openapi/runtimeMode.js';
 import { responseCheck } from './openapi/responseCheck.js';
 import { specValidate } from './openapi/specValidate.js';
 import { createAuthRouter } from './routes/auth.js';
@@ -25,6 +25,47 @@ import type { JsonResponse } from './openapi/types.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const { version } = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf8')) as { version: string };
+
+const OPENAPI_JSON_PATH = join(__dirname, 'generated/openapi.json');
+
+/** Whitelist of files served under /api/docs/assets/ (file name -> content type). */
+const DOCS_ASSETS: ReadonlyMap<string, string> = new Map([
+  ['swagger-ui.css', 'text/css; charset=utf-8'],
+  ['swagger-ui-bundle.js', 'text/javascript; charset=utf-8'],
+  ['swagger-ui.css.map', 'application/json; charset=utf-8'],
+  ['swagger-ui-bundle.js.map', 'application/json; charset=utf-8'],
+]);
+
+const DOCS_INIT_JS =
+  "window.onload = function () {\n  window.ui = SwaggerUIBundle({ url: '/api/openapi.json', dom_id: '#swagger-ui', withCredentials: true });\n};\n";
+
+const DOCS_HTML = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CRM API docs</title>
+<link rel="stylesheet" href="/api/docs/assets/swagger-ui.css">
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="/api/docs/assets/swagger-ui-bundle.js"></script>
+<script src="/api/docs/assets/docs-init.js"></script>
+</body>
+</html>
+`;
+
+let swaggerUiDirPromise: Promise<string> | undefined;
+
+/** Loads swagger-ui-dist lazily (first use only); production never reaches this. */
+function getSwaggerUiDir(): Promise<string> {
+  swaggerUiDirPromise ??= import('swagger-ui-dist').then((m) => {
+    const mod = m as unknown as { getAbsoluteFSPath?: () => string; default?: { getAbsoluteFSPath: () => string } };
+    const fn = mod.getAbsoluteFSPath ?? mod.default?.getAbsoluteFSPath;
+    if (!fn) throw new Error('swagger-ui-dist: getAbsoluteFSPath not found');
+    return fn();
+  });
+  return swaggerUiDirPromise;
+}
 
 export interface ApiRouter {
   basePath: string;
@@ -54,6 +95,34 @@ export function createApp(mode: ContractMode = getContractMode()): Express {
     const body: JsonResponse<'getHealth', 200> = { status: 'ok', timestamp: new Date().toISOString(), version };
     res.json(body);
   });
+
+  // Interactive API docs: development and test only (production falls through to the JSON 404)
+  if (isDevOrTest(mode)) {
+    app.get('/api/openapi.json', (_req, res) => {
+      res.sendFile(OPENAPI_JSON_PATH);
+    });
+    app.get('/api/docs', (_req, res) => {
+      res.type('text/html; charset=utf-8').send(DOCS_HTML);
+    });
+    app.get('/api/docs/assets/docs-init.js', (_req, res) => {
+      res.type('text/javascript; charset=utf-8').send(DOCS_INIT_JS);
+    });
+    app.get('/api/docs/assets/:file', async (req, res, next) => {
+      try {
+        const file = req.params['file'] ?? '';
+        const contentType = DOCS_ASSETS.get(file);
+        if (!contentType) {
+          next(new NotFoundError('Ressource nicht gefunden'));
+          return;
+        }
+        res.type(contentType).sendFile(join(await getSwaggerUiDir(), file), { dotfiles: 'deny' }, (err) => {
+          if (err) next(err);
+        });
+      } catch (err) {
+        next(err);
+      }
+    });
+  }
 
   // Routes
   const apiRouters: ApiRouter[] = [
