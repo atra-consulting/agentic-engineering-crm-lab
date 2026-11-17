@@ -3,13 +3,14 @@ import bcrypt from 'bcryptjs';
 import { findByBenutzername } from '../config/users.js';
 import { requireAuth } from '../middleware/auth.js';
 import { UnauthorizedError } from '../utils/errors.js';
+import { specValidate } from '../openapi/specValidate.js';
 import { isDevOrTest, type ContractMode } from '../openapi/runtimeMode.js';
 
 export function createAuthRouter(mode: ContractMode): Router {
   const router = Router();
 
   // POST /api/auth/login
-  router.post('/login', (req: Request, res: Response, next: NextFunction): void => {
+  router.post('/login', specValidate, (req: Request, res: Response, next: NextFunction): void => {
     try {
       const { benutzername, passwort } = req.body as {
         benutzername?: string;
@@ -53,7 +54,7 @@ export function createAuthRouter(mode: ContractMode): Router {
   });
 
   // POST /api/auth/logout
-  router.post('/logout', (req: Request, res: Response, next: NextFunction): void => {
+  router.post('/logout', specValidate, (req: Request, res: Response, next: NextFunction): void => {
     req.session.destroy((err) => {
       if (err) {
         next(err);
@@ -65,7 +66,7 @@ export function createAuthRouter(mode: ContractMode): Router {
   });
 
   // GET /api/auth/me
-  router.get('/me', requireAuth, (req: Request, res: Response): void => {
+  router.get('/me', requireAuth, specValidate, (req: Request, res: Response): void => {
     const user = req.currentUser!;
     res.json({
       id: user.id,
@@ -80,7 +81,7 @@ export function createAuthRouter(mode: ContractMode): Router {
 
   // POST /api/auth/test-login — only in development/test mode (for Playwright tests)
   if (isDevOrTest(mode)) {
-    router.post('/test-login', (req: Request, res: Response, next: NextFunction): void => {
+    router.post('/test-login', specValidate, (req: Request, res: Response, next: NextFunction): void => {
       try {
         const { benutzername } = req.body as { benutzername?: string };
 

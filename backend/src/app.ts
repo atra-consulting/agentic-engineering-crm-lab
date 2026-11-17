@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { NotFoundError } from './utils/errors.js';
 import { getContractMode, type ContractMode } from './openapi/runtimeMode.js';
 import { responseCheck } from './openapi/responseCheck.js';
+import { specValidate } from './openapi/specValidate.js';
 import { createAuthRouter } from './routes/auth.js';
 import firmenRouter from './routes/firmen.js';
 import personenRouter from './routes/personen.js';
@@ -48,7 +49,7 @@ export function createApp(mode: ContractMode = getContractMode()): Express {
   }
 
   // Health check (public)
-  app.get('/api/health', (_req, res) => {
+  app.get('/api/health', specValidate, (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString(), version });
   });
 

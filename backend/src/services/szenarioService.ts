@@ -1,6 +1,6 @@
 import { client } from '../config/db.js';
 import { NotFoundError, ConflictError } from '../utils/errors.js';
-import type { SzenarioCreateDTO } from '../utils/validation.js';
+import type { RequestBody } from '../openapi/types.js';
 
 export interface ProzessDauer {
   works: number[];
@@ -70,7 +70,7 @@ export const szenarioService = {
     return toDTO(row);
   },
 
-  async create(dto: SzenarioCreateDTO): Promise<SzenarioDTO> {
+  async create(dto: RequestBody<'createSzenario'>): Promise<SzenarioDTO> {
     const now = new Date().toISOString();
     try {
       const result = await client.execute({
@@ -98,7 +98,7 @@ export const szenarioService = {
     }
   },
 
-  async update(id: number, dto: SzenarioCreateDTO): Promise<SzenarioDTO> {
+  async update(id: number, dto: RequestBody<'updateSzenario'>): Promise<SzenarioDTO> {
     await this.findById(id);
     const now = new Date().toISOString();
     try {
