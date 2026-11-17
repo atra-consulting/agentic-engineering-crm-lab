@@ -5,10 +5,11 @@ import { provideRouter } from '@angular/router';
 import { SidebarComponent } from './sidebar.component';
 import { AuthService } from '../../core/services/auth.service';
 import { LayoutService } from '../../core/services/layout.service';
+import { makeBenutzerInfo } from '../../core/testing/model-factories';
 import { BenutzerInfo } from '../../core/models/auth.model';
 
 describe('SidebarComponent', () => {
-  const adminUser: BenutzerInfo = {
+  const adminUser: BenutzerInfo = makeBenutzerInfo({
     id: 1,
     benutzername: 'admin',
     vorname: 'Admin',
@@ -16,9 +17,9 @@ describe('SidebarComponent', () => {
     email: 'admin@test.de',
     rollen: ['ROLE_ADMIN', 'ROLE_USER'],
     permissions: [],
-  };
+  });
 
-  const regularUser: BenutzerInfo = {
+  const regularUser: BenutzerInfo = makeBenutzerInfo({
     id: 2,
     benutzername: 'user',
     vorname: 'Regular',
@@ -26,7 +27,7 @@ describe('SidebarComponent', () => {
     email: 'user@test.de',
     rollen: ['ROLE_USER'],
     permissions: [],
-  };
+  });
 
   let fixture: ComponentFixture<SidebarComponent>;
   let component: SidebarComponent;
