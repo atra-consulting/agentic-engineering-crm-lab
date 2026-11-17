@@ -98,7 +98,7 @@ All requirements are "Must" unless marked "Should". The technical details are in
 - **R12 — Same tolerance as today.**
   - The server ignores unknown extra fields in a body and removes them before the business logic. Example: an "isAdmin" field has no effect.
   - Missing or bad paging values fall back to the defaults. Page sizes above 200 stop at 200.
-  - A login or test login without user name or password gets today's "invalid login" answer.
+  - A login without user name or password gets 401 "Ungültige Anmeldedaten", as today. A test login without a user name gets 401 "benutzername required", as today.
   - Empty bodies stay allowed where they are allowed today: start, done, won't do, hand to AI, reset and logout.
   - Any tightening needs a user decision (Decisions b).
 - **R13 — Rules that need the database stay in the server logic.** Examples: "linked feedback entry must exist", "scenario name already taken", invalid ticket or task state changes. The contract lists these answers, and the rules stay in code.
@@ -123,7 +123,7 @@ All requirements are "Must" unless marked "Should". The technical details are in
   - The existing access checks stay the only enforcement. The contract describes them.
   - A test generated from the contract calls every operation without valid credentials and expects the refusal the contract names.
   - The same test calls every admin-only operation as a normal user and expects "forbidden". Cron triggers answer "not logged in", as today.
-  - The test switches off the agents' local shortcut. A separate test covers the shortcut itself.
+  - The test blocks the agents' local shortcut with forwarding headers or a wrong key. A separate test covers the shortcut itself.
   - A security reviewer signs off (TN5).
 
 ### C. Web app
@@ -247,7 +247,7 @@ The decisions made in this PRD are listed in Decisions (a).
 - **N2 — Startup.** Loading the contract adds under 1 second to server start. Measure and report it the same way.
 - **N3 — Platform.** Node.js 20.19 or newer. CI uses the pinned version (22). Commands work on macOS, Linux and WSL.
 - **N4 — No new services.** No network calls at runtime and no external content network. Everything works offline.
-- **N5 — Libraries.** New runtime libraries only for the input check (plus its format add-on) and the docs page. The generator and the linter are developer tools only.
+- **N5 — Libraries.** New runtime libraries only for the input check and the docs page. (Revised: no format add-on; see Decisions (a) 17.) The generator and the linter are developer tools only.
 - **N6 — Security.** Who may call what stays the same. The local agent shortcut stays the same. The test login, the docs page and the answer checks are off in production. The contract contains no secrets.
 - **N7 — Clarity.** Every generated file says it is generated and names the command that rebuilds it.
 
@@ -307,12 +307,12 @@ The decisions made in this PRD are listed in Decisions (a).
     - Lengths count UTF-16 units (`unicode: false`), as Zod did.
     - Contract lookup ignores letter case, like Express routing.
     - Integer ids in bodies get an upper limit (largest safe integer), as Zod's `.int()` did.
-    - Array bodies on empty-body operations (logout, start, reset, hand-to-ai) now answer 400. No client sends arrays. Accepted tightening.
+    - `CONTRACT_RESPONSE_CHECK=off` turns the answer check off in test mode only. It exists for the benchmark (N1 without the check). Development and production ignore it.
     - The agent definitions no longer recommend `requirePermission`, which does not exist.
 
 ### (b) User decisions
 
-The user approved D1–D6 as recommended on 2026-11-17.
+The user approved D1–D6 as recommended on 2026-11-17. D7 came up during implementation and is open for confirmation in the PR.
 
 - **D1 — Sales-phase filter error.** Today a wrong phase returns an error in a different shape from all other errors. Proposal: use the standard shape and keep the text. **Recommend: yes.**
 - **D2 — Record numbers in addresses.** Today a non-number such as "abc" gives an unclear result: "not found" or a server error. Proposal: return "invalid input" for the field "id" with a German text. Zero and negative numbers get the same answer. **Recommend: yes.**
@@ -320,6 +320,7 @@ The user approved D1–D6 as recommended on 2026-11-17.
 - **D4 — Broken or oversized requests.** Today unreadable data and oversized data both give "server error". Proposal: "invalid input" for unreadable data and "too large" for oversized data, both in the standard shape. **Recommend: yes.**
 - **D5 — Development mode switch.** Today the start script sets no mode, and the test login stays open in every mode except production, including when no mode is set. Proposal: the start script sets development mode, and the test login, docs page and answer checks all follow the same allow-list. Effect: without a mode, all three are off. Without this decision, the start script runs with answer checks and the docs page off. **Recommend: yes.**
 - **D6 — German texts.** Confirm the replacement table in TN4. **Recommend: accept as written.**
+- **D7 — Array bodies on empty-body operations (found during implementation, needs your confirmation).** `logout`, `startTicket`, `startAgentTask`, `resetTickets`, `resetAgentTasks` and `handTicketToAi` take an optional empty object. Today a JSON array as body is ignored. Now it answers 400 "Ungültige Anfrage". No client sends arrays. This is a tightening, so R12 needs your approval. **Recommend: accept.** Alternative: allow arrays in the contract for these six operations.
 
 ### (c) Found, out of scope
 - The server's cross-origin settings allow neither the PATCH method nor the agent-key header. Same-origin use through the web app address works. That is why the docs page works only there.
@@ -404,7 +405,7 @@ The user approved D1–D6 as recommended on 2026-11-17.
   - The code keeps `parsePaginationParams`, `parseSort` and the inline enum checks in `agentTasks.ts`, `tickets.ts` and `chancen.ts`, with their value-bearing messages.
   - The R16 tests compare the contract with `enums.ts` and `ALLOWED_SORT_FIELDS`.
 - Formats:
-  - Use `ajv-formats` for `email` and `uri`. `email` also accepts the empty string through `anyOf`. `uri` is for the cron `githubRunUrl`, which is `z.string().url()` today.
+  - ~~Use `ajv-formats` for `email` and `uri`.~~ Superseded (Decisions (a) 17): custom `email` and `uri` formats reproduce the Zod 4 verdicts. `email` also accepts the empty string through `anyOf`. `uri` is for the cron `githubRunUrl`, which was `z.string().url()`.
   - Before removing Zod, run an edge-case corpus through both checkers.
 - Response check:
   - Wrap `res.json` per request, only in allowed modes.
