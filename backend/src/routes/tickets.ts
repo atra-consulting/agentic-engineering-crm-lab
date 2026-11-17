@@ -1,5 +1,4 @@
 import { Router, type Request, type Response } from 'express';
-import { z } from 'zod';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import {
   requireAgentToken,
@@ -8,54 +7,17 @@ import {
 } from '../middleware/agentAuth.js';
 import { ticketService } from '../services/ticketService.js';
 import { parsePaginationParams, parseSort } from '../utils/pagination.js';
-import { validate } from '../utils/validation.js';
+import { specValidate } from '../openapi/specValidate.js';
+import type { RequestBody } from '../openapi/types.js';
 import { ValidationError, ForbiddenError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   TICKET_TYPE,
   TICKET_STATUS,
   TICKET_OWNER,
-  TICKET_COMMENT_AUTHOR,
 } from '../db/schema/enums.js';
 
 const router = Router();
-
-// ─── Zod schemas ──────────────────────────────────────────────────────────────
-
-const AskBodySchema = z.object({
-  question: z.string().min(1, 'Frage ist erforderlich'),
-});
-
-const DoneBodySchema = z.object({
-  comment: z.string().optional(),
-});
-
-const WontDoBodySchema = z.object({
-  comment: z.string().optional(),
-});
-
-const CommentBodySchema = z.object({
-  body: z.string().min(1, 'Kommentar-Text ist erforderlich'),
-  handBackToAi: z.boolean().optional(),
-  clearFullyReady: z.boolean().optional(),
-  author: z.enum(TICKET_COMMENT_AUTHOR, { error: 'Ungültiger Autor' }).optional(),
-});
-
-const CreateBodySchema = z.object({
-  type: z.enum(TICKET_TYPE, { error: 'Ungültiger Ticket-Typ' }),
-  title: z.string().min(1, 'Titel ist erforderlich'),
-  body: z.string().min(1, 'Beschreibung ist erforderlich'),
-  agentTaskId: z.number().int().positive().nullable().optional(),
-  fullyReady: z.boolean().optional(),
-});
-
-const StatusBodySchema = z.object({
-  status: z.enum(TICKET_STATUS, { error: 'Ungültiger Status' }),
-});
-
-const OwnerBodySchema = z.object({
-  owner: z.enum(TICKET_OWNER, { error: 'Ungültiger Eigentümer' }),
-});
 
 // ─── Agent endpoints ──────────────────────────────────────────────────────────
 
@@ -68,6 +30,7 @@ const OwnerBodySchema = z.object({
 router.get(
   '/next',
   requireAgentToken,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const typeParam = req.query['type'] as string | undefined;
 
@@ -95,6 +58,7 @@ router.get(
 router.get(
   '/board',
   requireAgentTokenOrSession,
+  specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     res.json(await ticketService.getBoard());
   }),
@@ -106,6 +70,7 @@ router.get(
 router.get(
   '/summary',
   requireAuth,
+  specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     res.json(await ticketService.getSummary());
   }),
@@ -116,6 +81,7 @@ router.post(
   '/reset',
   requireAuth,
   requireRole('ADMIN'),
+  specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     const count = await ticketService.resetAll();
     res.json({ seeded: count });
@@ -127,6 +93,7 @@ router.get(
   '/',
   requireAuth,
   requireRole('ADMIN'),
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const { page, size } = parsePaginationParams(req.query as Record<string, unknown>);
     const sort = parseSort(
@@ -167,8 +134,9 @@ router.get(
 router.post(
   '/',
   requireAgentTokenOrAdminSession,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
-    const dto = validate(CreateBodySchema, req.body);
+    const dto = req.body as RequestBody<'createTicket'>;
     const ticket = await ticketService.create(dto);
     res.status(201).json(ticket);
   }),
@@ -181,6 +149,7 @@ router.post(
 router.get(
   '/:id',
   requireAgentTokenOrSession,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     res.json(await ticketService.findById(id));
@@ -193,9 +162,10 @@ router.get(
 router.patch(
   '/:id/status',
   requireAgentTokenOrAdminSession,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(StatusBodySchema, req.body);
+    const dto = req.body as RequestBody<'setTicketStatus'>;
     res.json(await ticketService.setStatus(id, dto.status));
   }),
 );
@@ -206,9 +176,10 @@ router.patch(
 router.patch(
   '/:id/owner',
   requireAgentTokenOrAdminSession,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(OwnerBodySchema, req.body);
+    const dto = req.body as RequestBody<'setTicketOwner'>;
     res.json(await ticketService.setOwner(id, dto.owner));
   }),
 );
@@ -219,6 +190,7 @@ router.patch(
 router.post(
   '/:id/start',
   requireAgentTokenOrAdminSession,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     res.json(await ticketService.start(id));
@@ -231,9 +203,10 @@ router.post(
 router.post(
   '/:id/done',
   requireAgentTokenOrAdminSession,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(DoneBodySchema, req.body);
+    const dto = req.body as RequestBody<'completeTicket'>;
     res.json(await ticketService.done(id, dto.comment));
   }),
 );
@@ -244,9 +217,10 @@ router.post(
 router.post(
   '/:id/ask',
   requireAgentTokenOrAdminSession,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(AskBodySchema, req.body);
+    const dto = req.body as RequestBody<'askTicketQuestion'>;
     res.json(await ticketService.ask(id, dto.question));
   }),
 );
@@ -256,9 +230,10 @@ router.post(
   '/:id/wont-do',
   requireAuth,
   requireRole('ADMIN'),
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(WontDoBodySchema, req.body);
+    const dto = req.body as RequestBody<'markTicketWontDo'>;
     res.json(await ticketService.wontDo(id, dto.comment));
   }),
 );
@@ -268,6 +243,7 @@ router.post(
   '/:id/hand-to-ai',
   requireAuth,
   requireRole('ADMIN'),
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     res.json(await ticketService.handToAi(id));
@@ -289,9 +265,10 @@ router.post(
 router.post(
   '/:id/comments',
   requireAgentTokenOrAdminSession,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(CommentBodySchema, req.body);
+    const dto = req.body as RequestBody<'addTicketComment'>;
     if (dto.author === 'AGENT' && req.session.userId) {
       throw new ForbiddenError('Nur ein Agent-Token oder Loopback-Zugriff darf Kommentare als AGENT speichern');
     }

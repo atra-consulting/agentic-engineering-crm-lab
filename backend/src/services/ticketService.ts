@@ -11,6 +11,7 @@ import {
   type TicketSolution,
   type TicketCommentAuthor,
 } from '../db/schema/enums.js';
+import type { RequestBody } from '../openapi/types.js';
 import { seedTickets, TICKET_SEED_COUNT } from '../seed/ticketSeed.js';
 
 // ─── DTOs ─────────────────────────────────────────────────────────────────────
@@ -538,13 +539,7 @@ export const ticketService = {
   },
 
   /** Create a new ticket (human-owned, DEFINITION). */
-  async create(data: {
-    type: TicketType;
-    title: string;
-    body: string;
-    agentTaskId?: number | null;
-    fullyReady?: boolean;
-  }): Promise<TicketDTO> {
+  async create(data: RequestBody<'createTicket'>): Promise<TicketDTO> {
     if (data.agentTaskId !== null && data.agentTaskId !== undefined) {
       const agentTaskResult = await client.execute({
         sql: 'SELECT id FROM agent_task WHERE id = ?',
