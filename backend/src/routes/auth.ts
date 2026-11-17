@@ -1,30 +1,14 @@
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
-import { findByBenutzername } from '../config/users.js';
+import { findByBenutzername, type CrmUser } from '../config/users.js';
 import { requireAuth } from '../middleware/auth.js';
 import { UnauthorizedError } from '../utils/errors.js';
 import { specValidate } from '../openapi/specValidate.js';
 import type { JsonResponse, Schema } from '../openapi/types.js';
 import { isDevOrTest, type ContractMode } from '../openapi/runtimeMode.js';
 
-type Rolle = Schema<'Rolle'>;
-type Permission = Schema<'Permission'>;
-
-const ROLLEN: readonly string[] = ['ROLE_ADMIN', 'ROLE_USER'];
-const PERMISSIONS: readonly string[] = [
-  'FIRMEN', 'PERSONEN', 'ABTEILUNGEN', 'ADRESSEN', 'AKTIVITAETEN', 'CHANCEN', 'BENUTZERVERWALTUNG',
-];
-
-function isRolle(value: string): value is Rolle {
-  return ROLLEN.includes(value);
-}
-
-function isPermission(value: string): value is Permission {
-  return PERMISSIONS.includes(value);
-}
-
-function toRollen(roles: string[]): Rolle[] {
-  return roles.map((r) => `ROLE_${r}`).filter(isRolle);
+function toRollen(roles: CrmUser['roles']): Schema<'Rolle'>[] {
+  return roles.map((r) => `ROLE_${r}` as const);
 }
 
 export function createAuthRouter(mode: ContractMode): Router {
@@ -98,7 +82,7 @@ export function createAuthRouter(mode: ContractMode): Router {
       nachname: user.nachname,
       email: `${user.benutzername}@crm.local`,
       rollen: toRollen(user.roles),
-      permissions: user.permissions.filter(isPermission),
+      permissions: user.permissions,
     };
     res.json(body);
   });

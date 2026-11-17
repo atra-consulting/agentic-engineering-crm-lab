@@ -1,7 +1,7 @@
 import { client } from '../config/db.js';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import { AKTIVITAET_TYP, type AktivitaetTyp } from '../db/schema/enums.js';
+import { AKTIVITAET_TYP, asEnum } from '../db/schema/enums.js';
 import type { RequestBody, Schema } from '../openapi/types.js';
 
 type AktivitaetCreateDTO = RequestBody<'createAktivitaet'>;
@@ -24,23 +24,15 @@ interface AktivitaetRow {
   updatedAt: string;
 }
 
-function isAktivitaetTyp(value: string): value is AktivitaetTyp {
-  return (AKTIVITAET_TYP as readonly string[]).includes(value);
-}
-
 function toDTO(row: AktivitaetRow): AktivitaetDTO {
   const personName =
     row.personFirstName && row.personLastName
       ? `${row.personFirstName} ${row.personLastName}`
       : row.personFirstName ?? row.personLastName ?? null;
 
-  if (!isAktivitaetTyp(row.typ)) {
-    throw new Error(`Unexpected aktivitaet.typ in database: ${row.typ}`);
-  }
-
   return {
     id: row.id,
-    typ: row.typ,
+    typ: asEnum(AKTIVITAET_TYP, row.typ, 'aktivitaet.typ'),
     subject: row.subject,
     description: row.description,
     datum: row.datum,

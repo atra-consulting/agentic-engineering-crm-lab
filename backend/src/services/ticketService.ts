@@ -11,7 +11,13 @@ import {
   type TicketType,
   type TicketStatus,
   type TicketSolution,
+  asEnum,
   type TicketCommentAuthor,
+  isTicketOwner,
+  isTicketType,
+  isTicketStatus,
+  isTicketSolution,
+  warnEnumOnce,
 } from '../db/schema/enums.js';
 import type { RequestBody, Schema } from '../openapi/types.js';
 import { seedTickets, TICKET_SEED_COUNT } from '../seed/ticketSeed.js';
@@ -76,44 +82,26 @@ interface TicketListRow extends TicketRow {
 
 // ─── Mappers ──────────────────────────────────────────────────────────────────
 
-function isTicketOwner(v: string): v is TicketOwner {
-  return (TICKET_OWNER as readonly string[]).includes(v);
-}
-function isTicketType(v: string): v is TicketType {
-  return (TICKET_TYPE as readonly string[]).includes(v);
-}
-function isTicketStatus(v: string): v is TicketStatus {
-  return (TICKET_STATUS as readonly string[]).includes(v);
-}
-function isTicketSolution(v: string): v is TicketSolution {
-  return (TICKET_SOLUTION as readonly string[]).includes(v);
-}
-function isTicketCommentAuthor(v: string): v is TicketCommentAuthor {
-  return (TICKET_COMMENT_AUTHOR as readonly string[]).includes(v);
-}
-
-/** Narrow the enum columns of a ticket row; throws on values outside the contract. */
+/** Read the enum columns of a ticket row; unknown DB values pass through with a warning. */
 function narrowTicketEnums(row: TicketRow): {
   owner: TicketOwner;
   type: TicketType;
   status: TicketStatus;
   solution: TicketSolution | null;
 } {
-  if (!isTicketOwner(row.owner)) throw new Error(`Unbekannter Ticket-Owner: ${row.owner}`);
-  if (!isTicketType(row.type)) throw new Error(`Unbekannter Ticket-Typ: ${row.type}`);
-  if (!isTicketStatus(row.status)) throw new Error(`Unbekannter Ticket-Status: ${row.status}`);
-  if (row.solution !== null && !isTicketSolution(row.solution)) {
-    throw new Error(`Unbekannte Ticket-Lösung: ${row.solution}`);
-  }
-  return { owner: row.owner, type: row.type, status: row.status, solution: row.solution };
+  return {
+    owner: asEnum(TICKET_OWNER, row.owner, 'ticket.owner'),
+    type: asEnum(TICKET_TYPE, row.type, 'ticket.type'),
+    status: asEnum(TICKET_STATUS, row.status, 'ticket.status'),
+    solution: row.solution === null ? null : asEnum(TICKET_SOLUTION, row.solution, 'ticket.solution'),
+  };
 }
 
 function toCommentDTO(row: TicketCommentRow): TicketCommentDTO {
-  if (!isTicketCommentAuthor(row.author)) throw new Error(`Unbekannter Kommentar-Autor: ${row.author}`);
   return {
     id: row.id,
     ticketId: row.ticketId,
-    author: row.author,
+    author: asEnum(TICKET_COMMENT_AUTHOR, row.author, 'ticket_comment.author'),
     authorName: row.authorName,
     body: row.body,
     createdAt: row.createdAt,
@@ -506,22 +494,34 @@ export const ticketService = {
       DONE: 0,
     };
     for (const r of statusResult.rows as unknown as CountRow[]) {
-      if (r.status && isTicketStatus(r.status)) byStatus[r.status] = Number(r.cnt);
+      if (r.status) {
+        if (isTicketStatus(r.status)) byStatus[r.status] = Number(r.cnt);
+        else warnEnumOnce('ticket.status', r.status);
+      }
     }
 
     const byType: TicketSummaryDTO['byType'] = { FEATURE: 0, BUG: 0, CHORE: 0 };
     for (const r of typeResult.rows as unknown as CountRow[]) {
-      if (r.type && isTicketType(r.type)) byType[r.type] = Number(r.cnt);
+      if (r.type) {
+        if (isTicketType(r.type)) byType[r.type] = Number(r.cnt);
+        else warnEnumOnce('ticket.type', r.type);
+      }
     }
 
     const byOwner: TicketSummaryDTO['byOwner'] = { AI: 0, HUMAN: 0 };
     for (const r of ownerResult.rows as unknown as CountRow[]) {
-      if (r.owner && isTicketOwner(r.owner)) byOwner[r.owner] = Number(r.cnt);
+      if (r.owner) {
+        if (isTicketOwner(r.owner)) byOwner[r.owner] = Number(r.cnt);
+        else warnEnumOnce('ticket.owner', r.owner);
+      }
     }
 
     const bySolution: TicketSummaryDTO['bySolution'] = { DONE: 0, WONT_DO: 0 };
     for (const r of solutionResult.rows as unknown as CountRow[]) {
-      if (r.solution && isTicketSolution(r.solution)) bySolution[r.solution] = Number(r.cnt);
+      if (r.solution) {
+        if (isTicketSolution(r.solution)) bySolution[r.solution] = Number(r.cnt);
+        else warnEnumOnce('ticket.solution', r.solution);
+      }
     }
 
     return { byStatus, byType, byOwner, bySolution };

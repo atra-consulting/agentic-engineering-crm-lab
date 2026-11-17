@@ -1,5 +1,5 @@
 import { client } from '../config/db.js';
-import { CHANCE_PHASE, AKTIVITAET_TYP, type ChancePhase, type AktivitaetTyp } from '../db/schema/enums.js';
+import { CHANCE_PHASE, AKTIVITAET_TYP, asEnum } from '../db/schema/enums.js';
 import type { Schema } from '../openapi/types.js';
 
 // ─── DTOs ─────────────────────────────────────────────────────────────────────
@@ -38,36 +38,20 @@ interface RecentAktivitaetRow {
   createdAt: string;
 }
 
-function isChancePhase(value: string): value is ChancePhase {
-  return (CHANCE_PHASE as readonly string[]).includes(value);
-}
-
-function isAktivitaetTyp(value: string): value is AktivitaetTyp {
-  return (AKTIVITAET_TYP as readonly string[]).includes(value);
-}
-
-function toRecentChance(row: RecentChanceRow): RecentChance {
-  if (!isChancePhase(row.phase)) {
-    throw new Error(`Unexpected chance.phase in database: ${row.phase}`);
-  }
-  return {
+function toRecentChance(row: RecentChanceRow): RecentChance {  return {
     id: row.id,
     titel: row.titel,
     wert: row.wert,
     currency: row.currency,
-    phase: row.phase,
+    phase: asEnum(CHANCE_PHASE, row.phase, 'chance.phase'),
     firmaName: row.firmaName,
     createdAt: row.createdAt,
   };
 }
 
-function toRecentAktivitaet(row: RecentAktivitaetRow): RecentAktivitaet {
-  if (!isAktivitaetTyp(row.typ)) {
-    throw new Error(`Unexpected aktivitaet.typ in database: ${row.typ}`);
-  }
-  return {
+function toRecentAktivitaet(row: RecentAktivitaetRow): RecentAktivitaet {  return {
     id: row.id,
-    typ: row.typ,
+    typ: asEnum(AKTIVITAET_TYP, row.typ, 'aktivitaet.typ'),
     subject: row.subject,
     datum: row.datum,
     // personName is NULL when no person is linked — LEFT JOIN miss returns null

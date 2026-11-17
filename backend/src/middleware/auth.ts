@@ -16,13 +16,13 @@ declare module 'express' {
   }
 }
 
-export function requireRole(...roles: string[]): RequestHandler {
+export function requireRole(...roles: CrmUser["roles"]): RequestHandler {
   return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.currentUser) {
       next(new ForbiddenError('Zugriff verweigert'));
       return;
     }
-    if (!roles.some(r => req.currentUser!.roles.includes(r))) {
+    if (!roles.some((r) => req.currentUser!.roles.includes(r))) {
       next(new ForbiddenError('Zugriff verweigert'));
       return;
     }

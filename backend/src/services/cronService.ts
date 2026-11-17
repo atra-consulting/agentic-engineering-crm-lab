@@ -3,6 +3,7 @@ import { client } from '../config/db.js';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, parsePaginationParams, parseSort, type PageResult, type SortParams } from '../utils/pagination.js';
 import { CRON_JOBS } from '../config/cronJobs.js';
+import { CRON_RUN_STATUS, CRON_TRIGGER, asEnum } from '../db/schema/enums.js';
 
 // ─── DTO ──────────────────────────────────────────────────────────────────────
 
@@ -22,22 +23,12 @@ interface CronRunRow {
   error: string | null;
 }
 
-function isCronRunStatus(value: string): value is CronRunDTO['status'] {
-  return value === 'RUNNING' || value === 'SUCCESS' || value === 'FAILED' || value === 'SKIPPED';
-}
-
-function isCronTrigger(value: string): value is CronRunDTO['trigger'] {
-  return value === 'CRON' || value === 'MANUAL';
-}
-
 function toDTO(row: CronRunRow): CronRunDTO {
-  if (!isCronRunStatus(row.status)) throw new Error(`Unbekannter CronRun-Status: ${row.status}`);
-  if (!isCronTrigger(row.trigger)) throw new Error(`Unbekannter CronRun-Trigger: ${row.trigger}`);
   return {
     id: row.id,
     job: row.job,
-    status: row.status,
-    trigger: row.trigger,
+    status: asEnum(CRON_RUN_STATUS, row.status, 'cron_run.status'),
+    trigger: asEnum(CRON_TRIGGER, row.trigger, 'cron_run.trigger'),
     startedAt: row.startedAt,
     finishedAt: row.finishedAt,
     durationMs: row.durationMs !== null ? Number(row.durationMs) : null,
