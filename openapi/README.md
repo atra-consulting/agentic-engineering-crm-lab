@@ -204,7 +204,7 @@ Proven in the tooling trial. `api-check.ts` compiles with it. The runtime (`back
 import { Ajv2020 } from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
-const base = { strict: false, allowUnionTypes: true, allErrors: true, verbose: true };
+const base = { strict: false, allowUnionTypes: true, allErrors: true, verbose: true, unicode: false };
 const bodyAjv = new Ajv2020({ ...base, removeAdditional: 'all', coerceTypes: false }); // request bodies
 const plainAjv = new Ajv2020({ ...base });                                             // path params, responses
 for (const ajv of [bodyAjv, plainAjv]) {
@@ -224,6 +224,10 @@ const validatePut = bodyAjv.compile({
 - `verbose: true`: each error carries `parentSchema`. Read `parentSchema['x-error-messages'][keyword]` for property errors. For `required`, read `parentSchema.properties[missingProperty]`. Errors inside `anyOf` branches (`schemaPath` contains `/anyOf/<n>/`) carry no texts. Use the `anyOf` error, or look the text up by instance path.
 - `removeAdditional: 'all'` mutates the data. Validate a deep clone and write the clone back.
 - Patterns compile with the `u` flag.
+- `unicode: false`: lengths count UTF-16 code units, like Zod and JS `.length`.
+- 5xx answers are not declared per operation; any 5xx body is validated against `ErrorResponse`.
+- Runtime request validation (`specValidate`) runs after each route's auth guard, so 401/403 always come before 400.
+- `x-error-messages` must sit next to an inline schema, not next to a `$ref` (Ajv reports keyword errors from the referenced schema).
 
 ## OperationId table (binding, 79 operations, 57 paths)
 

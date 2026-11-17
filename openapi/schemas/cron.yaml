@@ -132,13 +132,17 @@ CronRunCompleteInput:
     tasksSolved:
       type: integer
       minimum: 0
+      maximum: 9007199254740991
       x-error-messages:
         minimum: Darf nicht negativ sein
+        maximum: Ungültiger Wert
     tasksRejected:
       type: integer
       minimum: 0
+      maximum: 9007199254740991
       x-error-messages:
         minimum: Darf nicht negativ sein
+        maximum: Ungültiger Wert
     githubRunUrl:
       type: string
       format: uri

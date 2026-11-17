@@ -98,7 +98,7 @@
       "post": {
         "operationId": "login",
         "summary": "Log in with user name and password",
-        "description": "Starts a new session (the old session id is replaced) and sets the\ncookie `JSESSIONID` (httpOnly). Missing, empty or wrong credentials all\nanswer 401 `Ungültige Anmeldedaten`. The contract does not validate the\nbody.\n",
+        "description": "Starts a new session (the old session id is replaced) and sets the\ncookie `JSESSIONID` (httpOnly). Missing, empty or unknown credentials\nanswer 401 `Ungültige Anmeldedaten`. The contract does not validate the\nbody.\n",
         "tags": [
           "auth"
         ],
@@ -119,7 +119,7 @@
             "description": "Logged in.",
             "headers": {
               "Set-Cookie": {
-                "description": "Session cookie `JSESSIONID=<id>; Path=/; HttpOnly`.",
+                "description": "Session cookie `JSESSIONID`: HttpOnly, Path=/, Expires (24 h maxAge), SameSite=Lax, plus Secure when NODE_ENV=production.",
                 "schema": {
                   "type": "string"
                 }
@@ -230,7 +230,7 @@
             "description": "Logged in.",
             "headers": {
               "Set-Cookie": {
-                "description": "Session cookie `JSESSIONID=<id>; Path=/; HttpOnly`.",
+                "description": "Session cookie `JSESSIONID`: HttpOnly, Path=/, Expires (24 h maxAge), SameSite=Lax, plus Secure when NODE_ENV=production.",
                 "schema": {
                   "type": "string"
                 }
@@ -720,7 +720,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The all contacts (not paged).",
+            "description": "All contacts (not paged).",
             "content": {
               "application/json": {
                 "schema": {
@@ -966,7 +966,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The all departments (not paged).",
+            "description": "All departments (not paged).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1304,7 +1304,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The all addresses (not paged).",
+            "description": "All addresses (not paged).",
             "content": {
               "application/json": {
                 "schema": {
@@ -1571,7 +1571,7 @@
     "/aktivitaeten/{id}": {
       "get": {
         "operationId": "getAktivitaet",
-        "summary": "Get one an activity",
+        "summary": "Get one activity",
         "tags": [
           "aktivitaeten"
         ],
@@ -1587,7 +1587,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The an activity.",
+            "description": "The activity.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1830,7 +1830,7 @@
     "/chancen/{id}": {
       "get": {
         "operationId": "getChance",
-        "summary": "Get one an opportunity",
+        "summary": "Get one opportunity",
         "tags": [
           "chancen"
         ],
@@ -1846,7 +1846,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The an opportunity.",
+            "description": "The opportunity.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4340,10 +4340,12 @@
           "firmaId": {
             "type": "integer",
             "minimum": 1,
+            "maximum": 9007199254740991,
             "x-error-messages": {
               "required": "Firma ist erforderlich",
               "type": "Firma ist erforderlich",
-              "minimum": "Firma ist erforderlich"
+              "minimum": "Firma ist erforderlich",
+              "maximum": "Firma ist erforderlich"
             }
           },
           "abteilungId": {
@@ -4352,9 +4354,11 @@
               "null"
             ],
             "minimum": 1,
+            "maximum": 9007199254740991,
             "x-error-messages": {
               "type": "Ungültige ID",
-              "minimum": "Ungültige ID"
+              "minimum": "Ungültige ID",
+              "maximum": "Ungültige ID"
             }
           }
         }
@@ -4460,10 +4464,12 @@
           "firmaId": {
             "type": "integer",
             "minimum": 1,
+            "maximum": 9007199254740991,
             "x-error-messages": {
               "required": "Firma ist erforderlich",
               "type": "Firma ist erforderlich",
-              "minimum": "Firma ist erforderlich"
+              "minimum": "Firma ist erforderlich",
+              "maximum": "Firma ist erforderlich"
             }
           }
         }
@@ -4577,7 +4583,7 @@
               "string",
               "null"
             ],
-            "description": "First and last name joined by a space; null when the address has no person."
+            "description": "`firstName lastName`; only one part if the other is empty; null without person."
           },
           "latitude": {
             "type": [
@@ -4653,9 +4659,11 @@
               "null"
             ],
             "minimum": 1,
+            "maximum": 9007199254740991,
             "x-error-messages": {
               "type": "Ungültige ID",
-              "minimum": "Ungültige ID"
+              "minimum": "Ungültige ID",
+              "maximum": "Ungültige ID"
             }
           },
           "personId": {
@@ -4664,9 +4672,11 @@
               "null"
             ],
             "minimum": 1,
+            "maximum": 9007199254740991,
             "x-error-messages": {
               "type": "Ungültige ID",
-              "minimum": "Ungültige ID"
+              "minimum": "Ungültige ID",
+              "maximum": "Ungültige ID"
             }
           },
           "latitude": {
@@ -4839,9 +4849,11 @@
               "null"
             ],
             "minimum": 1,
+            "maximum": 9007199254740991,
             "x-error-messages": {
               "type": "Ungültige ID",
-              "minimum": "Ungültige ID"
+              "minimum": "Ungültige ID",
+              "maximum": "Ungültige ID"
             }
           },
           "personId": {
@@ -4850,9 +4862,11 @@
               "null"
             ],
             "minimum": 1,
+            "maximum": 9007199254740991,
             "x-error-messages": {
               "type": "Ungültige ID",
-              "minimum": "Ungültige ID"
+              "minimum": "Ungültige ID",
+              "maximum": "Ungültige ID"
             }
           }
         }
@@ -5051,10 +5065,12 @@
           "firmaId": {
             "type": "integer",
             "minimum": 1,
+            "maximum": 9007199254740991,
             "x-error-messages": {
               "required": "Firma ist erforderlich",
               "type": "Firma ist erforderlich",
-              "minimum": "Firma ist erforderlich"
+              "minimum": "Firma ist erforderlich",
+              "maximum": "Firma ist erforderlich"
             }
           },
           "kontaktPersonId": {
@@ -5063,9 +5079,11 @@
               "null"
             ],
             "minimum": 1,
+            "maximum": 9007199254740991,
             "x-error-messages": {
               "type": "Ungültige ID",
-              "minimum": "Ungültige ID"
+              "minimum": "Ungültige ID",
+              "maximum": "Ungültige ID"
             }
           }
         }
@@ -5924,15 +5942,19 @@
           "tasksSolved": {
             "type": "integer",
             "minimum": 0,
+            "maximum": 9007199254740991,
             "x-error-messages": {
-              "minimum": "Darf nicht negativ sein"
+              "minimum": "Darf nicht negativ sein",
+              "maximum": "Ungültiger Wert"
             }
           },
           "tasksRejected": {
             "type": "integer",
             "minimum": 0,
+            "maximum": 9007199254740991,
             "x-error-messages": {
-              "minimum": "Darf nicht negativ sein"
+              "minimum": "Darf nicht negativ sein",
+              "maximum": "Ungültiger Wert"
             }
           },
           "githubRunUrl": {
@@ -6327,7 +6349,12 @@
         ],
         "properties": {
           "type": {
-            "$ref": "#/components/schemas/TicketType",
+            "type": "string",
+            "enum": [
+              "FEATURE",
+              "BUG",
+              "CHORE"
+            ],
             "x-error-messages": {
               "required": "Ungültiger Ticket-Typ",
               "type": "Ungültiger Ticket-Typ",
@@ -6358,10 +6385,12 @@
               "null"
             ],
             "minimum": 1,
+            "maximum": 9007199254740991,
             "description": "Must name an existing agent task, else 400 with a field error on `agentTaskId`.",
             "x-error-messages": {
               "type": "Ungültige ID",
-              "minimum": "Ungültige ID"
+              "minimum": "Ungültige ID",
+              "maximum": "Ungültige ID"
             }
           },
           "fullyReady": {
@@ -6377,7 +6406,14 @@
         ],
         "properties": {
           "status": {
-            "$ref": "#/components/schemas/TicketStatus",
+            "type": "string",
+            "enum": [
+              "DEFINITION",
+              "TODO",
+              "IN_PROGRESS",
+              "ON_HOLD",
+              "DONE"
+            ],
             "x-error-messages": {
               "required": "Ungültiger Status",
               "type": "Ungültiger Status",
@@ -6393,7 +6429,11 @@
         ],
         "properties": {
           "owner": {
-            "$ref": "#/components/schemas/TicketOwner",
+            "type": "string",
+            "enum": [
+              "AI",
+              "HUMAN"
+            ],
             "x-error-messages": {
               "required": "Ungültiger Eigentümer",
               "type": "Ungültiger Eigentümer",
@@ -6461,7 +6501,11 @@
             "description": "Resets `fullyReady` to false."
           },
           "author": {
-            "$ref": "#/components/schemas/TicketCommentAuthor",
+            "type": "string",
+            "enum": [
+              "HUMAN",
+              "AGENT"
+            ],
             "description": "Default `HUMAN`. `AGENT` is rejected with 403 when the request carries an authenticated session.",
             "x-error-messages": {
               "type": "Ungültiger Autor",

@@ -73,7 +73,7 @@
 /aktivitaeten/{id}:
   get:
     operationId: getAktivitaet
-    summary: Get one an activity
+    summary: Get one activity
     tags: [aktivitaeten]
     security:
       - sessionCookie: []
@@ -81,7 +81,7 @@
       - $ref: '../common.yaml#/parameters/IdPath'
     responses:
       '200':
-        description: The an activity.
+        description: The activity.
         content:
           application/json:
             schema:

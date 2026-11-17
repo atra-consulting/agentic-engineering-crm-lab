@@ -6,7 +6,7 @@
     summary: Log in with user name and password
     description: |
       Starts a new session (the old session id is replaced) and sets the
-      cookie `JSESSIONID` (httpOnly). Missing, empty or wrong credentials all
+      cookie `JSESSIONID` (httpOnly). Missing, empty or unknown credentials
       answer 401 `Ungültige Anmeldedaten`. The contract does not validate the
       body.
     tags: [auth]
@@ -23,7 +23,9 @@
         description: Logged in.
         headers:
           Set-Cookie:
-            description: Session cookie `JSESSIONID=<id>; Path=/; HttpOnly`.
+            description: >-
+              Session cookie `JSESSIONID`: HttpOnly, Path=/, Expires (24 h maxAge),
+              SameSite=Lax, plus Secure when NODE_ENV=production.
             schema:
               type: string
         content:
@@ -98,7 +100,9 @@
         description: Logged in.
         headers:
           Set-Cookie:
-            description: Session cookie `JSESSIONID=<id>; Path=/; HttpOnly`.
+            description: >-
+              Session cookie `JSESSIONID`: HttpOnly, Path=/, Expires (24 h maxAge),
+              SameSite=Lax, plus Secure when NODE_ENV=production.
             schema:
               type: string
         content:

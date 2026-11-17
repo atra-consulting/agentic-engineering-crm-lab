@@ -34,7 +34,7 @@ export interface paths {
         /**
          * Log in with user name and password
          * @description Starts a new session (the old session id is replaced) and sets the
-         *     cookie `JSESSIONID` (httpOnly). Missing, empty or wrong credentials all
+         *     cookie `JSESSIONID` (httpOnly). Missing, empty or unknown credentials
          *     answer 401 `Ungültige Anmeldedaten`. The contract does not validate the
          *     body.
          */
@@ -527,7 +527,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get one an activity */
+        /** Get one activity */
         get: operations["getAktivitaet"];
         /**
          * Update an activity (full replace)
@@ -591,7 +591,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get one an opportunity */
+        /** Get one opportunity */
         get: operations["getChance"];
         /**
          * Update an opportunity (full replace)
@@ -1468,7 +1468,7 @@ export interface components {
             firmaId: number | null;
             firmaName: string | null;
             personId: number | null;
-            /** @description First and last name joined by a space; null when the address has no person. */
+            /** @description `firstName lastName`; only one part if the other is empty; null without person. */
             personName: string | null;
             latitude: number | null;
             longitude: number | null;
@@ -1874,7 +1874,8 @@ export interface components {
         };
         /** @description New ticket. It starts as `owner=HUMAN`, `status=DEFINITION`. */
         TicketCreateInput: {
-            type: components["schemas"]["TicketType"];
+            /** @enum {string} */
+            type: "FEATURE" | "BUG" | "CHORE";
             title: string;
             body: string;
             /** @description Must name an existing agent task, else 400 with a field error on `agentTaskId`. */
@@ -1883,10 +1884,12 @@ export interface components {
             fullyReady?: boolean;
         };
         TicketStatusInput: {
-            status: components["schemas"]["TicketStatus"];
+            /** @enum {string} */
+            status: "DEFINITION" | "TODO" | "IN_PROGRESS" | "ON_HOLD" | "DONE";
         };
         TicketOwnerInput: {
-            owner: components["schemas"]["TicketOwner"];
+            /** @enum {string} */
+            owner: "AI" | "HUMAN";
         };
         TicketAskInput: {
             question: string;
@@ -1905,8 +1908,11 @@ export interface components {
             handBackToAi?: boolean;
             /** @description Resets `fullyReady` to false. */
             clearFullyReady?: boolean;
-            /** @description Default `HUMAN`. `AGENT` is rejected with 403 when the request carries an authenticated session. */
-            author?: components["schemas"]["TicketCommentAuthor"];
+            /**
+             * @description Default `HUMAN`. `AGENT` is rejected with 403 when the request carries an authenticated session.
+             * @enum {string}
+             */
+            author?: "HUMAN" | "AGENT";
         };
         TicketResetResult: {
             /** @description Number of seeded workshop tickets. */
@@ -2032,7 +2038,7 @@ export interface operations {
             /** @description Logged in. */
             200: {
                 headers: {
-                    /** @description Session cookie `JSESSIONID=<id>; Path=/; HttpOnly`. */
+                    /** @description Session cookie `JSESSIONID`: HttpOnly, Path=/, Expires (24 h maxAge), SameSite=Lax, plus Secure when NODE_ENV=production. */
                     "Set-Cookie"?: string;
                     [name: string]: unknown;
                 };
@@ -2104,7 +2110,7 @@ export interface operations {
             /** @description Logged in. */
             200: {
                 headers: {
-                    /** @description Session cookie `JSESSIONID=<id>; Path=/; HttpOnly`. */
+                    /** @description Session cookie `JSESSIONID`: HttpOnly, Path=/, Expires (24 h maxAge), SameSite=Lax, plus Secure when NODE_ENV=production. */
                     "Set-Cookie"?: string;
                     [name: string]: unknown;
                 };
@@ -2416,7 +2422,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The all contacts (not paged). */
+            /** @description All contacts (not paged). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2578,7 +2584,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The all departments (not paged). */
+            /** @description All departments (not paged). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2798,7 +2804,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The all addresses (not paged). */
+            /** @description All addresses (not paged). */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2984,7 +2990,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The an activity. */
+            /** @description The activity. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -3154,7 +3160,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The an opportunity. */
+            /** @description The opportunity. */
             200: {
                 headers: {
                     [name: string]: unknown;

@@ -256,7 +256,8 @@ TicketCreateInput:
   required: [type, title, body]
   properties:
     type:
-      $ref: '#/TicketType'
+      type: string
+      enum: [FEATURE, BUG, CHORE]
       x-error-messages:
         required: Ungültiger Ticket-Typ
         type: Ungültiger Ticket-Typ
@@ -278,10 +279,12 @@ TicketCreateInput:
     agentTaskId:
       type: [integer, 'null']
       minimum: 1
+      maximum: 9007199254740991
       description: Must name an existing agent task, else 400 with a field error on `agentTaskId`.
       x-error-messages:
         type: Ungültige ID
         minimum: Ungültige ID
+        maximum: Ungültige ID
     fullyReady:
       type: boolean
       description: Default false.
@@ -291,7 +294,8 @@ TicketStatusInput:
   required: [status]
   properties:
     status:
-      $ref: '#/TicketStatus'
+      type: string
+      enum: [DEFINITION, TODO, IN_PROGRESS, ON_HOLD, DONE]
       x-error-messages:
         required: Ungültiger Status
         type: Ungültiger Status
@@ -302,7 +306,8 @@ TicketOwnerInput:
   required: [owner]
   properties:
     owner:
-      $ref: '#/TicketOwner'
+      type: string
+      enum: [AI, HUMAN]
       x-error-messages:
         required: Ungültiger Eigentümer
         type: Ungültiger Eigentümer
@@ -352,7 +357,8 @@ TicketCommentInput:
       type: boolean
       description: Resets `fullyReady` to false.
     author:
-      $ref: '#/TicketCommentAuthor'
+      type: string
+      enum: [HUMAN, AGENT]
       description: Default `HUMAN`. `AGENT` is rejected with 403 when the request carries an authenticated session.
       x-error-messages:
         type: Ungültiger Autor

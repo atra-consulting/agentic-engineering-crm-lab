@@ -47,7 +47,7 @@ Adresse:
       type: [integer, 'null']
     personName:
       type: [string, 'null']
-      description: First and last name joined by a space; null when the address has no person.
+      description: '`firstName lastName`; only one part if the other is empty; null without person.'
     latitude:
       type: [number, 'null']
     longitude:
@@ -102,15 +102,19 @@ AdresseInput:
     firmaId:
       type: [integer, 'null']
       minimum: 1
+      maximum: 9007199254740991
       x-error-messages:
         type: Ungültige ID
         minimum: Ungültige ID
+        maximum: Ungültige ID
     personId:
       type: [integer, 'null']
       minimum: 1
+      maximum: 9007199254740991
       x-error-messages:
         type: Ungültige ID
         minimum: Ungültige ID
+        maximum: Ungültige ID
     latitude:
       type: [number, 'null']
       minimum: -90

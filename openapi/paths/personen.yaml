@@ -80,7 +80,7 @@
           type: integer
     responses:
       '200':
-        description: The all contacts (not paged).
+        description: All contacts (not paged).
         content:
           application/json:
             schema:

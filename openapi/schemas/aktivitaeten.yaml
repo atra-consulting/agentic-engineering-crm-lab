@@ -98,12 +98,16 @@ AktivitaetInput:
     firmaId:
       type: [integer, 'null']
       minimum: 1
+      maximum: 9007199254740991
       x-error-messages:
         type: Ungültige ID
         minimum: Ungültige ID
+        maximum: Ungültige ID
     personId:
       type: [integer, 'null']
       minimum: 1
+      maximum: 9007199254740991
       x-error-messages:
         type: Ungültige ID
         minimum: Ungültige ID
+        maximum: Ungültige ID

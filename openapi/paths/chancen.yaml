@@ -84,7 +84,7 @@
 /chancen/{id}:
   get:
     operationId: getChance
-    summary: Get one an opportunity
+    summary: Get one opportunity
     tags: [chancen]
     security:
       - sessionCookie: []
@@ -92,7 +92,7 @@
       - $ref: '../common.yaml#/parameters/IdPath'
     responses:
       '200':
-        description: The an opportunity.
+        description: The opportunity.
         content:
           application/json:
             schema:

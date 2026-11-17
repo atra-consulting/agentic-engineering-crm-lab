@@ -111,13 +111,17 @@ PersonInput:
     firmaId:
       type: integer
       minimum: 1
+      maximum: 9007199254740991
       x-error-messages:
         required: Firma ist erforderlich
         type: Firma ist erforderlich
         minimum: Firma ist erforderlich
+        maximum: Firma ist erforderlich
     abteilungId:
       type: [integer, 'null']
       minimum: 1
+      maximum: 9007199254740991
       x-error-messages:
         type: Ungültige ID
         minimum: Ungültige ID
+        maximum: Ungültige ID
