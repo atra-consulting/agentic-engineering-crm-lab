@@ -1,40 +1,38 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { ApiClient } from '../api/api-client';
 import { Abteilung, AbteilungCreate } from '../models/abteilung.model';
 import { Page } from '../models/page.model';
 
 @Injectable({ providedIn: 'root' })
 export class AbteilungService {
-  private http = inject(HttpClient);
-  private baseUrl = '/api/abteilungen';
+  private api = inject(ApiClient);
 
   getAll(page = 0, size = 10, sort = 'name,asc'): Observable<Page<Abteilung>> {
-    const params = new HttpParams().set('page', page).set('size', size).set('sort', sort);
-    return this.http.get<Page<Abteilung>>(this.baseUrl, { params });
+    return this.api.get('/abteilungen', { query: { page, size, sort } });
   }
 
   listAll(): Observable<Abteilung[]> {
-    return this.http.get<Abteilung[]>(`${this.baseUrl}/all`);
+    return this.api.get('/abteilungen/all');
   }
 
   getById(id: number): Observable<Abteilung> {
-    return this.http.get<Abteilung>(`${this.baseUrl}/${id}`);
+    return this.api.get('/abteilungen/{id}', { path: { id } });
   }
 
   create(abteilung: AbteilungCreate): Observable<Abteilung> {
-    return this.http.post<Abteilung>(this.baseUrl, abteilung);
+    return this.api.post('/abteilungen', { body: abteilung });
   }
 
   update(id: number, abteilung: AbteilungCreate): Observable<Abteilung> {
-    return this.http.put<Abteilung>(`${this.baseUrl}/${id}`, abteilung);
+    return this.api.put('/abteilungen/{id}', { path: { id }, body: abteilung });
   }
 
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.api.delete('/abteilungen/{id}', { path: { id } });
   }
 
   getAllByFirmaId(firmaId: number): Observable<Abteilung[]> {
-    return this.http.get<Abteilung[]>(`${this.baseUrl}/firma/${firmaId}`);
+    return this.api.get('/abteilungen/firma/{firmaId}', { path: { firmaId } });
   }
 }

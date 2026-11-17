@@ -1,12 +1,12 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, catchError, of, switchMap, tap } from 'rxjs';
+import { ApiClient } from '../api/api-client';
 import { BenutzerInfo, LoginRequest, LoginResponse } from '../models/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private http = inject(HttpClient);
+  private api = inject(ApiClient);
   private router = inject(Router);
 
   private currentUserSignal = signal<BenutzerInfo | null>(null);
@@ -15,8 +15,8 @@ export class AuthService {
   isAuthenticated = computed(() => this.currentUserSignal() !== null);
 
   login(request: LoginRequest): Observable<LoginResponse> {
-    return this.http
-      .post<LoginResponse>('/api/auth/login', request)
+    return this.api
+      .post('/auth/login', { body: request })
       .pipe(
         switchMap((response) =>
           this.fetchCurrentUser().pipe(
@@ -27,7 +27,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.http.post('/api/auth/logout', {}).subscribe({
+    this.api.post('/auth/logout', { body: {} }).subscribe({
       complete: () => {
         this.clearAuth();
         this.router.navigate(['/login']);
@@ -46,7 +46,7 @@ export class AuthService {
   }
 
   private fetchCurrentUser(): Observable<BenutzerInfo> {
-    return this.http.get<BenutzerInfo>('/api/auth/me').pipe(
+    return this.api.get('/auth/me').pipe(
       tap((user) => this.currentUserSignal.set(user)),
       catchError((err) => {
         this.clearAuth();
