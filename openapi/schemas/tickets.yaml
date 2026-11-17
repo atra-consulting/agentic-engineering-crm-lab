@@ -1,5 +1,5 @@
-# Area: tickets. Source: backend/src/routes/tickets.ts (inline Zod schemas),
-# backend/src/services/ticketService.ts (DTOs), backend/src/db/schema/enums.ts.
+# Area: tickets. Source of response shapes: backend/src/services/ticketService.ts (DTOs), backend/src/db/schema/enums.ts.
+# This file is the source of truth for input validation.
 
 TicketOwner:
   type: string

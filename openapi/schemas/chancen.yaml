@@ -1,5 +1,5 @@
-# Area: chancen. Source: backend/src/services/chanceService.ts (ChanceDTO, toDTO)
-# and backend/src/utils/validation.ts (ChanceCreateSchema).
+# Area: chancen. Source of response shapes: backend/src/services/chanceService.ts (ChanceDTO, toDTO).
+# This file is the source of truth for input validation.
 
 ChancePhase:
   type: string

@@ -1,5 +1,5 @@
-# Area: firmen. Source: backend/src/services/firmaService.ts (FirmaDTO, toDTO,
-# FirmaAddressSummary) and backend/src/utils/validation.ts (FirmaCreateSchema).
+# Area: firmen. Source of response shapes: backend/src/services/firmaService.ts (FirmaDTO, toDTO,
+# FirmaAddressSummary). This file is the source of truth for input validation.
 
 Firma:
   type: object

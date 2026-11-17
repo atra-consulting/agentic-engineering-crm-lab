@@ -1,5 +1,5 @@
-# Area: szenarien. Source: backend/src/routes/szenario.ts, backend/src/services/szenarioService.ts,
-# backend/src/utils/validation.ts (SzenarioSchema, PROCESS_STEP_COUNTS).
+# Area: szenarien. Source of response shapes: backend/src/routes/szenario.ts, backend/src/services/szenarioService.ts.
+# This file is the source of truth for input validation.
 
 Szenario:
   type: object

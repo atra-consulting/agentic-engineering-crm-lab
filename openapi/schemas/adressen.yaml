@@ -1,5 +1,5 @@
-# Area: adressen. Source: backend/src/services/adresseService.ts (AdresseDTO, toDTO)
-# and backend/src/utils/validation.ts (AdresseCreateSchema).
+# Area: adressen. Source of response shapes: backend/src/services/adresseService.ts (AdresseDTO, toDTO).
+# This file is the source of truth for input validation.
 
 Adresse:
   type: object

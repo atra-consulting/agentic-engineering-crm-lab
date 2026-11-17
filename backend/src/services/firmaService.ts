@@ -124,7 +124,7 @@ export const firmaService = {
     return this.findById(Number(result.lastInsertRowid));
   },
 
-  async update(id: number, dto: RequestBody<'createFirma'>): Promise<FirmaDTO> {
+  async update(id: number, dto: RequestBody<'updateFirma'>): Promise<FirmaDTO> {
     await this.findById(id); // throws 404 if not found
     const now = new Date().toISOString();
     await client.execute({
