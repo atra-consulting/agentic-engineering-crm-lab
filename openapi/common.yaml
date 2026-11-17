@@ -54,6 +54,7 @@ schemas:
     description: |
       An object with no declared properties. As a request body, extra fields
       are stripped and ignored. As an answer, the server sends `{}`.
+    properties: {}
 
 parameters:
   IdPath:

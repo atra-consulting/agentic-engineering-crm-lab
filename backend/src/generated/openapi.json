@@ -3793,7 +3793,8 @@
       },
       "EmptyObject": {
         "type": "object",
-        "description": "An object with no declared properties. As a request body, extra fields\nare stripped and ignored. As an answer, the server sends `{}`.\n"
+        "description": "An object with no declared properties. As a request body, extra fields\nare stripped and ignored. As an answer, the server sends `{}`.\n",
+        "properties": {}
       },
       "Health": {
         "type": "object",
