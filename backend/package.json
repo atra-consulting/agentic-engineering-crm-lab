@@ -19,7 +19,7 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "drizzle-orm": "^0.45.4",
-    "express": "^4.21.2",
+    "express": "^5.3.0",
     "express-session": "^1.18.1",
     "swagger-ui-dist": "^5.35.0"
   },
