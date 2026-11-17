@@ -5,10 +5,11 @@ import { CronDashboardComponent } from './cron-dashboard.component';
 import { CronService } from '../../../core/services/cron.service';
 import { CronJob, CronRun, CronRunStatus, CronTrigger, CronJobLastRun } from '../../../core/models/cron.model';
 import { Page } from '../../../core/models/page.model';
+import { makeCronRun } from '../../../core/testing/model-factories';
 
 // ─── Test-data factories ────────────────────────────────────────────────────
 
-const makeLastRun = (): CronJobLastRun => ({
+const makeLastRun = (): CronJobLastRun => makeCronRun({
   status: 'SUCCESS',
   startedAt: '2024-06-01T08:00:00.000Z',
   finishedAt: '2024-06-01T08:05:00.000Z',

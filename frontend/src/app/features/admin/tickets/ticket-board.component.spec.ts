@@ -7,13 +7,14 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { TicketBoardComponent } from './ticket-board.component';
 import { TicketService } from '../../../core/services/ticket.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { Ticket, TicketBoard, TicketSummary } from '../../../core/models/ticket.model';
+import { Ticket, TicketBoard, TicketListItem, TicketSummary } from '../../../core/models/ticket.model';
+import { makeTicketDetail, makeTicketListItem } from '../../../core/testing/model-factories';
 
 // ─── Test-data factories ──────────────────────────────────────────────────────
 // Create fresh objects on every call to avoid shared-reference mutations between tests.
 
-function makeTicket(id: number, overrides: Partial<Ticket> = {}): Ticket {
-  return {
+function makeTicket(id: number, overrides: Partial<TicketListItem> = {}): TicketListItem {
+  return makeTicketListItem({
     id,
     owner: 'AI',
     type: 'FEATURE',
@@ -23,13 +24,32 @@ function makeTicket(id: number, overrides: Partial<Ticket> = {}): Ticket {
     solution: null,
     agentTaskId: null,
     commentCount: 0,
+    pickedUpAt: null,
+    resolvedAt: null,
+    createdAt: '2024-06-01T07:00:00.000Z',
+    updatedAt: '2024-06-01T07:00:00.000Z',
+    ...overrides,
+  });
+}
+
+// Detail variant: what setStatus() and getById() return.
+function makeTicketDetailFor(id: number, overrides: Partial<Ticket> = {}): Ticket {
+  return makeTicketDetail({
+    id,
+    owner: 'AI',
+    type: 'FEATURE',
+    title: `Ticket ${id}`,
+    body: `Body of ticket ${id}`,
+    status: 'TODO',
+    solution: null,
+    agentTaskId: null,
     comments: [],
     pickedUpAt: null,
     resolvedAt: null,
     createdAt: '2024-06-01T07:00:00.000Z',
     updatedAt: '2024-06-01T07:00:00.000Z',
     ...overrides,
-  };
+  });
 }
 
 // Board factory — always returns fresh arrays to prevent cross-test mutation.
@@ -292,7 +312,7 @@ describe('TicketBoardComponent — onDrop() success path', () => {
     mockService = makeMockTicketService();
     mockService.getBoard.and.callFake(() => of(makeMockBoard()));
     mockService.getSummary.and.returnValue(of(MOCK_SUMMARY));
-    mockService.setStatus.and.returnValue(of(makeTicket(1, { status: 'IN_PROGRESS' })));
+    mockService.setStatus.and.returnValue(of(makeTicketDetailFor(1, { status: 'IN_PROGRESS' })));
     await setupTestBed(mockService);
   });
 
@@ -309,7 +329,7 @@ describe('TicketBoardComponent — onDrop() success path', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'IN_PROGRESS');
     tick();
@@ -332,7 +352,7 @@ describe('TicketBoardComponent — onDrop() success path', () => {
       previousIndex: 0,
       currentIndex: 1,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'TODO');
     tick();
@@ -355,7 +375,7 @@ describe('TicketBoardComponent — onDrop() success path', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'IN_PROGRESS');
     tick();
@@ -384,7 +404,7 @@ describe('TicketBoardComponent — onDrop() success path', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'IN_PROGRESS');
 
@@ -393,12 +413,12 @@ describe('TicketBoardComponent — onDrop() success path', () => {
     expect(component.inProgress.length).toBe(2); // was 1, now 2
 
     // Resolve to clean up subscription
-    resolver!(makeTicket(1, { status: 'IN_PROGRESS' }));
+    resolver!(makeTicketDetailFor(1, { status: 'IN_PROGRESS' }));
     tick();
   }));
 
   it('sets solution to "DONE" on the moved card when dropping INTO the DONE column', fakeAsync(() => {
-    mockService.setStatus.and.returnValue(of(makeTicket(1, { status: 'DONE', solution: 'DONE' })));
+    mockService.setStatus.and.returnValue(of(makeTicketDetailFor(1, { status: 'DONE', solution: 'DONE' })));
 
     const fixture = TestBed.createComponent(TicketBoardComponent);
     const component = fixture.componentInstance;
@@ -413,7 +433,7 @@ describe('TicketBoardComponent — onDrop() success path', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'DONE');
     tick();
@@ -423,7 +443,7 @@ describe('TicketBoardComponent — onDrop() success path', () => {
   }));
 
   it('sets solution to null on the moved card when dropping OUT of the DONE column', fakeAsync(() => {
-    mockService.setStatus.and.returnValue(of(makeTicket(5, { status: 'TODO', solution: null })));
+    mockService.setStatus.and.returnValue(of(makeTicketDetailFor(5, { status: 'TODO', solution: null })));
 
     // Build a board that has a DONE ticket to drag out
     const boardWithDone: TicketBoard = {
@@ -448,7 +468,7 @@ describe('TicketBoardComponent — onDrop() success path', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'TODO');
     tick();
@@ -506,7 +526,7 @@ describe('TicketBoardComponent — onDrop() error rollback', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'IN_PROGRESS');
     tick();
@@ -531,7 +551,7 @@ describe('TicketBoardComponent — onDrop() error rollback', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'IN_PROGRESS');
     tick();
@@ -554,7 +574,7 @@ describe('TicketBoardComponent — onDrop() error rollback', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'IN_PROGRESS');
     tick();
@@ -575,7 +595,7 @@ describe('TicketBoardComponent — onDrop() error rollback', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'IN_PROGRESS');
     tick();
@@ -609,7 +629,7 @@ describe('TicketBoardComponent — onDrop() error rollback', () => {
       previousIndex: 0,
       currentIndex: 0,
       item: { data: ticket },
-    } as unknown as CdkDragDrop<Ticket[]>;
+    } as unknown as CdkDragDrop<TicketListItem[]>;
 
     component.onDrop(dropEvent, 'IN_PROGRESS');
     tick();

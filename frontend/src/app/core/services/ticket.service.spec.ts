@@ -2,7 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { TicketService } from './ticket.service';
-import { Ticket, TicketBoard, TicketComment, TicketSummary } from '../models/ticket.model';
+import { Ticket, TicketBoard, TicketListItem, TicketComment, TicketSummary } from '../models/ticket.model';
+import { makeTicketDetail } from '../testing/model-factories';
 import { Page } from '../models/page.model';
 
 // ─── Shared test data ─────────────────────────────────────────────────────────
@@ -16,7 +17,7 @@ const MOCK_COMMENT: TicketComment = {
   createdAt: '2024-06-01T08:00:00.000Z',
 };
 
-const MOCK_TICKET: Ticket = {
+const MOCK_TICKET: Ticket = makeTicketDetail({
   id: 10,
   owner: 'AI',
   type: 'FEATURE',
@@ -25,17 +26,21 @@ const MOCK_TICKET: Ticket = {
   status: 'TODO',
   solution: null,
   agentTaskId: null,
-  commentCount: 1,
   comments: [MOCK_COMMENT],
   pickedUpAt: null,
   resolvedAt: null,
   createdAt: '2024-06-01T07:00:00.000Z',
   updatedAt: '2024-06-01T07:00:00.000Z',
-};
+});
+
+const MOCK_LIST_ITEM: TicketListItem = (() => {
+  const { comments, ...rest } = MOCK_TICKET;
+  return { ...rest, commentCount: comments.length };
+})();
 
 const MOCK_BOARD: TicketBoard = {
   DEFINITION: [],
-  TODO: [MOCK_TICKET],
+  TODO: [MOCK_LIST_ITEM],
   IN_PROGRESS: [],
   ON_HOLD: [],
   DONE: [],
@@ -48,8 +53,8 @@ const MOCK_SUMMARY: TicketSummary = {
   bySolution: { DONE: 0, WONT_DO: 0 },
 };
 
-const MOCK_PAGE: Page<Ticket> = {
-  content: [MOCK_TICKET],
+const MOCK_PAGE: Page<TicketListItem> = {
+  content: [MOCK_LIST_ITEM],
   totalElements: 1,
   totalPages: 1,
   size: 20,
@@ -212,7 +217,7 @@ describe('TicketService', () => {
     });
 
     it('emits the server page response', () => {
-      let received: Page<Ticket> | undefined;
+      let received: Page<TicketListItem> | undefined;
       service.getAll().subscribe((r) => (received = r));
 
       httpMock.expectOne((r) => r.url === '/api/tickets').flush(MOCK_PAGE);

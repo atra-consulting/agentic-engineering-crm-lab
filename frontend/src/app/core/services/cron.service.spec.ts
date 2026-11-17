@@ -4,8 +4,9 @@ import { provideHttpClientTesting, HttpTestingController } from '@angular/common
 import { CronService } from './cron.service';
 import { CronJob, CronRun, CronJobLastRun } from '../models/cron.model';
 import { Page } from '../models/page.model';
+import { makeCronRun } from '../testing/model-factories';
 
-const makeLastRun = (): CronJobLastRun => ({
+const makeLastRun = (): CronJobLastRun => makeCronRun({
   status: 'SUCCESS',
   startedAt: '2024-06-01T08:00:00.000Z',
   finishedAt: '2024-06-01T08:05:00.000Z',
