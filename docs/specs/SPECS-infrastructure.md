@@ -35,14 +35,13 @@ coding-with-ai-lab/
 │       ├── seed/
 │       │   ├── dataMigration.ts  # Loads fixture.json into the DB when empty (CRM entities)
 │       │   ├── fixture.json      # Fixed seed data (390 rows total, CRM entities only)
-│       │   ├── agentTaskSeed.ts  # Idempotent agent_task seeding (INSERT OR IGNORE, ids 1–16)
+│       │   ├── agentTaskSeed.ts  # Idempotent agent_task seeding (INSERT OR IGNORE, ids 1–23)
 │       │   └── build-fixture.ts  # Dev tool: regenerates fixture.json after schema changes
 │       └── utils/
 │           ├── asyncHandler.ts # Wraps async route handlers; forwards errors to Express error handler
 │           ├── errors.ts       # Error types
 │           ├── githubDispatch.ts  # Fires GitHub repository_dispatch events (for cron/agent workflows)
-│           ├── pagination.ts   # Spring-Data-style page format helper (naming only; backend is Node)
-│           └── validation.ts   # Validation helpers
+│           └── pagination.ts   # Spring-Data-style page format helper (naming only; backend is Node)
 ├── openapi/                    # Hand-written OpenAPI 3.1 contract — API source of truth
 ├── frontend/                   # Angular 21 SPA
 │   ├── package.json
@@ -187,7 +186,7 @@ cd frontend && npx ng build
 
 ### Startup Sequence (index.ts)
 
-1. `runMigrations()` — creates tables if they do not exist; also calls `seedAgentTasks()` (INSERT OR IGNORE, ids 1–16) so `agent_task` rows exist on every startup
+1. `runMigrations()` — creates tables if they do not exist; also calls `seedAgentTasks()` (INSERT OR IGNORE, ids 1–23) so `agent_task` rows exist on every startup
 2. `runDataMigration()` — inserts CRM fixture data from `backend/src/seed/fixture.json` if database is empty; skipped if rows exist
 3. `app.listen(7070)` — starts the HTTP server
 
@@ -238,7 +237,7 @@ No JWT secrets. No RSA key paths. No cookie-flag overrides.
 
 | Mode | `/api/auth/test-login` | Response check | `/api/docs` |
 |------|------------------------|----------------|-------------|
-| `development` | on | off | on |
+| `development` | on | on (logs `[contract]` lines, sets `X-Contract-Violation` header, answer unchanged) | on |
 | `test` | on | on (500 on violation; `CONTRACT_RESPONSE_CHECK=off` disables) | on |
 | anything else, incl. unset (production) | off (404) | off | off |
 

@@ -64,7 +64,15 @@ Agents only ever claim `TODO`+`AI` tickets, so a `DEFINITION` ticket is never au
 
 ## Authentication
 
-Three schemes. Most verb endpoints accept more than one — the finish/ask verbs (`/:id/start`, `/:id/done`, `/:id/ask`) plus the write endpoints a skill needs (`create`, `/:id/owner`, `/:id/comments`, `/:id/status`) accept **agent token · loopback bypass · admin session** (first match wins). The read endpoints `GET /board` and `GET /:id` go one step wider: agent token, loopback bypass, or **any logged-in user**, so workshop participants can follow the board without an admin account. `GET /summary` takes any logged-in session only. All reads stay read-only — every write still needs an admin session or an agent token. `GET /next` is the exception: it's a GET that mutates state (claims a ticket), so it accepts **agent token · loopback bypass only** — never an admin session, to avoid a GET-based CSRF surface (a `SameSite=Lax` session cookie still rides cross-site top-level GET navigations).
+Three schemes. Most endpoints accept more than one.
+
+- **Write and verb endpoints** accept agent token, loopback bypass, or admin session. First match wins.
+  - Verbs: `/:id/start`, `/:id/done`, `/:id/ask`.
+  - Writes a skill needs: `create`, `/:id/owner`, `/:id/comments`, `/:id/status`.
+- **`GET /board` and `GET /:id`** accept agent token, loopback bypass, or any logged-in user. Workshop participants follow the board without an admin account.
+- **`GET /summary`** takes any logged-in session only.
+- **All reads stay read-only.** Every write needs an admin session or an agent token.
+- **`GET /next`** is the exception. It is a GET that changes state (it claims a ticket). It accepts agent token or loopback bypass only. It never accepts an admin session. This avoids a GET-based CSRF risk. A `SameSite=Lax` session cookie still travels on cross-site top-level GET navigation.
 
 ### Agent token (used by `/next`, `/:id/start`, `/:id/done`, `/:id/ask`, `POST /`, `GET /:id`, `GET /board`, `PATCH /:id/owner`, `PATCH /:id/status`, `POST /:id/comments`)
 
@@ -77,7 +85,10 @@ X-Agent-Token: <AGENT_API_TOKEN>
 ```
 
 - Compared against `AGENT_API_TOKEN` env var via SHA-256 + constant-time `timingSafeEqual`.
-- If `AGENT_API_TOKEN` is **unset/empty**, the session-accepting endpoints still work with a valid session — agent token and loopback bypass are both skipped when the token is unset, so the check falls through to the session check. `GET /next` returns **401**.
+- If `AGENT_API_TOKEN` is **unset or empty**, the code skips the agent token and the loopback bypass.
+  - The check falls through to the session check.
+  - Endpoints that accept a session still work with a valid session.
+  - `GET /next` returns **401**.
 - A wrong token → **401**. It never falls through to the session check.
 - No token and no session → **401**.
 - **Localhost bypass:** Set `AGENT_AUTH_ALLOW_LOOPBACK=1` in `backend/.env`. Requests from `127.0.0.1`, `::1`, or `::ffff:127.0.0.1` with no `Authorization` or `X-Agent-Token` header then skip validation. Requests with proxy-forwarding headers (`X-Forwarded-For`, `X-Real-IP`, `Forwarded`) are never bypassed. Local development only — never set in production.
@@ -199,7 +210,7 @@ curl -s -X POST -H "Authorization: Bearer $AGENT_API_TOKEN" \
 
 | Trigger | From | To | Side effects |
 |---------|------|----|-------------|
-| `PATCH /:id/owner {AI}` (agent · loopback · admin) | `DEFINITION` | `DEFINITION` | `owner→AI` ("An KI übergeben") |
+| `PATCH /:id/owner {AI}` (agent · loopback · admin) | any | unchanged | `owner→AI` ("An KI übergeben"). Status does not change |
 | `POST /:id/hand-to-ai` (admin) | `DEFINITION` | `TODO` | `owner→AI` ("Nach Bereit") |
 | `GET /next` (agent · loopback) | `TODO` + `owner=AI` | `IN_PROGRESS` | sets `pickedUpAt` |
 | `POST /start` (agent · loopback · admin) | `TODO` + `owner=AI` | `IN_PROGRESS` | sets `pickedUpAt` |
@@ -260,18 +271,20 @@ X-Agent-Token: $AGENT_API_TOKEN
 
 **The calls a skill needs:**
 
-| Step | Call | Notes |
-|------|------|-------|
-| Peek board | `GET /api/tickets/board` | Read all columns without claiming. Agent token or loopback bypass. |
-| Create | `POST /api/tickets` | Body `{ "type", "title", "body" }`. New ticket lands `DEFINITION` + `owner=HUMAN`. Use to file a triaged feedback item as an intake ticket. `201` on success. |
-| Assign to AI | `PATCH /api/tickets/:id/owner` | Body `{ "owner": "AI" }`. Flips owner without changing status — "An KI übergeben" on a `DEFINITION` ticket. |
-| Comment | `POST /api/tickets/:id/comments` | Body `{ "body": string }`. Adds a comment (stored as `author=HUMAN`). Use to record what a thin ticket is missing. |
-| Set status | `PATCH /api/tickets/:id/status` | Body `{ "status" }`. Move to any column incl. `DEFINITION`. Sets/clears `solution` + `resolvedAt` on DONE transitions. |
-| Claim | `GET /api/tickets/next` | Optional `?type=FEATURE\|BUG\|CHORE`. Claims the oldest `TODO` ticket owned by `AI`, flips it to `IN_PROGRESS`. **`204` = queue empty, stop.** The response includes the full `comments` thread. |
-| Start | `POST /api/tickets/:id/start` | No body. From `TODO`+`owner=AI` → `IN_PROGRESS`. Use when you have the id but did not go through `/next`. Response includes full `comments` thread. |
-| Read | `GET /api/tickets/:id` | Re-read a ticket by id (full ticket + comments). Accepts agent token or loopback bypass. |
-| Finish | `POST /api/tickets/:id/done` | Body `{ "comment"?: string }`. Only from `IN_PROGRESS`. Sets `solution=DONE`. |
-| Ask | `POST /api/tickets/:id/ask` | Body `{ "question": string }` (required). Hands the ticket to a human (`ON_HOLD`, owner→`HUMAN`). Posts the question as an `AGENT` comment. |
+Request and response shapes: [`openapi/paths/tickets.yaml`](../../openapi/paths/tickets.yaml).
+
+| Step | Purpose | Notes |
+|------|---------|-------|
+| Peek board (`GET /board`) | Read all columns without claiming | Agent token or loopback bypass. |
+| Create (`POST /`) | File a triaged feedback item as an intake ticket | Ticket lands in `DEFINITION` with `owner=HUMAN`. |
+| Assign to AI (`PATCH /:id/owner`) | "An KI übergeben" | Flips owner only. Status stays. |
+| Comment (`POST /:id/comments`) | Record what a thin ticket misses | Author defaults to `HUMAN`. `author=AGENT` works with the agent token. With a session cookie, `author=AGENT` gets `403`. |
+| Set status (`PATCH /:id/status`) | Move a ticket to any column, incl. `DEFINITION` | Sets or clears `solution` and `resolvedAt` on DONE moves. |
+| Claim (`GET /next`) | Take the oldest `TODO` ticket owned by `AI` | Optional `type` filter. Flips to `IN_PROGRESS`. `204` = queue empty, stop. Response has the full `comments` thread. |
+| Start (`POST /:id/start`) | Start a ticket by id | Only from `TODO` with `owner=AI`. Use it when you skipped `/next`. Response has the full `comments` thread. |
+| Read (`GET /:id`) | Re-read a ticket with comments | Agent token or loopback bypass. |
+| Finish (`POST /:id/done`) | Close the ticket | Only from `IN_PROGRESS`. Sets `solution=DONE`. |
+| Ask (`POST /:id/ask`) | Hand the ticket to a human | Question required. Status `ON_HOLD`, owner `HUMAN`. Question becomes an `AGENT` comment. |
 
 **Loop shape:**
 

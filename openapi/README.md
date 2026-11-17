@@ -85,7 +85,7 @@ Manual lint: `cd backend && npx redocly lint --config ../openapi/redocly.yaml ..
 - Declare `parameters` on the operation, not on the path item.
 - `{id}` → `IdPath`; `{firmaId}` → `FirmaIdPath`. Both are strings with `pattern: '^[1-9][0-9]*$'` and "Ungültige ID". No coercion.
 - Every `{id}` operation declares `400` (invalid id, D2).
-- Lists: `PageQuery`, `SizeQuery`, `SortQuery`, `SearchQuery` as the route reads them. Query params are not validated at runtime; the code keeps today's lenient handling.
+- Lists: `PageQuery`, `SizeQuery`, `SortQuery`, `SearchQuery` as the route reads them. The code handles query params leniently. Nothing validates them at runtime.
 - Every guarded operation declares `401`; admin-only adds `403`; every operation declares at least one 4xx (exemptions in `.redocly.lint-ignore.yaml`).
 - `204` answers have no `content`.
 - English summaries and descriptions. Error texts stay German, as the server sends them.
@@ -224,12 +224,12 @@ const validatePut = body.compile({
 - Import: the named `{ Ajv2020 }` import type-checks under the backend's NodeNext config and runs under tsx.
 - Refs: `spec#` plus a JSON pointer. Escape `~` as `~0` and `/` as `~1`. `{id}` works raw or as `%7Bid%7D`.
 - Ajv does not follow a `$ref` in the middle of a pointer. Resolve OAS-level refs (parameters, responses, request bodies) in JS first, then compile at the target, for example `spec#/components/responses/BadRequest/content/application~1json/schema`.
-- `strict: false`: Ajv ignores `example`, `discriminator`, `xml`, `externalDocs` and every `x-*` keyword. No vocabulary registration needed. Unknown formats are ignored too (with a console warning), hence the format rule.
+- `strict: false`: Ajv ignores `example`, `discriminator`, `xml`, `externalDocs` and every `x-*` keyword. No vocabulary registration needed. Ajv ignores unknown formats. It prints a console warning. Hence the format rule.
 - `removeAdditional: 'all'` mutates the data. Validate a deep clone and write the clone back.
 - `removeAdditional` strips only on object schemas that declare `properties`. Every input object declares `properties`. `EmptyObject` declares `properties: {}` for this reason.
 - `verbose: true`: each error carries `schema`, `parentSchema` and `data`. The mapper does not read texts from `parentSchema`. It reads only the `minimum` and `maximum` numbers from it, for placeholders.
 - Error texts: the mapper walks the contract schema along the error's instance path. For each property it reads `x-error-messages` on the property first, then on its `$ref` target. Array items use `items`. `anyOf`, `oneOf` and `allOf` branches count too. A `$ref` next to `x-error-messages` works.
-- Errors from inside a failed `anyOf` or `oneOf` branch are dropped. The union's own error speaks for them, so write its text (for example `anyOf` on an email).
+- The mapper drops errors from inside a failed `anyOf`/`oneOf` branch. The union's own error speaks for them, so write its text (for example `anyOf` on an email).
 - Patterns compile with the `u` flag.
 - 5xx answers are not declared per operation; any 5xx body is validated against `ErrorResponse`.
 - Runtime request validation (`specValidate`) runs after each route's auth guard, so 401/403 always come before 400.

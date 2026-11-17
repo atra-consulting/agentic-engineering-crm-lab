@@ -43,7 +43,7 @@ cd backend && npm run api:check                    # Lint, rules, Ajv compile, d
 
 `start.sh` and `start.bat` start the backend with `NODE_ENV=development`. Only `development` and `test` count as dev modes. Anything else, including unset, runs as production. In dev and test modes, test-login exists and the response check runs. `cd frontend && npm run api:generate` delegates to the backend command. `ng build`, `ng serve` and Karma never regenerate.
 
-Interactive API docs: http://localhost:7200/api/docs (development and test only; raw contract at /api/openapi.json). Use port 7200: direct calls to 7070 fail on CORS for non-GET requests.
+Interactive API docs: http://localhost:7200/api/docs (development and test only; raw contract at /api/openapi.json). Use port 7200 (the proxy). Direct calls to 7070 fail on CORS for non-GET requests. The CORS config allows only GET, POST, PUT, DELETE and the headers `Content-Type` and `Authorization`, and only from the origins in `CORS_ORIGINS` (default `http://localhost:7200`). It allows no PATCH and no `X-Agent-Token` header.
 
 **Prerequisites:** Node.js 20.19+ (checked by `start.sh`).
 

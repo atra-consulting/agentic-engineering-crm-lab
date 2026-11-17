@@ -66,6 +66,7 @@ The API contract (`openapi/`) defines every model. Never hand-write one.
 
 - `frontend/src/app/core/api/api-types.ts` is generated from the contract.
 - Each `core/models/*.model.ts` file holds thin aliases of `components['schemas'][...]`.
+- Exception: `page.model.ts` keeps the hand-written generic `Page<T>`. The compiler checks it against the generated page schemas (`core/api/page.type-check.ts`).
 - Field lists live in the contract, not here.
 
 Special cases:

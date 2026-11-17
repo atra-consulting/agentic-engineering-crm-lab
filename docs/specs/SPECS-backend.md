@@ -76,30 +76,19 @@ More background:
 | Admin only | Agent-task list, summary and reset; ticket list, reset, wont-do, hand-to-ai; cron runs and jobs |
 | Cron secret or admin session | `GET /api/cron/agent-tasks`, `GET /api/cron/github-issues` |
 
-Unauthenticated requests get `401`. Wrong role gets `403`. The contract names the exact guard per operation.
+Unauthenticated requests get `401`. Wrong role gets `403`, except cron triggers: a non-admin session gets `401`. The contract names the exact guard per operation.
 
 ## Pagination
 
 All paginated endpoints use the Spring Data Page response format for frontend compatibility.
 
-Response shape:
-```json
-{
-  "content": [...],
-  "totalElements": 42,
-  "totalPages": 5,
-  "size": 10,
-  "number": 0,
-  "first": true,
-  "last": false
-}
-```
+Response shape: `PageMeta` in [`openapi/common.yaml`](../../openapi/common.yaml). `number` is 0-based.
 
-`number` is 0-indexed. `size` defaults to 10, max 200.
+`size` defaults to 10, max 200.
 
 Sort query param format: `sort=field,asc` or `sort=field,desc`.
 
-Sort fields are validated against a per-entity whitelist in `src/utils/pagination.ts`. Invalid field names return `400`. Defaults and allowed fields per area: see the contract.
+The code checks sort fields against a per-entity whitelist in `src/utils/pagination.ts`. Invalid field names return `400`. Defaults and allowed fields per area: see the contract.
 
 ## Security
 
@@ -119,8 +108,9 @@ Sort fields are validated against a per-entity whitelist in `src/utils/paginatio
 ### Session auth
 
 - `express-session` with `LibsqlSessionStore` — a custom `express-session` Store subclass that persists sessions to the `sessions` table in the same libsql/Turso database. Expired rows are swept lazily on first request per process lifetime.
-- Cookie name: `JSESSIONID`. HttpOnly. SameSite: lax. MaxAge: 24 hours. `secure: true` in production.
-- Session secret from env var `SESSION_SECRET`. Falls back to `crm-dev-secret-key` in development (prints a warning in production).
+- Cookie name: `JSESSIONID`. HttpOnly. SameSite: lax. MaxAge: 24 hours. `secure: true` only when `NODE_ENV` is exactly `production`.
+- Session secret from env var `SESSION_SECRET`. Falls back to `crm-dev-secret-key` whenever `SESSION_SECRET` is unset. The missing-secret warning prints only when `NODE_ENV` is exactly `production`.
+- This check is literal `production`; it does not follow the contract mode allow-list (known gap, see PRD Decisions).
 - Login: `bcryptjs.compareSync()` compares submitted password to stored hash.
 - Session fixation protection: `req.session.regenerate()` on successful login.
 - Logout: `req.session.destroy()` + clear cookie.
@@ -136,7 +126,7 @@ Hardcoded in `src/config/users.ts`. No database table. No user management API.
 | user | test123 | USER | All |
 | demo | demo1234 | ADMIN | All |
 
-Passwords stored as bcrypt hashes (cost factor 10). Generated once at build time.
+Passwords stored as bcrypt hashes (cost factor 10). Generated once and hardcoded, for zero startup cost and stable reproducibility.
 
 All 3 users currently hold all 7 permissions: `FIRMEN`, `PERSONEN`, `ABTEILUNGEN`, `ADRESSEN`, `AKTIVITAETEN`, `CHANCEN`, `BENUTZERVERWALTUNG`.
 
@@ -229,7 +219,7 @@ src/
   seed/
     dataMigration.ts  — loads fixture.json into the DB when empty (CRM entities only)
     fixture.json      — fixed seed data (25 Firmen, 50 Abteilungen, 100 Personen, 100 Adressen, 75 Aktivitaeten, 40 Chancen)
-    agentTaskSeed.ts  — idempotent agent_task seeding (INSERT OR IGNORE, ids 1–16); called at end of runMigrations()
+    agentTaskSeed.ts  — idempotent agent_task seeding (INSERT OR IGNORE, ids 1–23); called at end of runMigrations()
     build-fixture.ts  — dev tool to regenerate fixture.json after schema changes (not called at runtime)
 ```
 
@@ -250,15 +240,7 @@ Global error handler in `src/middleware/errorHandler.ts`. Must be the last `app.
 | ConflictError | 409 |
 | Unexpected Error | 500 |
 
-All error responses use this shape:
-```json
-{
-  "status": 404,
-  "message": "Firma mit ID 99 nicht gefunden",
-  "timestamp": "2026-04-15T10:30:00.123",
-  "fieldErrors": {}
-}
-```
+All error responses use `ErrorResponse` in [`openapi/common.yaml`](../../openapi/common.yaml).
 
 `ValidationError` populates `fieldErrors` as `{ "fieldName": "error message" }`. All other errors return an empty `fieldErrors` object.
 
@@ -367,7 +349,7 @@ Error mapping:
 
 Contract values drive limits. Example: the four Szenario process arrays use `minItems`/`maxItems` in the contract. `PROCESS_STEP_COUNTS` no longer exists.
 
-Golden test: `backend/src/test/golden-errors.spec.ts` compares 404 recorded answers of the former Zod validation with today's answers. Intended changes (D1 to D6 below) show up as explicit differences.
+Golden test: `backend/src/test/golden-errors.spec.ts` compares the recorded answers of the former Zod validation with today's answers. Intended changes (D1 to D6 below) show up as explicit differences.
 
 Enum values (canonical: contract and [SPECS-database.md](SPECS-database.md)):
 
@@ -405,4 +387,4 @@ Backend changes:
 3. Add `CREATE TABLE IF NOT EXISTS` to `src/config/migrate.ts`.
 4. Add service. DTOs are aliases: `Schema<'X'>`.
 5. Add route file: guard(s) → `specValidate` → `asyncHandler`. Type bodies `RequestBody<'opId'>`. Mount the router in `src/app.ts`.
-6. Run the tests. In development and test, the response check fails on any answer that breaks the contract.
+6. Run the tests. Response check: in test, an answer that breaks the contract becomes a 500. In development, it logs and sets `X-Contract-Violation`; the real answer stays.

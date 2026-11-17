@@ -136,17 +136,17 @@ Single-flight + skip-when-idle, then dispatch:
 - A run already `RUNNING` (orphans older than 30 min are auto-expired first) → records a `SKIPPED` run.
 - No OPEN tasks across any source → records a `SKIPPED` run.
 - Otherwise creates a `RUNNING` run and fires `repository_dispatch` (`solve-agent-tasks`, `client_payload.cronRunId`). Dispatch failure → the run is marked `FAILED`.
-- **Always returns `200`** with the `cron_run` object — a 4xx/5xx could make a cron scheduler auto-retry and create duplicate runs.
+- Always answers with the `cron_run` object, never an error status. An error could make a cron scheduler retry and create duplicate runs.
 
 ### GET `/api/cron/github-issues` — GitHub-issue agent dispatcher
 Same auth as `/agent-tasks` (admin session via the per-job "Jetzt ausführen" button, or `CRON_SECRET`). Manual-only — no scheduled cron for it.
 - A `solve-github-issues` run already `RUNNING` → records a `SKIPPED` run.
 - Otherwise creates a `RUNNING` run and fires `repository_dispatch` (`solve-github-issues`, `client_payload.cronRunId`) → the [`github-issue-agent.yml`](../../.github/workflows/github-issue-agent.yml) workflow. Dispatch failure → `FAILED`.
 - No work-queue pre-check (the issues live on GitHub): it always dispatches; the agent reports the outcome via the same `/runs/:id/complete` callback (`tasksSolved=1` implemented, `tasksRejected=1` input-needed, both `0` if no issue was open).
-- **Always returns `200`** with the `cron_run` object.
+- Always answers with the `cron_run` object.
 
 ### POST `/api/cron/runs/:id/complete` — runner callback
-Agent token. Sets `finishedAt`, `durationMs`, `status`, `githubRunUrl`, `result`. `404` if no run with that id; `400` on body validation failure. `result` holds `{openTasks,dispatched}`, `{tasksSolved,tasksRejected}`, or `{skipReason}`.
+Agent token. Closes the run: sets `finishedAt`, `durationMs`, `status`, `githubRunUrl`, `result`.
 
 ### GET `/api/cron/runs` and `/api/cron/jobs` (admin)
 `runs` is the paginated history. `jobs` lists each configured job with its newest run attached.
@@ -168,7 +168,7 @@ Each job renders as its own card in `/admin/cron` with a dedicated "Jetzt ausfü
 | `CLAUDE_CODE_OAUTH_TOKEN` | GitHub repo secret | Claude CLI auth in the GitHub-issue agent (subscription token via `claude setup-token`; use **instead of** `ANTHROPIC_API_KEY`) |
 | `GH_PROJECT_TOKEN` | GitHub repo secret | **GitHub-issue agent only.** Classic PAT with scopes `repo`, `project`, `read:org`. Used by `gh` + `git` for issue/label/PR/push **and** moving the issue on Project board #7. The default `GITHUB_TOKEN` cannot write Projects v2. |
 
-All are read from `process.env`; never commit values. No cron schedule is configured. The admin "Run now" button (`/admin/cron`) triggers the dispatch on demand, also locally.
+All are read from `process.env`; never commit values. Schedules (`backend/src/config/cronJobs.ts`): `solve-tasks` runs daily at 02:00 UTC (`agent-task-runner.yml` also has a `0 2 * * *` schedule as a legacy fallback). `solve-github-issues` runs manually only. The admin "Run now" button (`/admin/cron`) triggers the dispatch on demand, also locally.
 
 ---
 
@@ -195,7 +195,7 @@ A **second** autonomous agent, separate from the agent-task runner. It works aga
 
 ## For skill authors
 
-A workshop skill drives this API as an agent. Use the **agent endpoints only** — the admin endpoints (`summary`, `reset`, list, detail) are for the human dashboard.
+A workshop skill drives this API as an agent. Use the **agent endpoints only** — the admin-only endpoints (`summary`, `reset`, list) are for the human dashboard. `GET /:id` accepts the agent token or an admin session.
 
 **Auth.** Send the agent token on every call (`AGENT_API_TOKEN`). Same token and header scheme as the Tickets API:
 
@@ -207,13 +207,15 @@ X-Agent-Token: $AGENT_API_TOKEN
 
 **The calls a skill needs:**
 
-| Step | Call | Notes |
-|------|------|-------|
-| Claim | `GET /api/agent-tasks/next?source=…` | **`source` is required** — one of `EMAIL`, `GITHUB_ISSUE`, `APP_LOG`, `ERROR_REPORT`. Claims the oldest `OPEN` task of that source, flips it to `IN_PROGRESS`. **`204` = none for that source.** |
-| Start | `POST /api/agent-tasks/:id/start` | No body. From `OPEN` → `IN_PROGRESS`. Use when you have the id but did not go through `/next`. |
-| Read | `GET /api/agent-tasks/:id` | Re-read a task by id. Accepts agent token or loopback bypass. |
-| Finish | `POST /api/agent-tasks/:id/done` | Body `{ "comment"?: string }`. From `IN_PROGRESS` → `DONE`. |
-| Reject | `POST /api/agent-tasks/:id/reject` | Body `{ "comment": string }` (required). From `IN_PROGRESS` → `REJECTED`. Use when the task is out of scope or not worth doing. |
+Request and response shapes: [`openapi/paths/agent-tasks.yaml`](../../openapi/paths/agent-tasks.yaml).
+
+| Step | Purpose | Notes |
+|------|---------|-------|
+| Claim (`GET /next`) | Take the oldest `OPEN` task of one source | `source` is required. Flips the task to `IN_PROGRESS`. `204` = none for that source. |
+| Start (`POST /:id/start`) | Start a task by id | Only from `OPEN`. Use it when you have the id but skipped `/next`. |
+| Read (`GET /:id`) | Re-read a task | Agent token, loopback bypass, or admin session. |
+| Finish (`POST /:id/done`) | Mark the task `DONE` | Allowed from `OPEN` or `IN_PROGRESS`. A finished task gets `409`. |
+| Reject (`POST /:id/reject`) | Mark the task `REJECTED` | Comment required. Allowed from `OPEN` or `IN_PROGRESS`. Use for out-of-scope tasks. |
 
 **Loop shape:**
 
