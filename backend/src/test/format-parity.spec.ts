@@ -1,5 +1,5 @@
 /**
- * Format parity: Ajv 2020 + ajv-formats (project factory, `unicode: false`) must
+ * Format parity: Ajv 2020 + custom formats (project factory, `unicode: false`) must
  * give the same email and uri verdicts as Zod did (fixtures/format-parity.json).
  * Differences are only allowed after an orchestrator decision: add them to
  * `acceptedDifferences`.

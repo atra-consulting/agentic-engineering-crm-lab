@@ -4,7 +4,6 @@
  * bundle exactly the same way. Documented in openapi/README.md ("Ajv setup").
  */
 import { Ajv2020, type Logger, type Options } from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
 
 /**
  * Ajv 8 marks `unicode` as deprecated and warns on every instance, but still
@@ -20,6 +19,27 @@ const AJV_LOGGER: Logger = {
   },
   error: (...args: unknown[]) => console.error(...args),
 };
+
+/**
+ * Formats reproduce Zod 4 verdicts to keep the pre-contract tolerance; see
+ * format-parity.spec.ts. `email`: Zod 4's default email regex. `uri`: Zod 4's
+ * `z.string().url()`, i.e. whatever the WHATWG `new URL()` parses (trims
+ * whitespace, accepts IDN hosts, rejects ports > 65535).
+ */
+const ZOD_EMAIL_REGEX = /^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/;
+
+export function isZodEmail(value: string): boolean {
+  return ZOD_EMAIL_REGEX.test(value);
+}
+
+export function isZodUrl(value: string): boolean {
+  try {
+    new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /** Key under which the bundle is registered; refs look like `spec#/components/schemas/X`. */
 export const SPEC_ID = 'spec';
@@ -60,9 +80,8 @@ export type ContractAjvKind = 'body' | 'plain';
 /** A fresh Ajv 2020 instance of the given kind, with the contract formats, without the bundle. */
 export function createAjv(kind: ContractAjvKind): Ajv2020 {
   const ajv = new Ajv2020(kind === 'body' ? { ...AJV_BASE_OPTIONS, ...AJV_BODY_OPTIONS } : { ...AJV_BASE_OPTIONS });
-  // ajv-formats is CommonJS; under NodeNext its default import is module.exports,
-  // whose `.default` is the plugin function (types and runtime agree).
-  addFormats.default(ajv, [...CONTRACT_FORMATS]);
+  ajv.addFormat('email', { type: 'string', validate: isZodEmail });
+  ajv.addFormat('uri', { type: 'string', validate: isZodUrl });
   return ajv;
 }
 

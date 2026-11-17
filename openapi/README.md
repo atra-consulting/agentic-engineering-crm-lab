@@ -214,7 +214,8 @@ const validatePut = body.compile({
 - Both register the bundle as `spec` and the formats `email` and `uri`.
 - Base options: `strict: false`, `allowUnionTypes: true`, `allErrors: true`, `verbose: true`, `unicode: false`.
 - `unicode: false`: lengths count UTF-16 code units, like Zod and JS `.length`. Ajv 8 warns that the option is deprecated. The shared logger drops only that warning. Other Ajv warnings still print.
-- Imports: the named `{ Ajv2020 }` import and `addFormats.default(...)` type-check under the backend's NodeNext config and run under tsx.
+- Formats: `email` and `uri` are custom formats that reproduce the former Zod 4 behavior (WHATWG URL parsing for `uri`, Zod's email regex). `format-parity.spec.ts` verifies this.
+- Import: the named `{ Ajv2020 }` import type-checks under the backend's NodeNext config and runs under tsx.
 - Refs: `spec#` plus a JSON pointer. Escape `~` as `~0` and `/` as `~1`. `{id}` works raw or as `%7Bid%7D`.
 - Ajv does not follow a `$ref` in the middle of a pointer. Resolve OAS-level refs (parameters, responses, request bodies) in JS first, then compile at the target, for example `spec#/components/responses/BadRequest/content/application~1json/schema`.
 - `strict: false`: Ajv ignores `example`, `discriminator`, `xml`, `externalDocs` and every `x-*` keyword. No vocabulary registration needed. Unknown formats are ignored too (with a console warning), hence the format rule.
