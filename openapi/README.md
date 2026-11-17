@@ -41,7 +41,7 @@ Adding an entity or endpoint:
 
 ## Contributor rules
 
-- `api:check` fails → run `npm run api:generate`, commit the result.
+- `api:check` fails at the drift step → run `npm run api:generate`, commit the result. Lint, rule or Ajv-compile failures → fix the contract in `openapi/`.
 - `api:check` also fails while regenerated files are uncommitted (it compares against git). Regenerate, commit, rerun.
 - Merge conflict in a generated file → resolve the conflict in `openapi/`, then run `npm run api:generate`. Never hand-merge generated files.
 - Never edit generated files.

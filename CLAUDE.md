@@ -98,7 +98,7 @@ Last steps: write tests (contract coverage needs every new operation to answer 2
 
 ## Contract Contributor Rules
 
-- `api:check` fails → run `npm run api:generate`, commit the result.
+- `api:check` fails at the drift step → run `npm run api:generate`, commit the result. Lint, rule or Ajv-compile failures → fix the contract in `openapi/`.
 - Merge conflict in a generated file → resolve the conflict in `openapi/`, then run `npm run api:generate`. Never hand-merge.
 - Never edit generated files: `backend/src/generated/openapi.json`, `backend/src/generated/api-types.ts`, `frontend/src/app/core/api/api-types.ts`.
 - Commit the contract and the three generated files together. CI runs `api:check` in `.github/workflows/deploy.yml` before `tsc`.
