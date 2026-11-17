@@ -2,18 +2,9 @@ import { client } from '../config/db.js';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
 import type { PersonDTO } from './personService.js';
-import type { RequestBody } from '../openapi/types.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
-export interface AbteilungDTO {
-  id: number;
-  name: string;
-  description: string | null;
-  firmaId: number;
-  firmaName: string | null;
-  personenCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
+export type AbteilungDTO = Schema<'Abteilung'>;
 
 interface AbteilungRow {
   id: number;

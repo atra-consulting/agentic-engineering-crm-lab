@@ -2,23 +2,9 @@ import { client } from '../config/db.js';
 import type { InValue } from '@libsql/client';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import type { RequestBody } from '../openapi/types.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
-export interface PersonDTO {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string | null;
-  phone: string | null;
-  position: string | null;
-  notes: string | null;
-  firmaId: number;
-  firmaName: string | null;
-  abteilungId: number | null;
-  abteilungName: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type PersonDTO = Schema<'Person'>;
 
 interface PersonRow {
   id: number;

@@ -2,34 +2,11 @@ import { client } from '../config/db.js';
 import type { InValue } from '@libsql/client';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import type { RequestBody } from '../openapi/types.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
-export interface FirmaAddressSummary {
-  id: number;
-  street: string | null;
-  houseNumber: string | null;
-  postalCode: string | null;
-  city: string | null;
-  country: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  typ: string | null;
-}
+export type FirmaAddressSummary = Schema<'FirmaAdresse'>;
 
-export interface FirmaDTO {
-  id: number;
-  name: string;
-  industry: string | null;
-  website: string | null;
-  phone: string | null;
-  email: string | null;
-  notes: string | null;
-  personenCount: number;
-  abteilungenCount: number;
-  adressen?: FirmaAddressSummary[];
-  createdAt: string;
-  updatedAt: string;
-}
+export type FirmaDTO = Schema<'Firma'>;
 
 interface FirmaRow {
   id: number;

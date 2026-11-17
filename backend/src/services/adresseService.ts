@@ -2,28 +2,12 @@ import { client } from '../config/db.js';
 import type { InValue } from '@libsql/client';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import type { RequestBody } from '../openapi/types.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 
 type AdresseCreateDTO = RequestBody<'createAdresse'>;
 type AdresseUpdateDTO = RequestBody<'updateAdresse'>;
 
-export interface AdresseDTO {
-  id: number;
-  street: string | null;
-  houseNumber: string | null;
-  postalCode: string | null;
-  city: string | null;
-  country: string | null;
-  typ: string | null;
-  firmaId: number | null;
-  firmaName: string | null;
-  personId: number | null;
-  personName: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type AdresseDTO = Schema<'Adresse'>;
 
 interface AdresseRow {
   id: number;
