@@ -166,6 +166,7 @@ oder den Ordner, in dem du sie gefunden hast:
 | `port 7070 is already in use` (7070 ist der Server im Hintergrund) | `./end.sh` ausführen, dann `./start.sh` erneut. |
 | `Node.js 20.19 or later is required` | Node.js nach `docs/SETUP.md` aktualisieren — v22 oder neuer —, Terminal neu öffnen. |
 | Klonen bricht ab (Proxy, Zertifikat) | Firmennetz filtert — Hotspot vom Handy für den Klon, danach mit der IT klären. |
+| Klonen klappt gar nicht, auch nicht über den Hotspot | Notlösung ZIP: [main.zip](https://github.com/atra-consulting/agentic-engineering-crm-lab/archive/refs/heads/main.zip) herunterladen (keine Anmeldung nötig), entpacken, den Ordner `agentic-engineering-crm-lab-main` in `coding-with-ai-lab` umbenennen und in euren Benutzerordner legen. Der ZIP fehlt Git — deshalb im Ordner einmal `git init -b main`, `git add .` und `git commit -m "Start"`, sonst klappen Branch, Commit und `git diff main` in den späteren Übungen nicht. Fragt Git dabei nach Name und E-Mail: Handheben. `git pull` geht damit nicht: Bei Änderungen am Trainingstag die ZIP neu holen. |
 | `./start.sh: Permission denied` | `bash start.sh` |
 | Windows: `start.sh` nicht gefunden | Ihr seid in PowerShell — Git Bash öffnen. |
 | `claude` oder `copilot` startet nicht oder will sich anmelden und es klappt nicht | Sofort Handheben — bis zum Lab ist Zeit für eine Lösung oder ein Paar. |
