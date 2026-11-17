@@ -1,28 +1,21 @@
 import { Router, type Request, type Response } from 'express';
-import { z } from 'zod';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { requireAgentToken, requireAgentTokenOrAdminSession } from '../middleware/agentAuth.js';
 import { agentTaskService } from '../services/agentTaskService.js';
 import { parsePaginationParams, parseSort } from '../utils/pagination.js';
-import { validate } from '../utils/validation.js';
+import { specValidate } from '../openapi/specValidate.js';
+import type { RequestBody } from '../openapi/types.js';
 import { ValidationError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AGENT_TASK_SOURCE, AGENT_TASK_STATUS } from '../db/schema/enums.js';
 
 const router = Router();
 
-const RejectBodySchema = z.object({
-  comment: z.string().min(1),
-});
-
-const DoneBodySchema = z.object({
-  comment: z.string().optional(),
-});
-
 // GET /api/agent-tasks/next
 router.get(
   '/next',
   requireAgentToken,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const source = req.query['source'] as string | undefined;
     if (!source) {
@@ -47,6 +40,7 @@ router.get(
   '/summary',
   requireAuth,
   requireRole('ADMIN'),
+  specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     res.json(await agentTaskService.getSummary());
   }),
@@ -57,6 +51,7 @@ router.post(
   '/reset',
   requireAuth,
   requireRole('ADMIN'),
+  specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     const count = await agentTaskService.resetAll();
     res.json({ reset: count });
@@ -67,6 +62,7 @@ router.post(
 router.post(
   '/:id/start',
   requireAgentToken,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     res.json(await agentTaskService.start(id));
@@ -77,9 +73,10 @@ router.post(
 router.post(
   '/:id/reject',
   requireAgentToken,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(RejectBodySchema, req.body);
+    const dto = req.body as RequestBody<'rejectAgentTask'>;
     res.json(await agentTaskService.reject(id, dto.comment));
   }),
 );
@@ -88,9 +85,10 @@ router.post(
 router.post(
   '/:id/done',
   requireAgentToken,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(DoneBodySchema, req.body);
+    const dto = req.body as RequestBody<'completeAgentTask'>;
     res.json(await agentTaskService.done(id, dto.comment));
   }),
 );
@@ -99,6 +97,7 @@ router.post(
 router.get(
   '/:id',
   requireAgentTokenOrAdminSession,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     res.json(await agentTaskService.findById(id));
@@ -110,6 +109,7 @@ router.get(
   '/',
   requireAuth,
   requireRole('ADMIN'),
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const { page, size } = parsePaginationParams(req.query as Record<string, unknown>);
     const sort = parseSort(

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import type { RequestBody } from '../openapi/types.js';
 import { client } from '../config/db.js';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, parsePaginationParams, parseSort, type PageResult, type SortParams } from '../utils/pagination.js';
@@ -47,17 +47,6 @@ function toDTO(row: CronRunRow): CronRunDTO {
     error: row.error,
   };
 }
-
-// ─── Zod schema for POST /runs/:id/complete ───────────────────────────────────
-
-export const CompleteRunBodySchema = z.object({
-  status: z.enum(['SUCCESS', 'FAILED']),
-  tasksSolved: z.number().int().min(0),
-  tasksRejected: z.number().int().min(0),
-  githubRunUrl: z.string().url(),
-});
-
-export type CompleteRunBody = z.infer<typeof CompleteRunBodySchema>;
 
 // ─── Service functions ────────────────────────────────────────────────────────
 
@@ -130,7 +119,7 @@ export async function markFailed(id: number, error: string): Promise<CronRunDTO>
  */
 export async function completeRun(
   id: number,
-  body: CompleteRunBody,
+  body: RequestBody<'completeCronRun'>,
 ): Promise<CronRunDTO> {
   const now = new Date().toISOString();
   const { status, tasksSolved, tasksRejected, githubRunUrl } = body;
