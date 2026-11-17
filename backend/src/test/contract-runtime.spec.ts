@@ -42,7 +42,7 @@ function validSzenario(): Record<string, unknown> {
     humanSteps: { works: works(19), waits: works(18) },
     agileKiSteps: { works: works(19), waits: works(18) },
     semiAutomatedSteps: { works: works(11), waits: works(10) },
-    automatedSteps: { works: works(11), waits: works(10) },
+    automatedSteps: { works: works(2), waits: works(1) },
   };
 }
 
@@ -133,7 +133,7 @@ test.describe('mapAjvErrors', () => {
   });
 
   test('maxLength gives "Maximal 255 Zeichen"', () => {
-    expect(bodyErrors('createFirma', { name: 'a'.repeat(256), industry: 'b'.repeat(256) })).toEqual({
+    expect(bodyErrors('createFirma', { name: 'a', industry: 'b'.repeat(256) })).toEqual({
       industry: 'Maximal 255 Zeichen',
     });
   });
