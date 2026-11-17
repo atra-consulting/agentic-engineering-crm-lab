@@ -139,7 +139,7 @@ All requirements are "Must" unless marked "Should". The technical details are in
   - Migrate one service at a time.
 - **R21 — Fix the web app, not the contract.**
   - The aliases expose today's mismatches (TN7 table). Fix them in the web app code.
-  - Show a placeholder for empty values. Forms treat empty values as blank text. No forced type casts.
+  - Empty values keep today's display and form behavior. Change only what the type check forces. Forms keep sending empty values as today, so stored data does not change. No forced type casts.
   - Update the unit tests that use model data, and make sure they pass.
 
 ### D. Generated files and workflow
@@ -508,11 +508,11 @@ The user approved D1–D6 as recommended on 2026-11-17.
 | TicketCreate, TicketCommentCreate | no agentTaskId, fullyReady, clearFullyReady, author | optional fields |
 
   AgentTask, Cron, Dashboard, Auth and Szenario match today. The plan re-checks them.
-- Nullability rule:
-  - Templates show "-" for empty values.
-  - Forms patch empty values as blank text.
-  - No `!` assertions and no `as` casts.
-  - Expect 5–10 places to change.
+- Nullability rule (revised after the plan review, 2026-11-17):
+  - Change only what the compiler forces, for example pipes or inputs that reject `null`.
+  - Templates keep today's output. No new "-" placeholders where the UI shows blank today.
+  - Forms keep `null`. Patching `''` would change the stored data from NULL to an empty string.
+  - No `!` assertions and no `as` casts in feature code. The typed helper's internals are exempt.
 - Ticket service mapping:
   - `getBoard` → TicketBoard, with TicketListItem columns.
   - `getAll` → page of TicketListItem.
