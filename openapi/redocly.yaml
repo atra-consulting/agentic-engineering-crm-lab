@@ -1,0 +1,63 @@
+# Redocly lint config for the CRM API contract.
+# Run: cd backend && npm run api:check  (lint + generate + project rules + Ajv compile + drift check)
+# Lint only: cd backend && npx redocly lint --config ../openapi/redocly.yaml ../openapi/openapi.yaml
+# Exemptions with reasons: .redocly.lint-ignore.yaml (same folder).
+# Rules Redocly cannot express run as JS checks in backend/scripts/api-check.ts:
+#   - an operation with a `sort` query param has a non-empty `x-sort-fields` and an `x-default-sort`
+#   - `x-loopback-bypass` only where security includes `agentBearer`
+#   - no `allOf` anywhere inside a request body schema (nested and behind $refs)
+#   - operationIds and paths match the binding table in README.md
+#   - component names are PascalCase; only the vendor keywords listed in README.md
+extends:
+  - recommended
+
+# No usage data leaves the machine (the scripts also set REDOCLY_TELEMETRY=off).
+telemetry: 'off'
+
+rules:
+  operation-operationId: error
+  operation-summary: error
+  security-defined: error
+  operation-4xx-response: error
+
+  # Request bodies run through Ajv with removeAdditional: 'all', which strips
+  # properties declared in sibling allOf branches. This catches allOf on the
+  # schema reached from a requestBody; api-check.ts also walks nested schemas.
+  rule/no-allof-in-request-body:
+    subject:
+      type: Schema
+      property: allOf
+    where:
+      - subject:
+          type: RequestBody
+        assertions:
+          defined: true
+    assertions:
+      defined: false
+    message: Request body schemas must not use allOf (removeAdditional 'all' strips sibling properties).
+    severity: error
+
+  # The runtime loads ajv-formats with these two formats only.
+  rule/allowed-formats:
+    subject:
+      type: Schema
+      property: format
+    assertions:
+      enum: [email, uri]
+    message: Only the formats email and uri are allowed.
+    severity: error
+
+  # Every guarded operation documents the 401 its guard can answer.
+  rule/secured-operation-declares-401:
+    subject:
+      type: Responses
+    where:
+      - subject:
+          type: Operation
+          property: security
+        assertions:
+          minLength: 1
+    assertions:
+      required: ['401']
+    message: An operation with a non-empty security requirement must declare a 401 response.
+    severity: error

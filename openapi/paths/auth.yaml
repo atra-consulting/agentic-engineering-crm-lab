@@ -1,0 +1,6 @@
+# Area: auth. Source: backend/src/routes/auth.ts, backend/src/config/users.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/auth/login: {}
+/auth/logout: {}
+/auth/me: {}
+/auth/test-login: {}

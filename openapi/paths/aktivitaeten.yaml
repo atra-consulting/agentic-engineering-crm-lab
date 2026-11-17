@@ -1,0 +1,5 @@
+# Area: aktivitaeten. Source: backend/src/routes/aktivitaeten.ts, backend/src/services/aktivitaetService.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/aktivitaeten: {}
+/aktivitaeten/all: {}
+/aktivitaeten/{id}: {}

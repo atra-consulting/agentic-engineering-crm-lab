@@ -1,0 +1,8 @@
+# Area: auth. Source: backend/src/routes/auth.ts, backend/src/config/users.ts.
+# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
+LoginRequest: {}
+LoginResponse: {}
+BenutzerInfo: {}
+TestLoginRequest: {}
+Rolle: {}
+Permission: {}

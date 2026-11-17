@@ -1,0 +1,156 @@
+# Shared schemas, parameters and error answers.
+# Indexed in openapi.yaml under components.schemas / parameters / responses.
+# Area files reference them as ../common.yaml#/<section>/<Name>.
+
+schemas:
+  ErrorResponse:
+    type: object
+    description: |
+      Every error answer (4xx and 5xx), built by `middleware/errorHandler.ts`.
+      `fieldErrors` is empty except for input errors.
+    additionalProperties: false
+    required: [status, message, timestamp, fieldErrors]
+    properties:
+      status:
+        type: integer
+        description: HTTP status code, repeated in the body.
+      message:
+        type: string
+        description: German top-level message, for example `Validierungsfehler` or `Firma mit ID 99 nicht gefunden`.
+      timestamp:
+        type: string
+        description: Server time, ISO-8601 with milliseconds and no `Z` suffix, for example `2026-04-15T10:30:00.123`.
+      fieldErrors:
+        type: object
+        description: Field name (dot path inside the body, path parameter name, or `_` for the whole body) mapped to a German text.
+        additionalProperties:
+          type: string
+
+  PageMeta:
+    type: object
+    description: |
+      Paging fields of every page answer (Spring Data Page shape).
+      Page schemas combine it with `allOf` and `unevaluatedProperties: false`.
+    required: [totalElements, totalPages, size, number, first, last]
+    properties:
+      totalElements:
+        type: integer
+        description: Number of rows across all pages.
+      totalPages:
+        type: integer
+      size:
+        type: integer
+        description: Page size used for this answer.
+      number:
+        type: integer
+        description: Current page, 0-indexed.
+      first:
+        type: boolean
+      last:
+        type: boolean
+
+  EmptyObject:
+    type: object
+    description: |
+      An object with no declared properties. As a request body, extra fields
+      are stripped and ignored. As an answer, the server sends `{}`.
+
+parameters:
+  IdPath:
+    name: id
+    in: path
+    required: true
+    description: Record id, a positive whole number without sign or leading zeros.
+    schema:
+      type: string
+      pattern: '^[1-9][0-9]*$'
+      x-error-messages:
+        type: Ungültige ID
+        pattern: Ungültige ID
+
+  FirmaIdPath:
+    name: firmaId
+    in: path
+    required: true
+    description: Company id, a positive whole number without sign or leading zeros.
+    schema:
+      type: string
+      pattern: '^[1-9][0-9]*$'
+      x-error-messages:
+        type: Ungültige ID
+        pattern: Ungültige ID
+
+  PageQuery:
+    name: page
+    in: query
+    required: false
+    description: Page number, 0-indexed. A missing, negative or non-numeric value falls back to 0.
+    schema:
+      type: integer
+      default: 0
+
+  SizeQuery:
+    name: size
+    in: query
+    required: false
+    description: Page size. Default 10. Values above 200 are capped at 200. A missing, non-positive or non-numeric value falls back to 10.
+    schema:
+      type: integer
+      default: 10
+
+  SortQuery:
+    name: sort
+    in: query
+    required: false
+    description: |
+      field,direction; direction in any case (asc/ASC/desc/DESC).
+      The allowed fields are the operation's `x-sort-fields`; the default is its
+      `x-default-sort`. An unknown field answers 400 with the message
+      `Ungültiges Sortierfeld: <field>`. A missing or unknown direction falls
+      back to the default direction.
+    schema:
+      type: string
+
+  SearchQuery:
+    name: search
+    in: query
+    required: false
+    description: Case-insensitive substring filter. The operation description names the matched field.
+    schema:
+      type: string
+
+responses:
+  BadRequest:
+    description: Invalid input. `message` names the problem; `fieldErrors` maps fields to German texts.
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/ErrorResponse'
+
+  Unauthorized:
+    description: Not authenticated (no session, or a missing or wrong token).
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/ErrorResponse'
+
+  Forbidden:
+    description: Authenticated, but the role is not allowed (`Zugriff verweigert`).
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/ErrorResponse'
+
+  NotFound:
+    description: Record not found.
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/ErrorResponse'
+
+  Conflict:
+    description: Conflict with the current data, for example a duplicate name or an invalid state change.
+    content:
+      application/json:
+        schema:
+          $ref: '#/schemas/ErrorResponse'

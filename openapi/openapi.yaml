@@ -1,0 +1,404 @@
+# CRM API contract — single source of truth for the backend and the web app.
+# Rules, workflow and the binding operationId table: see README.md in this folder.
+# After every edit: cd backend && npm run api:generate
+openapi: 3.1.0
+info:
+  title: CRM API
+  version: 1.0.0
+  summary: Contract for the CRM backend (Express) and the Angular web app.
+  description: |
+    Hand-written OpenAPI 3.1 contract. One file per area under `paths/` and
+    `schemas/`; shared parts live in `common.yaml`.
+
+    Error answers always use `ErrorResponse`. Texts are German.
+  license:
+    name: MIT
+    identifier: MIT
+
+servers:
+  - url: /api
+
+tags:
+  - name: health
+    description: Liveness probe.
+  - name: auth
+    description: Session login, logout and the current user.
+  - name: firmen
+    description: Companies (Firma), the top-level CRM record.
+  - name: personen
+    description: Contacts (Person) at a company.
+  - name: abteilungen
+    description: Departments (Abteilung) inside a company.
+  - name: adressen
+    description: Postal addresses (Adresse).
+  - name: aktivitaeten
+    description: Logged interactions (Aktivitaet).
+  - name: chancen
+    description: Sales opportunities (Chance).
+  - name: dashboard
+    description: Aggregated numbers for the start page.
+  - name: szenarien
+    description: Saved scenarios for the cycle-time calculator.
+  - name: agent-tasks
+    description: Work queue of the autonomous agent-task runner.
+  - name: tickets
+    description: Kanban ticket system for the software-factory training.
+  - name: cron
+    description: Scheduled and manual CI workflow dispatches.
+
+# No global `security`: every operation states its own rule (README, "Security mapping").
+paths:
+  # health
+  /health:
+    $ref: paths/health.yaml#/~1health
+
+  # auth
+  /auth/login:
+    $ref: paths/auth.yaml#/~1auth~1login
+  /auth/logout:
+    $ref: paths/auth.yaml#/~1auth~1logout
+  /auth/me:
+    $ref: paths/auth.yaml#/~1auth~1me
+  /auth/test-login:
+    $ref: paths/auth.yaml#/~1auth~1test-login
+
+  # firmen
+  /firmen:
+    $ref: paths/firmen.yaml#/~1firmen
+  /firmen/all:
+    $ref: paths/firmen.yaml#/~1firmen~1all
+  /firmen/{id}:
+    $ref: paths/firmen.yaml#/~1firmen~1{id}
+  /firmen/{id}/personen:
+    $ref: paths/firmen.yaml#/~1firmen~1{id}~1personen
+  /firmen/{id}/abteilungen:
+    $ref: paths/firmen.yaml#/~1firmen~1{id}~1abteilungen
+
+  # personen
+  /personen:
+    $ref: paths/personen.yaml#/~1personen
+  /personen/all:
+    $ref: paths/personen.yaml#/~1personen~1all
+  /personen/{id}:
+    $ref: paths/personen.yaml#/~1personen~1{id}
+
+  # abteilungen
+  /abteilungen:
+    $ref: paths/abteilungen.yaml#/~1abteilungen
+  /abteilungen/all:
+    $ref: paths/abteilungen.yaml#/~1abteilungen~1all
+  /abteilungen/firma/{firmaId}:
+    $ref: paths/abteilungen.yaml#/~1abteilungen~1firma~1{firmaId}
+  /abteilungen/{id}:
+    $ref: paths/abteilungen.yaml#/~1abteilungen~1{id}
+  /abteilungen/{id}/personen:
+    $ref: paths/abteilungen.yaml#/~1abteilungen~1{id}~1personen
+
+  # adressen
+  /adressen:
+    $ref: paths/adressen.yaml#/~1adressen
+  /adressen/all:
+    $ref: paths/adressen.yaml#/~1adressen~1all
+  /adressen/{id}:
+    $ref: paths/adressen.yaml#/~1adressen~1{id}
+
+  # aktivitaeten
+  /aktivitaeten:
+    $ref: paths/aktivitaeten.yaml#/~1aktivitaeten
+  /aktivitaeten/all:
+    $ref: paths/aktivitaeten.yaml#/~1aktivitaeten~1all
+  /aktivitaeten/{id}:
+    $ref: paths/aktivitaeten.yaml#/~1aktivitaeten~1{id}
+
+  # chancen
+  /chancen:
+    $ref: paths/chancen.yaml#/~1chancen
+  /chancen/all:
+    $ref: paths/chancen.yaml#/~1chancen~1all
+  /chancen/{id}:
+    $ref: paths/chancen.yaml#/~1chancen~1{id}
+
+  # dashboard
+  /dashboard:
+    $ref: paths/dashboard.yaml#/~1dashboard
+
+  # szenarien
+  /szenarien:
+    $ref: paths/szenarien.yaml#/~1szenarien
+  /szenarien/{id}:
+    $ref: paths/szenarien.yaml#/~1szenarien~1{id}
+
+  # agent-tasks
+  /agent-tasks/next:
+    $ref: paths/agent-tasks.yaml#/~1agent-tasks~1next
+  /agent-tasks/summary:
+    $ref: paths/agent-tasks.yaml#/~1agent-tasks~1summary
+  /agent-tasks/reset:
+    $ref: paths/agent-tasks.yaml#/~1agent-tasks~1reset
+  /agent-tasks/{id}/start:
+    $ref: paths/agent-tasks.yaml#/~1agent-tasks~1{id}~1start
+  /agent-tasks/{id}/reject:
+    $ref: paths/agent-tasks.yaml#/~1agent-tasks~1{id}~1reject
+  /agent-tasks/{id}/done:
+    $ref: paths/agent-tasks.yaml#/~1agent-tasks~1{id}~1done
+  /agent-tasks/{id}:
+    $ref: paths/agent-tasks.yaml#/~1agent-tasks~1{id}
+  /agent-tasks:
+    $ref: paths/agent-tasks.yaml#/~1agent-tasks
+
+  # tickets
+  /tickets/next:
+    $ref: paths/tickets.yaml#/~1tickets~1next
+  /tickets/board:
+    $ref: paths/tickets.yaml#/~1tickets~1board
+  /tickets/summary:
+    $ref: paths/tickets.yaml#/~1tickets~1summary
+  /tickets/reset:
+    $ref: paths/tickets.yaml#/~1tickets~1reset
+  /tickets:
+    $ref: paths/tickets.yaml#/~1tickets
+  /tickets/{id}:
+    $ref: paths/tickets.yaml#/~1tickets~1{id}
+  /tickets/{id}/status:
+    $ref: paths/tickets.yaml#/~1tickets~1{id}~1status
+  /tickets/{id}/owner:
+    $ref: paths/tickets.yaml#/~1tickets~1{id}~1owner
+  /tickets/{id}/start:
+    $ref: paths/tickets.yaml#/~1tickets~1{id}~1start
+  /tickets/{id}/done:
+    $ref: paths/tickets.yaml#/~1tickets~1{id}~1done
+  /tickets/{id}/ask:
+    $ref: paths/tickets.yaml#/~1tickets~1{id}~1ask
+  /tickets/{id}/wont-do:
+    $ref: paths/tickets.yaml#/~1tickets~1{id}~1wont-do
+  /tickets/{id}/hand-to-ai:
+    $ref: paths/tickets.yaml#/~1tickets~1{id}~1hand-to-ai
+  /tickets/{id}/comments:
+    $ref: paths/tickets.yaml#/~1tickets~1{id}~1comments
+
+  # cron
+  /cron/agent-tasks:
+    $ref: paths/cron.yaml#/~1cron~1agent-tasks
+  /cron/github-issues:
+    $ref: paths/cron.yaml#/~1cron~1github-issues
+  /cron/runs/{id}/complete:
+    $ref: paths/cron.yaml#/~1cron~1runs~1{id}~1complete
+  /cron/runs:
+    $ref: paths/cron.yaml#/~1cron~1runs
+  /cron/jobs:
+    $ref: paths/cron.yaml#/~1cron~1jobs
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+      description: |
+        Session cookie set by `POST /auth/login`. Scope `ADMIN` in a security
+        requirement means the session user must hold the role ADMIN
+        (`requireRole('ADMIN')`); a missing or wrong role answers 403.
+    agentBearer:
+      type: http
+      scheme: bearer
+      description: |
+        Agent token (`AGENT_API_TOKEN`) as `Authorization: Bearer <token>`.
+        Checked before `X-Agent-Token`. A wrong token answers 401 and never
+        falls through to the session.
+    agentHeader:
+      type: apiKey
+      in: header
+      name: X-Agent-Token
+      description: Agent token (`AGENT_API_TOKEN`) in the `X-Agent-Token` header.
+    cronBearer:
+      type: http
+      scheme: bearer
+      description: |
+        Cron secret (`CRON_SECRET`) as `Authorization: Bearer <secret>`.
+        A wrong secret falls through to the admin session check.
+
+  # Index of every schema. Each name points into its area file.
+  schemas:
+    # common
+    ErrorResponse:
+      $ref: common.yaml#/schemas/ErrorResponse
+    PageMeta:
+      $ref: common.yaml#/schemas/PageMeta
+    EmptyObject:
+      $ref: common.yaml#/schemas/EmptyObject
+    # health
+    Health:
+      $ref: schemas/health.yaml#/Health
+    # auth
+    LoginRequest:
+      $ref: schemas/auth.yaml#/LoginRequest
+    LoginResponse:
+      $ref: schemas/auth.yaml#/LoginResponse
+    BenutzerInfo:
+      $ref: schemas/auth.yaml#/BenutzerInfo
+    TestLoginRequest:
+      $ref: schemas/auth.yaml#/TestLoginRequest
+    Rolle:
+      $ref: schemas/auth.yaml#/Rolle
+    Permission:
+      $ref: schemas/auth.yaml#/Permission
+    # firmen
+    Firma:
+      $ref: schemas/firmen.yaml#/Firma
+    FirmaInput:
+      $ref: schemas/firmen.yaml#/FirmaInput
+    FirmaAdresse:
+      $ref: schemas/firmen.yaml#/FirmaAdresse
+    FirmaPage:
+      $ref: schemas/firmen.yaml#/FirmaPage
+    # personen
+    Person:
+      $ref: schemas/personen.yaml#/Person
+    PersonInput:
+      $ref: schemas/personen.yaml#/PersonInput
+    PersonPage:
+      $ref: schemas/personen.yaml#/PersonPage
+    # abteilungen
+    Abteilung:
+      $ref: schemas/abteilungen.yaml#/Abteilung
+    AbteilungInput:
+      $ref: schemas/abteilungen.yaml#/AbteilungInput
+    AbteilungPage:
+      $ref: schemas/abteilungen.yaml#/AbteilungPage
+    # adressen
+    Adresse:
+      $ref: schemas/adressen.yaml#/Adresse
+    AdresseInput:
+      $ref: schemas/adressen.yaml#/AdresseInput
+    AdressePage:
+      $ref: schemas/adressen.yaml#/AdressePage
+    # aktivitaeten
+    Aktivitaet:
+      $ref: schemas/aktivitaeten.yaml#/Aktivitaet
+    AktivitaetInput:
+      $ref: schemas/aktivitaeten.yaml#/AktivitaetInput
+    AktivitaetPage:
+      $ref: schemas/aktivitaeten.yaml#/AktivitaetPage
+    AktivitaetTyp:
+      $ref: schemas/aktivitaeten.yaml#/AktivitaetTyp
+    # chancen
+    Chance:
+      $ref: schemas/chancen.yaml#/Chance
+    ChanceInput:
+      $ref: schemas/chancen.yaml#/ChanceInput
+    ChancePage:
+      $ref: schemas/chancen.yaml#/ChancePage
+    ChancePhase:
+      $ref: schemas/chancen.yaml#/ChancePhase
+    # dashboard
+    DashboardData:
+      $ref: schemas/dashboard.yaml#/DashboardData
+    RecentChance:
+      $ref: schemas/dashboard.yaml#/RecentChance
+    RecentAktivitaet:
+      $ref: schemas/dashboard.yaml#/RecentAktivitaet
+    # szenarien
+    Szenario:
+      $ref: schemas/szenarien.yaml#/Szenario
+    SzenarioInput:
+      $ref: schemas/szenarien.yaml#/SzenarioInput
+    ProzessDauer:
+      $ref: schemas/szenarien.yaml#/ProzessDauer
+    # agent-tasks
+    AgentTask:
+      $ref: schemas/agent-tasks.yaml#/AgentTask
+    AgentTaskPage:
+      $ref: schemas/agent-tasks.yaml#/AgentTaskPage
+    AgentTaskSummary:
+      $ref: schemas/agent-tasks.yaml#/AgentTaskSummary
+    AgentTaskSource:
+      $ref: schemas/agent-tasks.yaml#/AgentTaskSource
+    AgentTaskStatus:
+      $ref: schemas/agent-tasks.yaml#/AgentTaskStatus
+    AgentTaskRejectInput:
+      $ref: schemas/agent-tasks.yaml#/AgentTaskRejectInput
+    AgentTaskDoneInput:
+      $ref: schemas/agent-tasks.yaml#/AgentTaskDoneInput
+    AgentTaskResetResult:
+      $ref: schemas/agent-tasks.yaml#/AgentTaskResetResult
+    # cron
+    CronRun:
+      $ref: schemas/cron.yaml#/CronRun
+    CronRunPage:
+      $ref: schemas/cron.yaml#/CronRunPage
+    CronJob:
+      $ref: schemas/cron.yaml#/CronJob
+    CronJobLastRun:
+      $ref: schemas/cron.yaml#/CronJobLastRun
+    CronRunStatus:
+      $ref: schemas/cron.yaml#/CronRunStatus
+    CronTrigger:
+      $ref: schemas/cron.yaml#/CronTrigger
+    CronRunCompleteInput:
+      $ref: schemas/cron.yaml#/CronRunCompleteInput
+    # tickets
+    TicketDetail:
+      $ref: schemas/tickets.yaml#/TicketDetail
+    TicketListItem:
+      $ref: schemas/tickets.yaml#/TicketListItem
+    TicketListItemPage:
+      $ref: schemas/tickets.yaml#/TicketListItemPage
+    TicketBoard:
+      $ref: schemas/tickets.yaml#/TicketBoard
+    TicketSummary:
+      $ref: schemas/tickets.yaml#/TicketSummary
+    TicketComment:
+      $ref: schemas/tickets.yaml#/TicketComment
+    TicketCreateInput:
+      $ref: schemas/tickets.yaml#/TicketCreateInput
+    TicketStatusInput:
+      $ref: schemas/tickets.yaml#/TicketStatusInput
+    TicketOwnerInput:
+      $ref: schemas/tickets.yaml#/TicketOwnerInput
+    TicketAskInput:
+      $ref: schemas/tickets.yaml#/TicketAskInput
+    TicketDoneInput:
+      $ref: schemas/tickets.yaml#/TicketDoneInput
+    TicketWontDoInput:
+      $ref: schemas/tickets.yaml#/TicketWontDoInput
+    TicketCommentInput:
+      $ref: schemas/tickets.yaml#/TicketCommentInput
+    TicketResetResult:
+      $ref: schemas/tickets.yaml#/TicketResetResult
+    TicketOwner:
+      $ref: schemas/tickets.yaml#/TicketOwner
+    TicketType:
+      $ref: schemas/tickets.yaml#/TicketType
+    TicketStatus:
+      $ref: schemas/tickets.yaml#/TicketStatus
+    TicketSolution:
+      $ref: schemas/tickets.yaml#/TicketSolution
+    TicketCommentAuthor:
+      $ref: schemas/tickets.yaml#/TicketCommentAuthor
+
+  # Shared parameters and error answers (common.yaml).
+  parameters:
+    IdPath:
+      $ref: common.yaml#/parameters/IdPath
+    FirmaIdPath:
+      $ref: common.yaml#/parameters/FirmaIdPath
+    PageQuery:
+      $ref: common.yaml#/parameters/PageQuery
+    SizeQuery:
+      $ref: common.yaml#/parameters/SizeQuery
+    SortQuery:
+      $ref: common.yaml#/parameters/SortQuery
+    SearchQuery:
+      $ref: common.yaml#/parameters/SearchQuery
+
+  responses:
+    BadRequest:
+      $ref: common.yaml#/responses/BadRequest
+    Unauthorized:
+      $ref: common.yaml#/responses/Unauthorized
+    Forbidden:
+      $ref: common.yaml#/responses/Forbidden
+    NotFound:
+      $ref: common.yaml#/responses/NotFound
+    Conflict:
+      $ref: common.yaml#/responses/Conflict

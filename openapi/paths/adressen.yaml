@@ -1,0 +1,5 @@
+# Area: adressen. Source: backend/src/routes/adressen.ts, backend/src/services/adresseService.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/adressen: {}
+/adressen/all: {}
+/adressen/{id}: {}

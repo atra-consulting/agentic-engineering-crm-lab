@@ -1,0 +1,21 @@
+# Area: tickets. Source: backend/src/routes/tickets.ts, backend/src/services/ticketService.ts.
+# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
+TicketDetail: {}
+TicketListItem: {}
+TicketListItemPage: {}
+TicketBoard: {}
+TicketSummary: {}
+TicketComment: {}
+TicketCreateInput: {}
+TicketStatusInput: {}
+TicketOwnerInput: {}
+TicketAskInput: {}
+TicketDoneInput: {}
+TicketWontDoInput: {}
+TicketCommentInput: {}
+TicketResetResult: {}
+TicketOwner: {}
+TicketType: {}
+TicketStatus: {}
+TicketSolution: {}
+TicketCommentAuthor: {}

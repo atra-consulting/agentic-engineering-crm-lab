@@ -1,0 +1,17 @@
+# Redocly lint exemptions. Redocly reads this file because it sits next to
+# redocly.yaml. Edit by hand and give a reason for every entry. Never run
+# `redocly lint --generate-ignore-file`: it rewrites this file and drops the
+# comments.
+openapi.yaml:
+  # True for today's API. Express registers /firma/:firmaId before
+  # /:id/personen, so /abteilungen/firma/personen hits listAbteilungenByFirma.
+  no-ambiguous-paths:
+    - '#/paths/~1abteilungen~1{id}~1personen'
+paths/health.yaml:
+  # Public liveness probe. It has no 4xx answer.
+  operation-4xx-response:
+    - '#/~1health/get/responses'
+paths/auth.yaml:
+  # Public logout. It always answers 200 {} (errors are 500 only).
+  operation-4xx-response:
+    - '#/~1auth~1logout/post/responses'

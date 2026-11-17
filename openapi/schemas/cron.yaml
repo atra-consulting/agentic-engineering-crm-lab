@@ -1,0 +1,9 @@
+# Area: cron. Source: backend/src/routes/cron.ts, backend/src/services/cronService.ts.
+# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
+CronRun: {}
+CronRunPage: {}
+CronJob: {}
+CronJobLastRun: {}
+CronRunStatus: {}
+CronTrigger: {}
+CronRunCompleteInput: {}

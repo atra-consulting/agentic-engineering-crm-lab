@@ -1,0 +1,6 @@
+# Area: chancen. Source: backend/src/routes/chancen.ts, backend/src/services/chanceService.ts.
+# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
+Chance: {}
+ChanceInput: {}
+ChancePage: {}
+ChancePhase: {}

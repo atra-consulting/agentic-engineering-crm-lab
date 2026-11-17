@@ -1,0 +1,16 @@
+# Area: tickets. Source: backend/src/routes/tickets.ts, backend/src/services/ticketService.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/tickets/next: {}
+/tickets/board: {}
+/tickets/summary: {}
+/tickets/reset: {}
+/tickets: {}
+/tickets/{id}: {}
+/tickets/{id}/status: {}
+/tickets/{id}/owner: {}
+/tickets/{id}/start: {}
+/tickets/{id}/done: {}
+/tickets/{id}/ask: {}
+/tickets/{id}/wont-do: {}
+/tickets/{id}/hand-to-ai: {}
+/tickets/{id}/comments: {}

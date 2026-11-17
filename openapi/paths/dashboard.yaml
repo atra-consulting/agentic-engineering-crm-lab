@@ -1,0 +1,3 @@
+# Area: dashboard. Source: backend/src/routes/dashboard.ts, backend/src/services/dashboardService.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/dashboard: {}

@@ -1,0 +1,5 @@
+# Area: szenarien. Source: backend/src/routes/szenario.ts, backend/src/services/szenarioService.ts.
+# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
+Szenario: {}
+SzenarioInput: {}
+ProzessDauer: {}

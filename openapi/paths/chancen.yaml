@@ -1,0 +1,5 @@
+# Area: chancen. Source: backend/src/routes/chancen.ts, backend/src/services/chanceService.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/chancen: {}
+/chancen/all: {}
+/chancen/{id}: {}

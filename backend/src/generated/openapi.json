@@ -1,0 +1,1037 @@
+{
+  "x-generated": "GENERATED — do not edit. Rebuild: cd backend && npm run api:generate",
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CRM API",
+    "version": "1.0.0",
+    "summary": "Contract for the CRM backend (Express) and the Angular web app.",
+    "description": "Hand-written OpenAPI 3.1 contract. One file per area under `paths/` and\n`schemas/`; shared parts live in `common.yaml`.\n\nError answers always use `ErrorResponse`. Texts are German.\n",
+    "license": {
+      "name": "MIT",
+      "identifier": "MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "tags": [
+    {
+      "name": "health",
+      "description": "Liveness probe."
+    },
+    {
+      "name": "auth",
+      "description": "Session login, logout and the current user."
+    },
+    {
+      "name": "firmen",
+      "description": "Companies (Firma), the top-level CRM record."
+    },
+    {
+      "name": "personen",
+      "description": "Contacts (Person) at a company."
+    },
+    {
+      "name": "abteilungen",
+      "description": "Departments (Abteilung) inside a company."
+    },
+    {
+      "name": "adressen",
+      "description": "Postal addresses (Adresse)."
+    },
+    {
+      "name": "aktivitaeten",
+      "description": "Logged interactions (Aktivitaet)."
+    },
+    {
+      "name": "chancen",
+      "description": "Sales opportunities (Chance)."
+    },
+    {
+      "name": "dashboard",
+      "description": "Aggregated numbers for the start page."
+    },
+    {
+      "name": "szenarien",
+      "description": "Saved scenarios for the cycle-time calculator."
+    },
+    {
+      "name": "agent-tasks",
+      "description": "Work queue of the autonomous agent-task runner."
+    },
+    {
+      "name": "tickets",
+      "description": "Kanban ticket system for the software-factory training."
+    },
+    {
+      "name": "cron",
+      "description": "Scheduled and manual CI workflow dispatches."
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "summary": "Liveness probe",
+        "description": "Public. Answers 200 while the process runs. The route lives inline in\n`app.ts`, not in a router file.\n",
+        "tags": [
+          "health"
+        ],
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Service is up.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {},
+    "/auth/logout": {},
+    "/auth/me": {},
+    "/auth/test-login": {},
+    "/firmen": {
+      "get": {
+        "operationId": "listFirmen",
+        "summary": "List companies (paged)",
+        "description": "Paged list without `adressen`. `search` matches `name`\n(case-insensitive substring).\n",
+        "tags": [
+          "firmen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "x-sort-fields": [
+          "name",
+          "industry",
+          "createdAt",
+          "updatedAt"
+        ],
+        "x-default-sort": "name,ASC",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SearchQuery"
+          },
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SortQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of companies.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FirmaPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "operationId": "createFirma",
+        "summary": "Create a company",
+        "description": "Answers the new record, read back with `adressen` (empty for a new company).",
+        "tags": [
+          "firmen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirmaInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Firma"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/firmen/all": {
+      "get": {
+        "operationId": "listAllFirmen",
+        "summary": "List all companies (not paged)",
+        "description": "Every company without `adressen`, sorted by `name` ascending.",
+        "tags": [
+          "firmen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All companies.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Firma"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/firmen/{id}": {
+      "get": {
+        "operationId": "getFirma",
+        "summary": "Get one company",
+        "description": "Includes `adressen`.",
+        "tags": [
+          "firmen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The company.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Firma"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "put": {
+        "operationId": "updateFirma",
+        "summary": "Update a company (full replace)",
+        "description": "Overwrites every field. Optional fields left out are stored as null.\nAnswers the record read back with `adressen`.\n",
+        "tags": [
+          "firmen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FirmaInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Firma"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteFirma",
+        "summary": "Delete a company",
+        "description": "Cascades to its contacts, departments, addresses, activities and opportunities.",
+        "tags": [
+          "firmen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted. No body."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/firmen/{id}/personen": {
+      "get": {
+        "operationId": "listFirmaPersonen",
+        "summary": "List the contacts of a company (paged)",
+        "description": "Fixed order: `lastName`, then `firstName`, ascending. No `sort` and no\n`search`. An unknown company id answers an empty page, not 404.\n",
+        "tags": [
+          "firmen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          },
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of contacts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/firmen/{id}/abteilungen": {
+      "get": {
+        "operationId": "listFirmaAbteilungen",
+        "summary": "List the departments of a company (paged)",
+        "description": "Fixed order: `name` ascending. No `sort` and no `search`. An unknown\ncompany id answers an empty page, not 404.\n",
+        "tags": [
+          "firmen"
+        ],
+        "security": [
+          {
+            "sessionCookie": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdPath"
+          },
+          {
+            "$ref": "#/components/parameters/PageQuery"
+          },
+          {
+            "$ref": "#/components/parameters/SizeQuery"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of departments.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbteilungPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/personen": {},
+    "/personen/all": {},
+    "/personen/{id}": {},
+    "/abteilungen": {},
+    "/abteilungen/all": {},
+    "/abteilungen/firma/{firmaId}": {},
+    "/abteilungen/{id}": {},
+    "/abteilungen/{id}/personen": {},
+    "/adressen": {},
+    "/adressen/all": {},
+    "/adressen/{id}": {},
+    "/aktivitaeten": {},
+    "/aktivitaeten/all": {},
+    "/aktivitaeten/{id}": {},
+    "/chancen": {},
+    "/chancen/all": {},
+    "/chancen/{id}": {},
+    "/dashboard": {},
+    "/szenarien": {},
+    "/szenarien/{id}": {},
+    "/agent-tasks/next": {},
+    "/agent-tasks/summary": {},
+    "/agent-tasks/reset": {},
+    "/agent-tasks/{id}/start": {},
+    "/agent-tasks/{id}/reject": {},
+    "/agent-tasks/{id}/done": {},
+    "/agent-tasks/{id}": {},
+    "/agent-tasks": {},
+    "/tickets/next": {},
+    "/tickets/board": {},
+    "/tickets/summary": {},
+    "/tickets/reset": {},
+    "/tickets": {},
+    "/tickets/{id}": {},
+    "/tickets/{id}/status": {},
+    "/tickets/{id}/owner": {},
+    "/tickets/{id}/start": {},
+    "/tickets/{id}/done": {},
+    "/tickets/{id}/ask": {},
+    "/tickets/{id}/wont-do": {},
+    "/tickets/{id}/hand-to-ai": {},
+    "/tickets/{id}/comments": {},
+    "/cron/agent-tasks": {},
+    "/cron/github-issues": {},
+    "/cron/runs/{id}/complete": {},
+    "/cron/runs": {},
+    "/cron/jobs": {}
+  },
+  "components": {
+    "securitySchemes": {
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID",
+        "description": "Session cookie set by `POST /auth/login`. Scope `ADMIN` in a security\nrequirement means the session user must hold the role ADMIN\n(`requireRole('ADMIN')`); a missing or wrong role answers 403.\n"
+      },
+      "agentBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Agent token (`AGENT_API_TOKEN`) as `Authorization: Bearer <token>`.\nChecked before `X-Agent-Token`. A wrong token answers 401 and never\nfalls through to the session.\n"
+      },
+      "agentHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Agent-Token",
+        "description": "Agent token (`AGENT_API_TOKEN`) in the `X-Agent-Token` header."
+      },
+      "cronBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Cron secret (`CRON_SECRET`) as `Authorization: Bearer <secret>`.\nA wrong secret falls through to the admin session check.\n"
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Every error answer (4xx and 5xx), built by `middleware/errorHandler.ts`.\n`fieldErrors` is empty except for input errors.\n",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "message",
+          "timestamp",
+          "fieldErrors"
+        ],
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code, repeated in the body."
+          },
+          "message": {
+            "type": "string",
+            "description": "German top-level message, for example `Validierungsfehler` or `Firma mit ID 99 nicht gefunden`."
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Server time, ISO-8601 with milliseconds and no `Z` suffix, for example `2026-04-15T10:30:00.123`."
+          },
+          "fieldErrors": {
+            "type": "object",
+            "description": "Field name (dot path inside the body, path parameter name, or `_` for the whole body) mapped to a German text.",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PageMeta": {
+        "type": "object",
+        "description": "Paging fields of every page answer (Spring Data Page shape).\nPage schemas combine it with `allOf` and `unevaluatedProperties: false`.\n",
+        "required": [
+          "totalElements",
+          "totalPages",
+          "size",
+          "number",
+          "first",
+          "last"
+        ],
+        "properties": {
+          "totalElements": {
+            "type": "integer",
+            "description": "Number of rows across all pages."
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer",
+            "description": "Page size used for this answer."
+          },
+          "number": {
+            "type": "integer",
+            "description": "Current page, 0-indexed."
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          }
+        }
+      },
+      "EmptyObject": {
+        "type": "object",
+        "description": "An object with no declared properties. As a request body, extra fields\nare stripped and ignored. As an answer, the server sends `{}`.\n"
+      },
+      "Health": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "status",
+          "timestamp",
+          "version"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "const": "ok"
+          },
+          "timestamp": {
+            "type": "string",
+            "description": "Server time, ISO-8601 UTC with `Z` (`new Date().toISOString()`)."
+          },
+          "version": {
+            "type": "string",
+            "description": "The `version` field of `backend/package.json`."
+          }
+        }
+      },
+      "LoginRequest": {},
+      "LoginResponse": {},
+      "BenutzerInfo": {},
+      "TestLoginRequest": {},
+      "Rolle": {},
+      "Permission": {},
+      "Firma": {
+        "type": "object",
+        "description": "A company. `adressen` appears only on single-record answers\n(get, create, update), never in lists.\n",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "industry",
+          "website",
+          "phone",
+          "email",
+          "notes",
+          "personenCount",
+          "abteilungenCount",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "industry": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "website": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "personenCount": {
+            "type": "integer",
+            "description": "Number of contacts of this company (computed, not stored)."
+          },
+          "abteilungenCount": {
+            "type": "integer",
+            "description": "Number of departments of this company (computed, not stored)."
+          },
+          "adressen": {
+            "type": "array",
+            "description": "Addresses of this company, sorted by `typ`, then `id`. Single-record answers only.",
+            "items": {
+              "$ref": "#/components/schemas/FirmaAdresse"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          },
+          "updatedAt": {
+            "type": "string",
+            "description": "ISO-8601 text as stored. Seed rows use a space instead of `T`."
+          }
+        }
+      },
+      "FirmaInput": {
+        "type": "object",
+        "description": "Body for create and full update. Every field except `name` is optional.\nA left-out optional field is stored as null. Unknown fields are stripped.\n",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "x-error-messages": {
+              "required": "Name ist erforderlich",
+              "type": "Name ist erforderlich",
+              "minLength": "Name ist erforderlich"
+            }
+          },
+          "industry": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 255
+          },
+          "website": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "A valid email address, the empty string, or null.",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "string",
+                "const": ""
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "x-error-messages": {
+              "type": "Ungültige E-Mail-Adresse",
+              "anyOf": "Ungültige E-Mail-Adresse",
+              "format": "Ungültige E-Mail-Adresse",
+              "const": "Ungültige E-Mail-Adresse"
+            }
+          },
+          "notes": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "FirmaAdresse": {
+        "type": "object",
+        "description": "Address summary inside a single company answer.",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "street",
+          "houseNumber",
+          "postalCode",
+          "city",
+          "country",
+          "latitude",
+          "longitude",
+          "typ"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "street": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "houseNumber": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "postalCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "typ": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Free text, for example `HAUPTQUARTIER` or `NIEDERLASSUNG`."
+          }
+        }
+      },
+      "FirmaPage": {
+        "type": "object",
+        "description": "One page of companies (without `adressen`).",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageMeta"
+          },
+          {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Firma"
+                }
+              }
+            }
+          }
+        ],
+        "unevaluatedProperties": false
+      },
+      "Person": {},
+      "PersonInput": {},
+      "PersonPage": {},
+      "Abteilung": {},
+      "AbteilungInput": {},
+      "AbteilungPage": {},
+      "Adresse": {},
+      "AdresseInput": {},
+      "AdressePage": {},
+      "Aktivitaet": {},
+      "AktivitaetInput": {},
+      "AktivitaetPage": {},
+      "AktivitaetTyp": {},
+      "Chance": {},
+      "ChanceInput": {},
+      "ChancePage": {},
+      "ChancePhase": {},
+      "DashboardData": {},
+      "RecentChance": {},
+      "RecentAktivitaet": {},
+      "Szenario": {},
+      "SzenarioInput": {},
+      "ProzessDauer": {},
+      "AgentTask": {},
+      "AgentTaskPage": {},
+      "AgentTaskSummary": {},
+      "AgentTaskSource": {},
+      "AgentTaskStatus": {},
+      "AgentTaskRejectInput": {},
+      "AgentTaskDoneInput": {},
+      "AgentTaskResetResult": {},
+      "CronRun": {},
+      "CronRunPage": {},
+      "CronJob": {},
+      "CronJobLastRun": {},
+      "CronRunStatus": {},
+      "CronTrigger": {},
+      "CronRunCompleteInput": {},
+      "TicketDetail": {},
+      "TicketListItem": {},
+      "TicketListItemPage": {},
+      "TicketBoard": {},
+      "TicketSummary": {},
+      "TicketComment": {},
+      "TicketCreateInput": {},
+      "TicketStatusInput": {},
+      "TicketOwnerInput": {},
+      "TicketAskInput": {},
+      "TicketDoneInput": {},
+      "TicketWontDoInput": {},
+      "TicketCommentInput": {},
+      "TicketResetResult": {},
+      "TicketOwner": {},
+      "TicketType": {},
+      "TicketStatus": {},
+      "TicketSolution": {},
+      "TicketCommentAuthor": {}
+    },
+    "parameters": {
+      "IdPath": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "description": "Record id, a positive whole number without sign or leading zeros.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$",
+          "x-error-messages": {
+            "type": "Ungültige ID",
+            "pattern": "Ungültige ID"
+          }
+        }
+      },
+      "FirmaIdPath": {
+        "name": "firmaId",
+        "in": "path",
+        "required": true,
+        "description": "Company id, a positive whole number without sign or leading zeros.",
+        "schema": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$",
+          "x-error-messages": {
+            "type": "Ungültige ID",
+            "pattern": "Ungültige ID"
+          }
+        }
+      },
+      "PageQuery": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "description": "Page number, 0-indexed. A missing, negative or non-numeric value falls back to 0.",
+        "schema": {
+          "type": "integer",
+          "default": 0
+        }
+      },
+      "SizeQuery": {
+        "name": "size",
+        "in": "query",
+        "required": false,
+        "description": "Page size. Default 10. Values above 200 are capped at 200. A missing, non-positive or non-numeric value falls back to 10.",
+        "schema": {
+          "type": "integer",
+          "default": 10
+        }
+      },
+      "SortQuery": {
+        "name": "sort",
+        "in": "query",
+        "required": false,
+        "description": "field,direction; direction in any case (asc/ASC/desc/DESC).\nThe allowed fields are the operation's `x-sort-fields`; the default is its\n`x-default-sort`. An unknown field answers 400 with the message\n`Ungültiges Sortierfeld: <field>`. A missing or unknown direction falls\nback to the default direction.\n",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "SearchQuery": {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Case-insensitive substring filter. The operation description names the matched field.",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid input. `message` names the problem; `fieldErrors` maps fields to German texts.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Not authenticated (no session, or a missing or wrong token).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Authenticated, but the role is not allowed (`Zugriff verweigert`).",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Record not found.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflict with the current data, for example a duplicate name or an invalid state change.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  }
+}

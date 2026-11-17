@@ -1,0 +1,7 @@
+# Area: abteilungen. Source: backend/src/routes/abteilungen.ts, backend/src/services/abteilungService.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/abteilungen: {}
+/abteilungen/all: {}
+/abteilungen/firma/{firmaId}: {}
+/abteilungen/{id}: {}
+/abteilungen/{id}/personen: {}

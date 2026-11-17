@@ -1,0 +1,6 @@
+# Area: aktivitaeten. Source: backend/src/routes/aktivitaeten.ts, backend/src/services/aktivitaetService.ts.
+# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
+Aktivitaet: {}
+AktivitaetInput: {}
+AktivitaetPage: {}
+AktivitaetTyp: {}

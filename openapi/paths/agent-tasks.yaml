@@ -1,0 +1,10 @@
+# Area: agent-tasks. Source: backend/src/routes/agentTasks.ts, backend/src/services/agentTaskService.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/agent-tasks/next: {}
+/agent-tasks/summary: {}
+/agent-tasks/reset: {}
+/agent-tasks/{id}/start: {}
+/agent-tasks/{id}/reject: {}
+/agent-tasks/{id}/done: {}
+/agent-tasks/{id}: {}
+/agent-tasks: {}

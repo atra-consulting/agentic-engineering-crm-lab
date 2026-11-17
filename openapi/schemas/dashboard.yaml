@@ -1,0 +1,5 @@
+# Area: dashboard. Source: backend/src/routes/dashboard.ts, backend/src/services/dashboardService.ts.
+# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
+DashboardData: {}
+RecentChance: {}
+RecentAktivitaet: {}

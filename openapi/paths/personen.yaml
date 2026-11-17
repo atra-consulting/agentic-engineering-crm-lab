@@ -1,0 +1,5 @@
+# Area: personen. Source: backend/src/routes/personen.ts, backend/src/services/personService.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/personen: {}
+/personen/all: {}
+/personen/{id}: {}

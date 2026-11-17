@@ -1,0 +1,7 @@
+# Area: cron. Source: backend/src/routes/cron.ts, backend/src/services/cronService.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/cron/agent-tasks: {}
+/cron/github-issues: {}
+/cron/runs/{id}/complete: {}
+/cron/runs: {}
+/cron/jobs: {}

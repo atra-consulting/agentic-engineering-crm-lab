@@ -1,0 +1,5 @@
+# Area: abteilungen. Source: backend/src/routes/abteilungen.ts, backend/src/services/abteilungService.ts.
+# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
+Abteilung: {}
+AbteilungInput: {}
+AbteilungPage: {}

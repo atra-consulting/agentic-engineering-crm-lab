@@ -1,0 +1,4 @@
+# Area: szenarien. Source: backend/src/routes/szenario.ts, backend/src/services/szenarioService.ts.
+# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
+/szenarien: {}
+/szenarien/{id}: {}

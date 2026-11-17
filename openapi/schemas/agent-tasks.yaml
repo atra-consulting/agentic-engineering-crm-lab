@@ -1,0 +1,10 @@
+# Area: agent-tasks. Source: backend/src/routes/agentTasks.ts, backend/src/services/agentTaskService.ts.
+# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
+AgentTask: {}
+AgentTaskPage: {}
+AgentTaskSummary: {}
+AgentTaskSource: {}
+AgentTaskStatus: {}
+AgentTaskRejectInput: {}
+AgentTaskDoneInput: {}
+AgentTaskResetResult: {}

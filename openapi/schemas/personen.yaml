@@ -1,0 +1,5 @@
+# Area: personen. Source: backend/src/routes/personen.ts, backend/src/services/personService.ts.
+# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
+Person: {}
+PersonInput: {}
+PersonPage: {}
