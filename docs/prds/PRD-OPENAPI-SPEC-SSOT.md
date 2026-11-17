@@ -604,4 +604,14 @@ The user approved D1–D6 as recommended on 2026-11-17. D7 came up during implem
 
 ## Implementierung
 
-Empty until implementation. Add links to the commits and pull requests here.
+- Pull request: [#207](https://github.com/atra-consulting/agentic-engineering-crm-lab/pull/207) (against `main`, not merged; D7 open for confirmation)
+- All commits: [`75de728...openapi-spec-ssot-spec-first-types-validation`](https://github.com/atra-consulting/agentic-engineering-crm-lab/compare/75de728...openapi-spec-ssot-spec-first-types-validation)
+- Key commits:
+  - Tooling: [`f055005`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/f055005) `api:generate` / `api:check`, [`ebc59de`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/ebc59de) full contract + CI drift check
+  - Contract: [`aa0bc0c`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/aa0bc0c), [`00a41d2`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/00a41d2), [`e0395cf`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/e0395cf), [`8f11692`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/8f11692), [`65abb15`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/65abb15), [`5b4b2c2`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/5b4b2c2)
+  - Runtime: [`b182265`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/b182265) Ajv core, [`286b536`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/286b536) `specValidate`, [`9ca732d`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/9ca732d) `createApp` + response check, [`c670b5c`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/c670b5c) D1/D3/D4/D5
+  - Zod removal: [`e3c5026`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/e3c5026), formats [`5f0221c`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/5f0221c)
+  - Frontend: [`2a65f60`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/2a65f60) typed `ApiClient`, [`046e152`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/046e152) + [`30f0b7a`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/30f0b7a) model aliases, [`00fefbe`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/00fefbe) + [`ebc59d8`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/ebc59d8) services via `ApiClient`
+  - Docs page: [`eda6177`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/eda6177)
+  - Review fixes: [`d6cafb0`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/d6cafb0), [`1517f0d`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/1517f0d) case-insensitive lookup; review report [`ccc2dcc`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/ccc2dcc)
+  - Doc sync: [`f7c87ef`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/f7c87ef)
