@@ -46,7 +46,7 @@ Kanban work items with an owner and status lifecycle. Created by admins or seede
 | solution | text | nullable — `TICKET_SOLUTION` enum; set on `status=DONE` |
 | pickedUpAt | text | nullable — ISO-8601, set when status → `IN_PROGRESS` |
 | resolvedAt | text | nullable — ISO-8601, set when status → `DONE` |
-| fullyReady | integer | NOT NULL, default `0` — boolean (0/1), set only at creation, never shown in the admin UI |
+| fullyReady | integer | NOT NULL, default `0` — boolean (0/1), set at creation. Only a comment with `clearFullyReady: true` resets it to `0`. Never shown in the admin UI |
 | agentTaskId | integer | nullable, FK → agent_task(id) SET NULL — write-once at creation, links to the app-feedback item that spawned the ticket |
 | createdAt | text | NOT NULL, default `datetime('now')` |
 | updatedAt | text | NOT NULL, default `datetime('now')` |

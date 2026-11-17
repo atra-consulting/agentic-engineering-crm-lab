@@ -234,7 +234,7 @@ const validatePut = body.compile({
 - Patterns compile with the `u` flag.
 - 5xx answers are not declared per operation; any 5xx body is validated against `ErrorResponse`.
 - Runtime request validation (`specValidate`) runs after each route's auth guard, so 401/403 always come before 400.
-- Contract lookup ignores letter case, like Express routing. `findOperation` and `matchOperation` (`backend/src/openapi/contract.ts`) fold the path to lower case.
+- Both `findOperation` and `matchOperation` ignore letter case, like Express routing (`findOperation` folds keys to lower case, `matchOperation` uses case-insensitive patterns; see `backend/src/openapi/contract.ts`).
 - Unknown enum values read from the database pass through unchanged. `asEnum` (`backend/src/db/schema/enums.ts`) logs one `[enum] …` console warning per distinct value. Summaries count only contract keys.
 
 ## OperationId table (binding, 79 operations, 57 paths)
