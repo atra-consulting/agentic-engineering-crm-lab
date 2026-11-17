@@ -301,6 +301,14 @@ The decisions made in this PRD are listed in Decisions (a).
     - The frontend spec's model table is incomplete.
     - The infrastructure spec gives the wrong workflow count.
     - The database spec still says "validated by Zod".
+17. Decided during implementation (2026-11-17):
+    - No `ajv-formats` (deviation from TN3). Custom `email` and `uri` formats reproduce the old Zod 4 verdicts. The format-parity test proves it on 67 recorded inputs. Reason: data stored today stays savable.
+    - Unknown enum values from the database pass through with a log warning, as before. No crash. Summaries count only contract keys.
+    - Lengths count UTF-16 units (`unicode: false`), as Zod did.
+    - Contract lookup ignores letter case, like Express routing.
+    - Integer ids in bodies get an upper limit (largest safe integer), as Zod's `.int()` did.
+    - Array bodies on empty-body operations (logout, start, reset, hand-to-ai) now answer 400. No client sends arrays. Accepted tightening.
+    - The agent definitions no longer recommend `requirePermission`, which does not exist.
 
 ### (b) User decisions
 
@@ -318,6 +326,25 @@ The user approved D1–D6 as recommended on 2026-11-17.
 - The two cron trigger addresses change data on a plain GET request that carries an admin session cookie. This is a cross-site request risk.
 - `CLAUDE.md` claims that CI runs the agent-sync check. The CI workflow has no such step.
 - `CLAUDE.md` names Turso cloud as the production database, but the repository has no hosted deployment (Vercel was removed in c8a9ced).
+- `CLAUDE.md` names an `engine` workflow input that no workflow has.
+- Found while writing the contract (the contract documents today's behavior):
+  - Create or update with a `firmaId` that does not exist hits the foreign key and answers 500.
+  - `listAbteilungPersonen` answers 404 for an unknown id, `listFirmaPersonen` an empty page.
+  - An unknown sort direction silently falls back to the default.
+  - A login with a non-string `passwort` answers 500 (bcrypt throws).
+  - test-login answers 401 in English ("benutzername required").
+  - The dashboard sums won opportunities across currencies without conversion.
+  - The dashboard `personName` is null if one name part is missing; the other answers join the parts present.
+  - `completeCronRun` overwrites any run status, including finished or skipped runs.
+  - Setting a ticket to DONE always sets `solution=DONE`, even for a WONT_DO ticket.
+  - `done` and `wont-do` with an empty comment store an empty comment. `completeTicket` stores the comment as AGENT even for an admin caller.
+  - The health timestamp ends with `Z`, the error timestamps do not.
+  - `personName` on Adresse and Aktivitaet is `""` when the first name is an empty string.
+- `session.ts` hardens the cookie and the secret only for literal `NODE_ENV=production`. With no mode set, the contract mode is production, but the session is not hardened.
+- The generic 500 handler echoes `err.message`, for example a rejected CORS origin.
+- Body validation collects all errors. A large invalid array (up to 100 KB, logged-in routes only) builds many error objects before mapping.
+- `githubRunUrl` accepts any URL scheme, as with Zod. The cron dashboard binds it with `[href]`, and Angular sanitizes `javascript:` URLs.
+- Seed agent task 13 mentions the removed `validation.ts`. It is workshop content about an already fixed bug, so it stays.
 
 ### (d) Later
 - A warning at development start when the contract source is newer than the generated files.
