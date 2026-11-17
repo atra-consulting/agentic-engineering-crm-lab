@@ -54,7 +54,7 @@ Generated and committed (never edit):
    - component names are PascalCase (catches hoisted refs such as `200` and renamed duplicates such as `Firma-2`)
    - only the vendor keywords listed below, in the right place; `x-error-messages` keys are Ajv keywords; placeholders are `{limit}`, `{min}`, `{max}`, `{value}`
 4. Compile the whole bundle with the runtime Ajv setup (below).
-5. `git status --porcelain` on the generated paths. Any changed or untracked file fails.
+5. Drift. Fails when step 2 had to rewrite a generated file (stale, or hand-edited even without a commit), or when `git status --porcelain` shows a changed or untracked file under the generated paths. So uncommitted generated files also fail: commit first, then check.
 
 Redocly rules (`redocly.yaml`): `recommended`, plus errors for `operation-operationId`, `operation-summary`, `security-defined`, `operation-4xx-response`, plus three configurable rules:
 

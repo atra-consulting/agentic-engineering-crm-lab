@@ -5,8 +5,9 @@
  *   2. api:generate (bundle + types)
  *   3. Project rules that Redocly cannot express (see RULES below)
  *   4. Compile the whole bundle with the runtime Ajv 2020 setup
- *   5. Drift: `git status --porcelain` on the generated paths must be empty
- *      (catches changed AND untracked files)
+ *   5. Drift: step 2 must not have rewritten any generated file (stale or
+ *      hand-edited, even uncommitted), and `git status --porcelain` on the
+ *      generated paths must be empty (catches changed AND untracked files)
  *
  * Exit 0 when every step passes, else 1 at the first failing step.
  */
@@ -495,16 +496,21 @@ async function main(): Promise<void> {
   }
   console.log(`  ok: ${stats.componentSchemas} component schemas, ${stats.operationValidators} operation validators, ${stats.ms} ms`);
 
-  console.log('api:check [5/5] drift (git status on generated files)');
+  console.log('api:check [5/5] drift (generated files vs. contract and commit)');
+  // Step 2 rewrote every generated file that did not match the contract: a
+  // stale file or a hand edit (even an uncommitted one, which git status alone
+  // would no longer see). git status then catches anything that differs from
+  // the commit or is untracked.
   const drift = gitDrift();
-  if (drift) {
+  if (changed.length > 0 || drift) {
     fail('drift', [
-      ...drift.split('\n'),
-      'Generated files differ from the committed ones (or are untracked).',
+      ...changed.map((file) => `rewritten by generate (was stale or hand-edited): ${file}`),
+      ...(drift ? ['git status --porcelain:', ...drift.split('\n').map((line) => `  ${line}`)] : []),
+      'Generated files must match the contract and be committed (no untracked files).',
       'Run `cd backend && npm run api:generate` and commit the result. Never edit or hand-merge generated files.',
     ]);
   }
-  console.log('  ok: generated files match the commit');
+  console.log('  ok: generated files match the contract and the commit');
   console.log('\napi:check passed');
 }
 
