@@ -1,8 +1,83 @@
 # Area: auth. Source: backend/src/routes/auth.ts, backend/src/config/users.ts.
-# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
-LoginRequest: {}
-LoginResponse: {}
-BenutzerInfo: {}
-TestLoginRequest: {}
-Rolle: {}
-Permission: {}
+
+LoginRequest:
+  type: object
+  description: |
+    Credentials. Both fields are optional in the contract: the route is not
+    validated by the contract (`x-skip-request-validation`). A missing or empty
+    field answers 401 `Ungültige Anmeldedaten`, not 400.
+  properties:
+    benutzername:
+      type: string
+    passwort:
+      type: string
+
+LoginResponse:
+  type: object
+  description: The logged-in user (short form). The session id travels in the `Set-Cookie` header.
+  additionalProperties: false
+  required: [benutzername, vorname, nachname, rollen]
+  properties:
+    benutzername:
+      type: string
+    vorname:
+      type: string
+    nachname:
+      type: string
+    rollen:
+      type: array
+      items:
+        $ref: '#/Rolle'
+
+BenutzerInfo:
+  type: object
+  description: The session user (long form) for `GET /auth/me`.
+  additionalProperties: false
+  required: [id, benutzername, vorname, nachname, email, rollen, permissions]
+  properties:
+    id:
+      type: integer
+    benutzername:
+      type: string
+    vorname:
+      type: string
+    nachname:
+      type: string
+    email:
+      type: string
+      description: Not stored. Built as `<benutzername>@crm.local`.
+    rollen:
+      type: array
+      items:
+        $ref: '#/Rolle'
+    permissions:
+      type: array
+      description: Listed on the user but not enforced by any middleware.
+      items:
+        $ref: '#/Permission'
+
+TestLoginRequest:
+  type: object
+  description: |
+    Test login by name only, no password. A missing or empty `benutzername`
+    answers 401 `benutzername required`.
+  properties:
+    benutzername:
+      type: string
+
+Rolle:
+  type: string
+  description: Role, the name from `users.ts` with the prefix `ROLE_`.
+  enum: [ROLE_ADMIN, ROLE_USER]
+
+Permission:
+  type: string
+  description: Permission on a user. Informational only.
+  enum:
+    - FIRMEN
+    - PERSONEN
+    - ABTEILUNGEN
+    - ADRESSEN
+    - AKTIVITAETEN
+    - CHANCEN
+    - BENUTZERVERWALTUNG
