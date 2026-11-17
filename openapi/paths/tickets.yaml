@@ -1,16 +1,516 @@
-# Area: tickets. Source: backend/src/routes/tickets.ts, backend/src/services/ticketService.ts.
-# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
-/tickets/next: {}
-/tickets/board: {}
-/tickets/summary: {}
-/tickets/reset: {}
-/tickets: {}
-/tickets/{id}: {}
-/tickets/{id}/status: {}
-/tickets/{id}/owner: {}
-/tickets/{id}/start: {}
-/tickets/{id}/done: {}
-/tickets/{id}/ask: {}
-/tickets/{id}/wont-do: {}
-/tickets/{id}/hand-to-ai: {}
-/tickets/{id}/comments: {}
+# Area: tickets. Source: backend/src/routes/tickets.ts, backend/src/services/ticketService.ts,
+# backend/src/middleware/agentAuth.ts.
+
+/tickets/next:
+  get:
+    operationId: claimNextTicket
+    summary: Claim the next ticket
+    description: |
+      Atomic claim: the oldest `TODO` + `AI` ticket becomes `IN_PROGRESS` (sets `pickedUpAt`).
+      Optional `type` filter. Answers 204 when no ticket matches.
+      Agent token or loopback only. A session cookie is not accepted, because this GET changes state (CSRF).
+      A wrong agent token answers 401 and never falls through to a session.
+    tags: [tickets]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+    x-loopback-bypass: true
+    parameters:
+      - name: type
+        in: query
+        required: false
+        description: 'Ticket type filter. An unknown value answers 400 `Ungültiger Ticket-Typ: <value>`.'
+        schema:
+          $ref: '../schemas/tickets.yaml#/TicketType'
+    responses:
+      '200':
+        description: The claimed ticket with comments.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '204':
+        description: No claimable ticket. No body.
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/tickets/board:
+  get:
+    operationId: getTicketBoard
+    summary: Get the Kanban board
+    description: |
+      Five columns, each an array of list items (with `commentCount`), oldest first.
+      Any logged-in session (no admin needed) or an agent token.
+      A wrong agent token answers 401 and never falls through to a session.
+    tags: [tickets]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+      - sessionCookie: []
+    x-loopback-bypass: true
+    responses:
+      '200':
+        description: The board.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketBoard'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/tickets/summary:
+  get:
+    operationId: getTicketSummary
+    summary: Get ticket counts
+    description: |
+      Counts by status, type, owner and solution. Any logged-in session. Agent tokens are not accepted.
+    tags: [tickets]
+    security:
+      - sessionCookie: []
+    responses:
+      '200':
+        description: The counts.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketSummary'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/tickets/reset:
+  post:
+    operationId: resetTickets
+    summary: Reset to the workshop tickets
+    description: |
+      Deletes all tickets and comments, then re-seeds the workshop tickets. Admin session only.
+    tags: [tickets]
+    security:
+      - sessionCookie: [ADMIN]
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '../common.yaml#/schemas/EmptyObject'
+    responses:
+      '200':
+        description: Re-seeded.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketResetResult'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+
+/tickets:
+  get:
+    operationId: listTickets
+    summary: List tickets (paged)
+    description: |
+      Paged list of list items (with `commentCount`). Admin session only.
+      Filters `type`, `status`, `owner`: an unknown value answers 400 (`Ungültiger Ticket-Typ: <value>`, `Ungültiger Status: <value>`, `Ungültiger Eigentümer: <value>`).
+    tags: [tickets]
+    security:
+      - sessionCookie: [ADMIN]
+    x-sort-fields: [createdAt, updatedAt, status, type, owner, title]
+    x-default-sort: createdAt,DESC
+    parameters:
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+      - $ref: '../common.yaml#/parameters/SortQuery'
+      - name: type
+        in: query
+        required: false
+        description: Filter by type.
+        schema:
+          $ref: '../schemas/tickets.yaml#/TicketType'
+      - name: status
+        in: query
+        required: false
+        description: Filter by status.
+        schema:
+          $ref: '../schemas/tickets.yaml#/TicketStatus'
+      - name: owner
+        in: query
+        required: false
+        description: Filter by owner.
+        schema:
+          $ref: '../schemas/tickets.yaml#/TicketOwner'
+    responses:
+      '200':
+        description: One page of tickets.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketListItemPage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+  post:
+    operationId: createTicket
+    summary: Create a ticket
+    description: |
+      New ticket starts as `owner=HUMAN`, `status=DEFINITION`, without comments.
+      An unknown `agentTaskId` answers 400 with a field error on `agentTaskId`.
+      Agent token, loopback or admin session.
+    tags: [tickets]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+      - sessionCookie: [ADMIN]
+    x-loopback-bypass: true
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/tickets.yaml#/TicketCreateInput'
+    responses:
+      '201':
+        description: Created.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+
+/tickets/{id}:
+  get:
+    operationId: getTicket
+    summary: Get one ticket
+    description: |
+      Ticket with comments. Any logged-in session (no admin needed) or an agent token.
+    tags: [tickets]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+      - sessionCookie: []
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '200':
+        description: The ticket.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+
+/tickets/{id}/status:
+  patch:
+    operationId: setTicketStatus
+    summary: Set the status
+    description: |
+      Moves the ticket to any column. Into `DONE` sets `solution=DONE` and `resolvedAt`. Out of `DONE` clears both. Owner never changes.
+      Agent token, loopback or admin session.
+    tags: [tickets]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+      - sessionCookie: [ADMIN]
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/tickets.yaml#/TicketStatusInput'
+    responses:
+      '200':
+        description: The updated ticket.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+
+/tickets/{id}/owner:
+  patch:
+    operationId: setTicketOwner
+    summary: Set the owner
+    description: |
+      Changes the owner only. `AI` keeps the ticket in `DEFINITION`. Agent token, loopback or admin session.
+    tags: [tickets]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+      - sessionCookie: [ADMIN]
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/tickets.yaml#/TicketOwnerInput'
+    responses:
+      '200':
+        description: The updated ticket.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+
+/tickets/{id}/start:
+  post:
+    operationId: startTicket
+    summary: Start a specific ticket
+    description: |
+      Claims by id: `TODO` + `AI` becomes `IN_PROGRESS`. Any other state answers 409.
+      Agent token, loopback or admin session.
+    tags: [tickets]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+      - sessionCookie: [ADMIN]
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '../common.yaml#/schemas/EmptyObject'
+    responses:
+      '200':
+        description: The updated ticket.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'
+
+/tickets/{id}/done:
+  post:
+    operationId: completeTicket
+    summary: Finish a ticket
+    description: |
+      `IN_PROGRESS` becomes `DONE` with `solution=DONE`. Any other state answers 409.
+      An optional `comment` is stored as an `AGENT` comment. Agent token, loopback or admin session.
+    tags: [tickets]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+      - sessionCookie: [ADMIN]
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/tickets.yaml#/TicketDoneInput'
+    responses:
+      '200':
+        description: The updated ticket.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'
+
+/tickets/{id}/ask:
+  post:
+    operationId: askTicketQuestion
+    summary: Ask a question
+    description: |
+      `IN_PROGRESS` becomes `ON_HOLD`, owner `HUMAN`. Any other state answers 409.
+      The question is stored as an `AGENT` comment. Agent token, loopback or admin session.
+    tags: [tickets]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+      - sessionCookie: [ADMIN]
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/tickets.yaml#/TicketAskInput'
+    responses:
+      '200':
+        description: The updated ticket.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'
+
+/tickets/{id}/wont-do:
+  post:
+    operationId: markTicketWontDo
+    summary: Mark as Won't Do
+    description: |
+      Resolves a ticket with `solution=WONT_DO`. Only allowed when the status is not `DONE` and the owner is `HUMAN`, else 409.
+      An optional `comment` is stored as a `HUMAN` comment. Admin session only.
+    tags: [tickets]
+    security:
+      - sessionCookie: [ADMIN]
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/tickets.yaml#/TicketWontDoInput'
+    responses:
+      '200':
+        description: The updated ticket.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'
+
+/tickets/{id}/hand-to-ai:
+  post:
+    operationId: handTicketToAi
+    summary: Hand a ticket to the AI
+    description: |
+      Only from `DEFINITION`, else 409. Sets owner `AI` and status `TODO`. Admin session only.
+    tags: [tickets]
+    security:
+      - sessionCookie: [ADMIN]
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '../common.yaml#/schemas/EmptyObject'
+    responses:
+      '200':
+        description: The updated ticket.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'
+
+/tickets/{id}/comments:
+  post:
+    operationId: addTicketComment
+    summary: Add a comment
+    description: |
+      Appends a comment, author defaults to `HUMAN`. `handBackToAi` needs an `ON_HOLD` + `HUMAN` ticket, else 409.
+      Answers 403 when `author=AGENT` comes with an authenticated session cookie, also on loopback. Only an agent token or loopback without a session may post as `AGENT`.
+      Agent token, loopback or admin session.
+    tags: [tickets]
+    security:
+      - agentBearer: []
+      - agentHeader: []
+      - sessionCookie: [ADMIN]
+    x-loopback-bypass: true
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/tickets.yaml#/TicketCommentInput'
+    responses:
+      '200':
+        description: The updated ticket.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/tickets.yaml#/TicketDetail'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '403':
+        $ref: '../common.yaml#/responses/Forbidden'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+      '409':
+        $ref: '../common.yaml#/responses/Conflict'

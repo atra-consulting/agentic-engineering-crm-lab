@@ -1,21 +1,359 @@
-# Area: tickets. Source: backend/src/routes/tickets.ts, backend/src/services/ticketService.ts.
-# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
-TicketDetail: {}
-TicketListItem: {}
-TicketListItemPage: {}
-TicketBoard: {}
-TicketSummary: {}
-TicketComment: {}
-TicketCreateInput: {}
-TicketStatusInput: {}
-TicketOwnerInput: {}
-TicketAskInput: {}
-TicketDoneInput: {}
-TicketWontDoInput: {}
-TicketCommentInput: {}
-TicketResetResult: {}
-TicketOwner: {}
-TicketType: {}
-TicketStatus: {}
-TicketSolution: {}
-TicketCommentAuthor: {}
+# Area: tickets. Source: backend/src/routes/tickets.ts (inline Zod schemas),
+# backend/src/services/ticketService.ts (DTOs), backend/src/db/schema/enums.ts.
+
+TicketOwner:
+  type: string
+  enum: [AI, HUMAN]
+
+TicketType:
+  type: string
+  enum: [FEATURE, BUG, CHORE]
+
+TicketStatus:
+  type: string
+  enum: [DEFINITION, TODO, IN_PROGRESS, ON_HOLD, DONE]
+
+TicketSolution:
+  type: string
+  enum: [DONE, WONT_DO]
+
+TicketCommentAuthor:
+  type: string
+  enum: [HUMAN, AGENT]
+
+TicketComment:
+  type: object
+  description: One comment of a ticket thread.
+  additionalProperties: false
+  required: [id, ticketId, author, authorName, body, createdAt]
+  properties:
+    id:
+      type: integer
+    ticketId:
+      type: integer
+    author:
+      $ref: '#/TicketCommentAuthor'
+    authorName:
+      type: [string, 'null']
+    body:
+      type: string
+    createdAt:
+      type: string
+      description: ISO-8601 text as stored.
+
+TicketDetail:
+  type: object
+  description: A ticket with its full comment thread (oldest first). Single-ticket answers.
+  additionalProperties: false
+  required:
+    - id
+    - owner
+    - type
+    - title
+    - body
+    - status
+    - solution
+    - pickedUpAt
+    - resolvedAt
+    - createdAt
+    - updatedAt
+    - fullyReady
+    - agentTaskId
+    - comments
+  properties:
+    id:
+      type: integer
+    owner:
+      $ref: '#/TicketOwner'
+    type:
+      $ref: '#/TicketType'
+    title:
+      type: string
+    body:
+      type: string
+    status:
+      $ref: '#/TicketStatus'
+    solution:
+      description: Set when the ticket is resolved (`DONE` column), else null.
+      type: [string, 'null']
+      enum: [DONE, WONT_DO, null]
+    pickedUpAt:
+      type: [string, 'null']
+      description: ISO-8601 text. Set when an agent claims the ticket.
+    resolvedAt:
+      type: [string, 'null']
+      description: ISO-8601 text. Set when the ticket is resolved.
+    createdAt:
+      type: string
+    updatedAt:
+      type: string
+    fullyReady:
+      type: boolean
+      description: Marker "ready to build without further human input". Stored as 0/1.
+    agentTaskId:
+      type: [integer, 'null']
+      description: Linked agent task (feedback item) that spawned the ticket.
+    comments:
+      type: array
+      items:
+        $ref: '#/TicketComment'
+
+TicketListItem:
+  type: object
+  description: A ticket in a list or board column. No comments, only their count.
+  additionalProperties: false
+  required:
+    - id
+    - owner
+    - type
+    - title
+    - body
+    - status
+    - solution
+    - pickedUpAt
+    - resolvedAt
+    - createdAt
+    - updatedAt
+    - fullyReady
+    - agentTaskId
+    - commentCount
+  properties:
+    id:
+      type: integer
+    owner:
+      $ref: '#/TicketOwner'
+    type:
+      $ref: '#/TicketType'
+    title:
+      type: string
+    body:
+      type: string
+    status:
+      $ref: '#/TicketStatus'
+    solution:
+      description: Set when the ticket is resolved (`DONE` column), else null.
+      type: [string, 'null']
+      enum: [DONE, WONT_DO, null]
+    pickedUpAt:
+      type: [string, 'null']
+    resolvedAt:
+      type: [string, 'null']
+    createdAt:
+      type: string
+    updatedAt:
+      type: string
+    fullyReady:
+      type: boolean
+    agentTaskId:
+      type: [integer, 'null']
+    commentCount:
+      type: integer
+
+TicketListItemPage:
+  type: object
+  allOf:
+    - $ref: '../common.yaml#/schemas/PageMeta'
+    - type: object
+      required: [content]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/TicketListItem'
+  unevaluatedProperties: false
+
+TicketBoard:
+  type: object
+  description: Tickets grouped by status, each column oldest first (`createdAt` ascending).
+  additionalProperties: false
+  required: [DEFINITION, TODO, IN_PROGRESS, ON_HOLD, DONE]
+  properties:
+    DEFINITION:
+      type: array
+      items:
+        $ref: '#/TicketListItem'
+    TODO:
+      type: array
+      items:
+        $ref: '#/TicketListItem'
+    IN_PROGRESS:
+      type: array
+      items:
+        $ref: '#/TicketListItem'
+    ON_HOLD:
+      type: array
+      items:
+        $ref: '#/TicketListItem'
+    DONE:
+      type: array
+      items:
+        $ref: '#/TicketListItem'
+
+TicketSummary:
+  type: object
+  description: Counts per enum value. Every key is always present (zero when empty).
+  additionalProperties: false
+  required: [byStatus, byType, byOwner, bySolution]
+  properties:
+    byStatus:
+      type: object
+      additionalProperties: false
+      required: [DEFINITION, TODO, IN_PROGRESS, ON_HOLD, DONE]
+      properties:
+        DEFINITION:
+          type: integer
+        TODO:
+          type: integer
+        IN_PROGRESS:
+          type: integer
+        ON_HOLD:
+          type: integer
+        DONE:
+          type: integer
+    byType:
+      type: object
+      additionalProperties: false
+      required: [FEATURE, BUG, CHORE]
+      properties:
+        FEATURE:
+          type: integer
+        BUG:
+          type: integer
+        CHORE:
+          type: integer
+    byOwner:
+      type: object
+      additionalProperties: false
+      required: [AI, HUMAN]
+      properties:
+        AI:
+          type: integer
+        HUMAN:
+          type: integer
+    bySolution:
+      type: object
+      description: Counts among resolved tickets only.
+      additionalProperties: false
+      required: [DONE, WONT_DO]
+      properties:
+        DONE:
+          type: integer
+        WONT_DO:
+          type: integer
+
+TicketResetResult:
+  type: object
+  additionalProperties: false
+  required: [seeded]
+  properties:
+    seeded:
+      type: integer
+      description: Number of seeded workshop tickets.
+
+TicketCreateInput:
+  type: object
+  description: New ticket. It starts as `owner=HUMAN`, `status=DEFINITION`.
+  required: [type, title, body]
+  properties:
+    type:
+      $ref: '#/TicketType'
+      x-error-messages:
+        required: Ungültiger Ticket-Typ
+        type: Ungültiger Ticket-Typ
+        enum: Ungültiger Ticket-Typ
+    title:
+      type: string
+      minLength: 1
+      x-error-messages:
+        required: Titel ist erforderlich
+        type: Titel ist erforderlich
+        minLength: Titel ist erforderlich
+    body:
+      type: string
+      minLength: 1
+      x-error-messages:
+        required: Beschreibung ist erforderlich
+        type: Beschreibung ist erforderlich
+        minLength: Beschreibung ist erforderlich
+    agentTaskId:
+      type: [integer, 'null']
+      minimum: 1
+      description: Must name an existing agent task, else 400 with a field error on `agentTaskId`.
+      x-error-messages:
+        type: Ungültige ID
+        minimum: Ungültige ID
+    fullyReady:
+      type: boolean
+      description: Default false.
+
+TicketStatusInput:
+  type: object
+  required: [status]
+  properties:
+    status:
+      $ref: '#/TicketStatus'
+      x-error-messages:
+        required: Ungültiger Status
+        type: Ungültiger Status
+        enum: Ungültiger Status
+
+TicketOwnerInput:
+  type: object
+  required: [owner]
+  properties:
+    owner:
+      $ref: '#/TicketOwner'
+      x-error-messages:
+        required: Ungültiger Eigentümer
+        type: Ungültiger Eigentümer
+        enum: Ungültiger Eigentümer
+
+TicketAskInput:
+  type: object
+  required: [question]
+  properties:
+    question:
+      type: string
+      minLength: 1
+      x-error-messages:
+        required: Frage ist erforderlich
+        type: Frage ist erforderlich
+        minLength: Frage ist erforderlich
+
+TicketDoneInput:
+  type: object
+  properties:
+    comment:
+      type: string
+      description: Closing comment, stored as an `AGENT` comment.
+
+TicketWontDoInput:
+  type: object
+  properties:
+    comment:
+      type: string
+      description: Closing comment, stored as a `HUMAN` comment.
+
+TicketCommentInput:
+  type: object
+  required: [body]
+  properties:
+    body:
+      type: string
+      minLength: 1
+      x-error-messages:
+        required: Kommentar-Text ist erforderlich
+        type: Kommentar-Text ist erforderlich
+        minLength: Kommentar-Text ist erforderlich
+    handBackToAi:
+      type: boolean
+      description: Moves the ticket to `TODO`, owner `AI`. Only allowed on `ON_HOLD` + `HUMAN` tickets, else 409.
+    clearFullyReady:
+      type: boolean
+      description: Resets `fullyReady` to false.
+    author:
+      $ref: '#/TicketCommentAuthor'
+      description: Default `HUMAN`. `AGENT` is rejected with 403 when the request carries an authenticated session.
+      x-error-messages:
+        type: Ungültiger Autor
+        enum: Ungültiger Autor
