@@ -66,6 +66,20 @@ test.describe('input validation', () => {
     expect(body.fieldErrors['firmaId']).toBe('Firma ist erforderlich');
   });
 
+  // JSON.parse('1e400') is Infinity. Zod answered 400; libsql would throw (500).
+  for (const [method, path] of [['post', '/api/chancen'], ['put', '/api/chancen/1']] as const) {
+    test(`${method.toUpperCase()} ${path} with wert 1e400 (Infinity) -> 400 fieldErrors.wert`, async () => {
+      const resp = await admin[method](path, {
+        data: '{"titel":"x","firmaId":1,"wert":1e400}',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      expect(resp.status()).toBe(400);
+      const body = (await resp.json()) as ErrorBody;
+      expect(body.message).toBe('Validierungsfehler');
+      expect(body.fieldErrors).toHaveProperty('wert');
+    });
+  }
+
   for (const badId of ['abc', '0', '-1', '01']) {
     test(`GET /api/firmen/${badId} -> 400 Ungültige ID`, async () => {
       const resp = await admin.get(`/api/firmen/${badId}`);

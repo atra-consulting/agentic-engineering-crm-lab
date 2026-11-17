@@ -467,6 +467,15 @@ async function main(): Promise<void> {
   const problems = checkRules(bundle, ops);
   if (problems.length > 0) fail('project rules', problems);
   const total = Object.keys(OPERATION_IDS).length;
+  if (ops.length !== total) {
+    // Rule check above covers contract → table; this covers table → contract.
+    const present = new Set(ops.map((op) => op.key));
+    const missing = Object.entries(OPERATION_IDS).filter(([key]) => !present.has(key));
+    fail('project rules', [
+      `contract has ${ops.length} operations, the operationId table has ${total}`,
+      ...missing.map(([key, id]) => `missing in contract: ${key} (${id})`),
+    ]);
+  }
   console.log(`  ok: ${ops.length} of ${total} operations present, all match the operationId table`);
 
   console.log('api:check [4/5] Ajv 2020 compile');

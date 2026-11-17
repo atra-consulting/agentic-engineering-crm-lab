@@ -54,9 +54,13 @@ export const CONTRACT_FORMATS = ['email', 'uri'] as const;
  * `unicode: false`: `minLength`/`maxLength` count UTF-16 code units, like JS
  * `.length` and Zod's `.min()`/`.max()` (Ajv's default counts code points, so
  * 255 × '😀' would pass Ajv's `maxLength: 255`).
+ * `strictNumbers: true` must stay explicit: `strict: false` turns it off, and
+ * then `type: number` accepts ±Infinity (`JSON.parse('1e400')`). Zod rejected
+ * that with 400; without the flag libsql throws and the client gets a 500.
  */
 export const AJV_BASE_OPTIONS: Readonly<Options> = Object.freeze({
   strict: false,
+  strictNumbers: true,
   allowUnionTypes: true,
   allErrors: true,
   verbose: true,

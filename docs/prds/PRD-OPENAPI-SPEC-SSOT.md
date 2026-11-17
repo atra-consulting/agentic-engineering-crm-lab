@@ -306,6 +306,8 @@ The decisions made in this PRD are listed in Decisions (a).
     - No `ajv-formats` (deviation from TN3). Custom `email` and `uri` formats reproduce the old Zod 4 verdicts. The format-parity test proves it on 67 recorded inputs. Reason: data stored today stays savable.
     - Unknown enum values from the database pass through with a log warning, as before. No crash. Summaries count only contract keys.
     - Lengths count UTF-16 units (`unicode: false`), as Zod did.
+    - Numbers must be finite (`strictNumbers: true`), as Zod required. `1e400` in JSON answers 400, not 500 (QA follow-up after #207).
+    - `githubRunUrl` gets stored trimmed, as Zod's `url()` did (QA follow-up after #207).
     - Contract lookup ignores letter case, like Express routing.
     - Integer ids in bodies get an upper limit (largest safe integer), as Zod's `.int()` did.
     - `CONTRACT_RESPONSE_CHECK=off` turns the answer check off in test mode only. It exists for the benchmark (N1 without the check). Development and production ignore it.
@@ -313,15 +315,15 @@ The decisions made in this PRD are listed in Decisions (a).
 
 ### (b) User decisions
 
-The user approved D1–D6 as recommended on 2026-11-17. D7 came up during implementation and is open for confirmation in the PR.
+The user approved D1–D6 as recommended on 2026-11-17. D7 came up during implementation. The user accepted it by merging #207 on 2026-11-17.
 
 - **D1 — Sales-phase filter error.** Today a wrong phase returns an error in a different shape from all other errors. Proposal: use the standard shape and keep the text. **Recommend: yes.**
-- **D2 — Record numbers in addresses.** Today a non-number such as "abc" gives an unclear result: "not found" or a server error. Proposal: return "invalid input" for the field "id" with a German text. Zero and negative numbers get the same answer. **Recommend: yes.**
+- **D2 — Record numbers in addresses.** Today a non-number such as "abc" gives an unclear result: "not found" or a server error. Proposal: return "invalid input" for the field "id" with a German text. Zero and negative numbers get the same answer. So do leading zeros (`007`) and trailing junk (`5abc`); `parseInt` used to read them as 7 and 5. **Recommend: yes.**
 - **D3 — Unknown addresses.** Today an unknown server address returns a web page, not data. In production the test login also has its own special "not found" answer. Proposal: one standard "not found" answer for every unknown address, and remove the special test-login answer. **Recommend: yes.**
 - **D4 — Broken or oversized requests.** Today unreadable data and oversized data both give "server error". Proposal: "invalid input" for unreadable data and "too large" for oversized data, both in the standard shape. **Recommend: yes.**
 - **D5 — Development mode switch.** Today the start script sets no mode, and the test login stays open in every mode except production, including when no mode is set. Proposal: the start script sets development mode, and the test login, docs page and answer checks all follow the same allow-list. Effect: without a mode, all three are off. Without this decision, the start script runs with answer checks and the docs page off. **Recommend: yes.**
 - **D6 — German texts.** Confirm the replacement table in TN4. **Recommend: accept as written.**
-- **D7 — Array bodies on empty-body operations (found during implementation, needs your confirmation).** `logout`, `startTicket`, `startAgentTask`, `resetTickets`, `resetAgentTasks` and `handTicketToAi` take an optional empty object. Today a JSON array as body is ignored. Now it answers 400 "Validierungsfehler" with `fieldErrors._` = "Ungültige Anfrage". No client sends arrays. This is a tightening, so R12 needs your approval. **Recommend: accept.** Alternative: allow arrays in the contract for these six operations.
+- **D7 — Array bodies on empty-body operations (found during implementation; accepted by merging #207).** `logout`, `startTicket`, `startAgentTask`, `resetTickets`, `resetAgentTasks` and `handTicketToAi` take an optional empty object. Today a JSON array as body is ignored. Now it answers 400 "Validierungsfehler" with `fieldErrors._` = "Ungültige Anfrage". No client sends arrays. This is a tightening, so R12 needs your approval. **Recommend: accept.** Alternative: allow arrays in the contract for these six operations.
 
 ### (c) Found, out of scope
 - The server's cross-origin settings allow neither the PATCH method nor the agent-key header. Same-origin use through the web app address works. That is why the docs page works only there.
@@ -604,7 +606,7 @@ The user approved D1–D6 as recommended on 2026-11-17. D7 came up during implem
 
 ## Implementierung
 
-- Pull request: [#207](https://github.com/atra-consulting/agentic-engineering-crm-lab/pull/207) (against `main`, not merged; D7 open for confirmation)
+- Pull request: [#207](https://github.com/atra-consulting/agentic-engineering-crm-lab/pull/207) (merged into `main` on 2026-11-17 as `f12fca9`; D7 accepted)
 - All commits: [`75de728...openapi-spec-ssot-spec-first-types-validation`](https://github.com/atra-consulting/agentic-engineering-crm-lab/compare/75de728...openapi-spec-ssot-spec-first-types-validation)
 - Key commits:
   - Tooling: [`f055005`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/f055005) `api:generate` / `api:check`, [`ebc59de`](https://github.com/atra-consulting/agentic-engineering-crm-lab/commit/ebc59de) full contract + CI drift check

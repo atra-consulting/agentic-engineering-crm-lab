@@ -219,7 +219,8 @@ const validatePut = body.compile({
 
 - Two instances. `body`: `removeAdditional: 'all'`, `coerceTypes: false` (request bodies). `plain`: no coercion, no removal (path params, responses).
 - Both register the bundle as `spec` and the formats `email` and `uri`.
-- Base options: `strict: false`, `allowUnionTypes: true`, `allErrors: true`, `verbose: true`, `unicode: false`.
+- Base options: `strict: false`, `strictNumbers: true`, `allowUnionTypes: true`, `allErrors: true`, `verbose: true`, `unicode: false`.
+- `strictNumbers: true`: `strict: false` would turn it off. Then `type: number` accepts ±Infinity (`1e400` in JSON). Keep it explicit.
 - `unicode: false`: lengths count UTF-16 code units, like Zod and JS `.length`. Ajv 8 warns that the option is deprecated. The shared logger drops only that warning. Other Ajv warnings still print.
 - Formats: `email` and `uri` are custom formats that reproduce the former Zod 4 behavior (WHATWG URL parsing for `uri`, Zod's email regex). `format-parity.spec.ts` verifies this.
 - Import: the named `{ Ajv2020 }` import type-checks under the backend's NodeNext config and runs under tsx.

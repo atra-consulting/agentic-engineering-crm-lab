@@ -139,7 +139,8 @@ export async function completeRun(
       now,
       durationMs,
       JSON.stringify({ tasksSolved, tasksRejected }),
-      githubRunUrl,
+      // Zod's url() stored the trimmed value; the `uri` format only checks it.
+      githubRunUrl.trim(),
       id,
     ],
   });
