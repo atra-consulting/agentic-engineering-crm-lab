@@ -99,7 +99,7 @@ rm -rf backend/data/
 ### Tail backend logs
 The backend runs in the foreground via `tsx --watch` — logs appear in the terminal that started it. For troubleshooting a one-off run:
 ```bash
-cd backend && npx tsx src/index.ts 2>&1 | tail -50
+cd backend && NODE_ENV=development npx tsx src/index.ts 2>&1 | tail -50
 ```
 
 ## Output Format

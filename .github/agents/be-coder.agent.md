@@ -26,7 +26,7 @@ Your spec reading list (paths are relative to the repo root):
 - Merge conflict in a generated file: resolve it in `openapi/`, then run `cd backend && npm run api:generate`. Never hand-merge
 - Commit the contract together with those three generated files
 - Every new operation must answer 2xx at least once in the suite, or the `contract-coverage` Playwright project fails. Prefer a test call. An exemption needs a reason in `backend/src/test/contract-coverage-exemptions.ts`.
-- `api:check` fails → run `cd backend && npm run api:generate`, commit the result.
+- `api:check` fails at the drift step → run `cd backend && npm run api:generate` and commit the result. Lint, rule or Ajv-compile failures → fix the contract in `openapi/`.
 - `api:check` also fails while regenerated files are uncommitted (it compares against git) — commit first, then rerun.
 
 ## Architecture Rules

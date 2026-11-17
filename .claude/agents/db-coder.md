@@ -21,7 +21,7 @@ Your spec reading list (paths are relative to the repo root):
 - Never edit generated files: `backend/src/generated/openapi.json`, `backend/src/generated/api-types.ts`, `frontend/src/app/core/api/api-types.ts`
 - Merge conflict in a generated file: resolve it in `openapi/`, then run `cd backend && npm run api:generate`. Never hand-merge
 - Commit the contract together with those three generated files
-- `api:check` fails → run `cd backend && npm run api:generate`, commit the result.
+- `api:check` fails at the drift step → run `cd backend && npm run api:generate` and commit the result. Lint, rule or Ajv-compile failures → fix the contract in `openapi/`.
 - `api:check` also fails while regenerated files are uncommitted (it compares against git) — commit first, then rerun.
 
 ## Your Expertise
