@@ -8,7 +8,7 @@
  * 3. Return a teardown function.
  */
 import { spawnSync, spawn, ChildProcess } from 'node:child_process';
-import { rmSync } from 'node:fs';
+import { rmSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
@@ -25,6 +25,12 @@ const TEST_DB_PATH = join(BACKEND_ROOT, 'backend', 'data', 'crmdb.test.sqlite');
  * Import this constant in spec files so the literal stays consistent.
  */
 export const TEST_AGENT_TOKEN = 'test-agent-token-abc123';
+
+/**
+ * Contract coverage file. The suite backend appends operationIds of 2xx
+ * answers to it; contract-coverage.spec.ts reads it.
+ */
+export const CONTRACT_COVERAGE_FILE = join(BACKEND_ROOT, 'backend', 'data', 'contract-coverage.7070.test.jsonl');
 
 let backendProcess: ChildProcess;
 
@@ -63,6 +69,9 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
     rmSync(`${TEST_DB_PATH}${suffix}`, { force: true });
   }
 
+  mkdirSync(dirname(CONTRACT_COVERAGE_FILE), { recursive: true });
+  rmSync(CONTRACT_COVERAGE_FILE, { force: true });
+
   const env: Record<string, string> = {
     ...Object.fromEntries(
       Object.entries(process.env).filter(([, v]) => v !== undefined) as [string, string][]
@@ -71,6 +80,10 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
     PORT: '7070',
     AGENT_API_TOKEN: TEST_AGENT_TOKEN,
     AGENT_AUTH_ALLOW_LOOPBACK: '1',
+    // Empty token: dispatchWorkflow() throws before any network call.
+    GH_DISPATCH_TOKEN: '',
+    GH_DISPATCH_REPO: 'invalid/invalid',
+    CONTRACT_COVERAGE_FILE,
   };
 
   const tsxBin = join(BACKEND_ROOT, 'backend', 'node_modules', '.bin', 'tsx');
@@ -114,6 +127,7 @@ export default async function globalSetup(): Promise<() => Promise<void>> {
   // 3. Return teardown
   // -------------------------------------------------------------------------
   return async () => {
+    rmSync(CONTRACT_COVERAGE_FILE, { force: true });
     backendProcess.kill('SIGTERM');
     await new Promise<void>((resolve_) => {
       backendProcess.on('exit', () => resolve_());
