@@ -4,7 +4,8 @@ import { firmaService } from '../services/firmaService.js';
 import { personService } from '../services/personService.js';
 import { abteilungService } from '../services/abteilungService.js';
 import { parsePaginationParams, parseSort } from '../utils/pagination.js';
-import { validate, FirmaCreateSchema } from '../utils/validation.js';
+import { specValidate } from '../openapi/specValidate.js';
+import type { RequestBody } from '../openapi/types.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 const router = Router();
@@ -13,6 +14,7 @@ const router = Router();
 router.get(
   '/all',
   requireAuth,
+  specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     res.json(await firmaService.listAll());
   }),
@@ -22,6 +24,7 @@ router.get(
 router.get(
   '/',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const { page, size } = parsePaginationParams(req.query as Record<string, unknown>);
     const sort = parseSort(
@@ -39,6 +42,7 @@ router.get(
 router.get(
   '/:id/personen',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     const { page, size } = parsePaginationParams(req.query as Record<string, unknown>);
@@ -50,6 +54,7 @@ router.get(
 router.get(
   '/:id/abteilungen',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     const { page, size } = parsePaginationParams(req.query as Record<string, unknown>);
@@ -61,6 +66,7 @@ router.get(
 router.get(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     res.json(await firmaService.findById(id));
@@ -71,8 +77,9 @@ router.get(
 router.post(
   '/',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
-    const dto = validate(FirmaCreateSchema, req.body);
+    const dto: RequestBody<'createFirma'> = req.body;
     res.status(201).json(await firmaService.create(dto));
   }),
 );
@@ -81,9 +88,10 @@ router.post(
 router.put(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
-    const dto = validate(FirmaCreateSchema, req.body);
+    const dto: RequestBody<'updateFirma'> = req.body;
     res.json(await firmaService.update(id, dto));
   }),
 );
@@ -92,6 +100,7 @@ router.put(
 router.delete(
   '/:id',
   requireAuth,
+  specValidate,
   asyncHandler(async (req: Request, res: Response) => {
     const id = parseInt(req.params['id'] as string, 10);
     await firmaService.delete(id);

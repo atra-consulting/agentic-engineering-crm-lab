@@ -2,7 +2,7 @@ import { client } from '../config/db.js';
 import type { InValue } from '@libsql/client';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import type { PersonCreateDTO } from '../utils/validation.js';
+import type { RequestBody } from '../openapi/types.js';
 
 export interface PersonDTO {
   id: number;
@@ -146,7 +146,7 @@ export const personService = {
     return buildPage(rows.map(toDTO), total, page, size);
   },
 
-  async create(dto: PersonCreateDTO): Promise<PersonDTO> {
+  async create(dto: RequestBody<'createPerson'>): Promise<PersonDTO> {
     const now = new Date().toISOString();
     const result = await client.execute({
       sql: `INSERT INTO person (firstName, lastName, email, phone, position, notes, firmaId, abteilungId, createdAt, updatedAt)
@@ -170,7 +170,7 @@ export const personService = {
     return this.findById(Number(result.lastInsertRowid));
   },
 
-  async update(id: number, dto: PersonCreateDTO): Promise<PersonDTO> {
+  async update(id: number, dto: RequestBody<'createPerson'>): Promise<PersonDTO> {
     await this.findById(id);
     const now = new Date().toISOString();
     await client.execute({
