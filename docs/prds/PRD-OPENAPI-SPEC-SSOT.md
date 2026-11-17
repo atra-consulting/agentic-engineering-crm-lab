@@ -108,7 +108,8 @@ All requirements are "Must" unless marked "Should". The technical details are in
   - Development mode: the server logs the problem and marks the answer, but still sends the real answer.
   - Error answers get checked too. Empty answers do not.
   - The check never crashes the server (TN3).
-  - With the start script, development mode depends on Decision D5.
+  - The start scripts run the backend in development mode (D5, done).
+  - For the benchmark only, `CONTRACT_RESPONSE_CHECK=off` switches the check off in test mode (Decisions (a) 17).
 - **R15 — Server code uses generated types.** Request and answer shapes in the server code come from types generated from the contract. Hand-written copies go away, so the type check fails on drift.
 - **R16 — Lists are defined once.** An automatic test fails on any difference between the contract and:
   - the server's value lists (database lists and filter checks)
@@ -287,7 +288,7 @@ The decisions made in this PRD are listed in Decisions (a).
 6. Query options: the contract declares them, the code checks them as today, and equality tests guard drift (TN3).
 7. Unknown body fields: removed and ignored (TN3).
 8. A request with two errors may report a different error first. Accepted.
-9. Answer checks: test mode fails, development mode warns, every other mode is off (TN3, TN9).
+9. Answer checks: test mode fails, development mode warns, every other mode is off (TN3, TN9). Exception for the benchmark: `CONTRACT_RESPONSE_CHECK=off` in test mode (see 17).
 10. Access: the existing checks stay the only enforcement, backed by a generated access test (TN5).
 11. The address type stays free text, up to 50 characters.
 12. User roles and permissions become closed lists taken from the hardcoded users, with an equality test.
@@ -320,7 +321,7 @@ The user approved D1–D6 as recommended on 2026-11-17. D7 came up during implem
 - **D4 — Broken or oversized requests.** Today unreadable data and oversized data both give "server error". Proposal: "invalid input" for unreadable data and "too large" for oversized data, both in the standard shape. **Recommend: yes.**
 - **D5 — Development mode switch.** Today the start script sets no mode, and the test login stays open in every mode except production, including when no mode is set. Proposal: the start script sets development mode, and the test login, docs page and answer checks all follow the same allow-list. Effect: without a mode, all three are off. Without this decision, the start script runs with answer checks and the docs page off. **Recommend: yes.**
 - **D6 — German texts.** Confirm the replacement table in TN4. **Recommend: accept as written.**
-- **D7 — Array bodies on empty-body operations (found during implementation, needs your confirmation).** `logout`, `startTicket`, `startAgentTask`, `resetTickets`, `resetAgentTasks` and `handTicketToAi` take an optional empty object. Today a JSON array as body is ignored. Now it answers 400 "Ungültige Anfrage". No client sends arrays. This is a tightening, so R12 needs your approval. **Recommend: accept.** Alternative: allow arrays in the contract for these six operations.
+- **D7 — Array bodies on empty-body operations (found during implementation, needs your confirmation).** `logout`, `startTicket`, `startAgentTask`, `resetTickets`, `resetAgentTasks` and `handTicketToAi` take an optional empty object. Today a JSON array as body is ignored. Now it answers 400 "Validierungsfehler" with `fieldErrors._` = "Ungültige Anfrage". No client sends arrays. This is a tightening, so R12 needs your approval. **Recommend: accept.** Alternative: allow arrays in the contract for these six operations.
 
 ### (c) Found, out of scope
 - The server's cross-origin settings allow neither the PATCH method nor the agent-key header. Same-origin use through the web app address works. That is why the docs page works only there.
@@ -569,10 +570,10 @@ The user approved D1–D6 as recommended on 2026-11-17. D7 came up during implem
 
 **TN9 — Runtime modes and CI.**
 - The allow-list `NODE_ENV ∈ {development, test}` gates the response check, `/api/docs` and `/api/openapi.json`. It fails closed: an unset or unknown value means production behavior.
-- Today:
-  - `start.sh` sets no `NODE_ENV`.
-  - test-login is registered whenever `NODE_ENV !== 'production'`, so it is open when `NODE_ENV` is unset.
-  - D5 would apply the allow-list to test-login and make `start.sh` export `NODE_ENV=development`.
+- Before this change:
+  - `start.sh` set no `NODE_ENV`.
+  - test-login was registered whenever `NODE_ENV !== 'production'`, so it was open when `NODE_ENV` was unset.
+- Done (D5): test-login follows the allow-list, and `start.sh` and `start.bat` start the backend with `NODE_ENV=development`.
 - The session cookie's `secure` flag and the secret warning react only to `production`, so they are unaffected.
 - Playwright `globalSetup` already sets `NODE_ENV=test`.
 - CI:
