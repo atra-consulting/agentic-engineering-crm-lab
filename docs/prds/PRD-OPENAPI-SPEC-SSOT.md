@@ -359,7 +359,7 @@ The user approved D1–D6 as recommended on 2026-11-17.
   - A route without a matching operation fails the route-chain test.
 - Route-chain test: walk the Express 4 router stack and assert that every `/api` route has `specValidate` after its guards. Only the docs routes are exempt.
 - Coercion:
-  - Path params use a separate Ajv instance with type coercion.
+  - Path params are never coerced. They are declared as `type: string` with the pattern `^[1-9][0-9]*$` (revised during planning), so the validated value equals what `parseInt` uses.
   - Bodies are never coerced: a string "5" for `firmaId` stays a 400, as today.
 - Unknown fields:
   - Use `removeAdditional: 'all'` on request bodies only.
