@@ -94,8 +94,9 @@ export interface paths {
         put?: never;
         /**
          * Log in by user name only (test helper)
-         * @description Exists only in development and test. In production the route answers 404
-         *     `{status, message}`. No password check. A missing `benutzername` answers
+         * @description Exists only in development and test. Outside them the route is not
+         *     registered; the request hits the JSON catch-all and answers the standard
+         *     `ErrorResponse` 404 `Ressource nicht gefunden`. No password check. A missing `benutzername` answers
          *     401 `benutzername required`; an unknown user answers 401
          *     `Benutzer nicht gefunden`. Sets the cookie `JSESSIONID`. The contract does
          *     not validate the body.

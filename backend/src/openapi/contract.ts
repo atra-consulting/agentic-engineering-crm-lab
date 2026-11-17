@@ -499,7 +499,8 @@ export function buildContract(bundle: unknown): Contract {
       });
       operations.push(operation);
       byId.set(operationId, operation);
-      byKey.set(`${method} ${specPath}`, operation);
+      // Key is case-folded: Express matches routes case-insensitively.
+      byKey.set(`${method} ${specPath.toLowerCase()}`, operation);
 
       const segments = specPath.split('/').slice(1);
       const pattern = segments
@@ -543,7 +544,7 @@ export function buildContract(bundle: unknown): Contract {
       const path = stripTrailingSlash(expressFullPath).replace(/:([A-Za-z0-9_]+)/g, '{$1}');
       if (path !== basePath && !path.startsWith(`${basePath}/`)) return undefined;
       const specPath = path.slice(basePath.length) || '/';
-      return withHeadFallback(method, (m) => byKey.get(`${m} ${specPath}`));
+      return withHeadFallback(method, (m) => byKey.get(`${m} ${specPath.toLowerCase()}`));
     },
 
     matchOperation(method, originalUrl) {
