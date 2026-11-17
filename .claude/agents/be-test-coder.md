@@ -14,6 +14,7 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-testing.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-backend.md`, `docs/specs/SPECS-database.md`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`
 
 ## Test Framework
 
@@ -71,6 +72,13 @@ All three currently hold full permissions. When the feature adds a new permissio
 - Auth middleware: `backend/src/middleware/auth.ts`
 - Error shape: `{ status, message, timestamp, fieldErrors }` from `middleware/errorHandler.ts`
 - Pagination shape: `{ content, totalElements, totalPages, size, number, first, last }` — `number` is 0-indexed
+
+## Contract Tests
+
+- Keep contract tests current: routes, route chain, access, lists, coverage project
+- Update golden-errors for changed error shapes
+- Response check in test mode turns violations into 500 with a `[contract]` log line. Fix the cause, not the test
+- Specs importing `app.ts` use `import type`
 
 ## Before Handing Off
 

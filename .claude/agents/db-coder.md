@@ -14,6 +14,7 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-database.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-backend.md`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`
 
 ## Your Expertise
 
@@ -63,7 +64,7 @@ Your spec reading list (paths are relative to the repo root):
 
 - **No native boolean/date** — use `INTEGER 0/1` and `TEXT` ISO-8601; convert in the service
 - **Limited `ALTER TABLE`** — no DROP COLUMN / CHANGE TYPE in older SQLite; rebuild the table if needed
-- **Type affinity, not type enforcement** — validate at the app layer with Zod
+- **Type affinity, not type enforcement** — validate at the app layer through the contract (`specValidate`, `openapi/schemas/`)
 - **@libsql/client is async** — always `await client.execute(...)` and `await client.batch(...)`; missing `await` silently loses the result
 - **`PRAGMA foreign_keys`** is set once at startup in `migrate.ts`; libSQL keeps it enforced for the app's single client
 - **Case-insensitive LIKE** requires `COLLATE NOCASE` or `LOWER(col) LIKE LOWER(?)`
@@ -84,6 +85,11 @@ When providing solutions:
 3. Note any SQLite-specific considerations
 4. Call out indexes you added or think should exist
 5. After changes, run `cd backend && npx tsc --noEmit` to verify types
+
+## Contract Sync
+
+- Enum or column changes need the contract enums in `openapi/schemas/` too. The contract-lists test fails otherwise
+- After contract edits: `cd backend && npm run api:generate && npm run api:check`
 
 ## Red Flags to Avoid
 
