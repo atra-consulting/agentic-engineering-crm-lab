@@ -1,26 +1,6 @@
-export type AgentTaskSource = 'EMAIL' | 'GITHUB_ISSUE' | 'APP_LOG' | 'ERROR_REPORT';
+import type { components } from '../api/api-types';
 
-export type AgentTaskStatus = 'OPEN' | 'IN_PROGRESS' | 'DONE' | 'REJECTED';
-
-export interface AgentTask {
-  id: number;
-  source: AgentTaskSource;
-  title: string;
-  body: string;
-  status: AgentTaskStatus;
-  comment: string | null;
-  metadata: string | null;
-  ticketId: number | null;
-  pickedUpAt: string | null;
-  resolvedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface AgentTaskSummary {
-  source: AgentTaskSource;
-  openCount: number;
-  inProgressCount: number;
-  doneCount: number;
-  rejectedCount: number;
-}
+export type AgentTaskSource = components['schemas']['AgentTaskSource'];
+export type AgentTaskStatus = components['schemas']['AgentTaskStatus'];
+export type AgentTask = components['schemas']['AgentTask'];
+export type AgentTaskSummary = components['schemas']['AgentTaskSummary'];

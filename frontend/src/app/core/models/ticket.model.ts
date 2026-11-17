@@ -1,73 +1,16 @@
-export type TicketOwner = 'AI' | 'HUMAN';
-export type TicketType = 'FEATURE' | 'BUG' | 'CHORE';
-export type TicketStatus = 'DEFINITION' | 'TODO' | 'IN_PROGRESS' | 'ON_HOLD' | 'DONE';
-export type TicketSolution = 'DONE' | 'WONT_DO';
-export type TicketCommentAuthor = 'HUMAN' | 'AGENT';
+import type { components } from '../api/api-types';
 
-export interface TicketComment {
-  id: number;
-  ticketId: number;
-  author: TicketCommentAuthor;
-  authorName: string | null;
-  body: string;
-  createdAt: string;
-}
+export type TicketOwner = components['schemas']['TicketOwner'];
+export type TicketType = components['schemas']['TicketType'];
+export type TicketStatus = components['schemas']['TicketStatus'];
+export type TicketSolution = components['schemas']['TicketSolution'];
+export type TicketCommentAuthor = components['schemas']['TicketCommentAuthor'];
 
-export interface Ticket {
-  id: number;
-  owner: TicketOwner;
-  type: TicketType;
-  title: string;
-  body: string;
-  status: TicketStatus;
-  solution: TicketSolution | null;
-  agentTaskId: number | null;
-  commentCount?: number;
-  comments?: TicketComment[];
-  pickedUpAt: string | null;
-  resolvedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface TicketBoard {
-  DEFINITION: Ticket[];
-  TODO: Ticket[];
-  IN_PROGRESS: Ticket[];
-  ON_HOLD: Ticket[];
-  DONE: Ticket[];
-}
-
-export interface TicketSummary {
-  byStatus: {
-    DEFINITION: number;
-    TODO: number;
-    IN_PROGRESS: number;
-    ON_HOLD: number;
-    DONE: number;
-  };
-  byType: {
-    FEATURE: number;
-    BUG: number;
-    CHORE: number;
-  };
-  byOwner: {
-    AI: number;
-    HUMAN: number;
-  };
-  bySolution: {
-    DONE: number;
-    WONT_DO: number;
-  };
-}
-
-export interface TicketCreate {
-  type: TicketType;
-  title: string;
-  body: string;
-}
-
-export interface TicketCommentCreate {
-  body: string;
-  handBackToAi?: boolean;
-}
+export type TicketComment = components['schemas']['TicketComment'];
+export type TicketDetail = components['schemas']['TicketDetail'];
+export type TicketListItem = components['schemas']['TicketListItem'];
+export type Ticket = TicketDetail;
+export type TicketBoard = components['schemas']['TicketBoard'];
+export type TicketSummary = components['schemas']['TicketSummary'];
+export type TicketCreate = components['schemas']['TicketCreateInput'];
+export type TicketCommentCreate = components['schemas']['TicketCommentInput'];

@@ -6,6 +6,7 @@ import {
   TicketBoard,
   TicketCommentCreate,
   TicketCreate,
+  TicketListItem,
   TicketOwner,
   TicketStatus,
   TicketSummary,
@@ -35,7 +36,7 @@ export class TicketService {
     size = 20,
     sort = 'createdAt,desc',
     filters?: { type?: TicketType; status?: TicketStatus; owner?: TicketOwner },
-  ): Observable<Page<Ticket>> {
+  ): Observable<Page<TicketListItem>> {
     let params = new HttpParams().set('page', page).set('size', size).set('sort', sort);
     if (filters?.type) {
       params = params.set('type', filters.type);
@@ -46,7 +47,7 @@ export class TicketService {
     if (filters?.owner) {
       params = params.set('owner', filters.owner);
     }
-    return this.http.get<Page<Ticket>>(this.baseUrl, { params });
+    return this.http.get<Page<TicketListItem>>(this.baseUrl, { params });
   }
 
   create(dto: TicketCreate): Observable<Ticket> {
