@@ -8,7 +8,7 @@ import {
 import { ticketService } from '../services/ticketService.js';
 import { parsePaginationParams, parseSort } from '../utils/pagination.js';
 import { specValidate } from '../openapi/specValidate.js';
-import type { RequestBody } from '../openapi/types.js';
+import type { JsonResponse, RequestBody } from '../openapi/types.js';
 import { ValidationError, ForbiddenError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
@@ -84,7 +84,8 @@ router.post(
   specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     const count = await ticketService.resetAll();
-    res.json({ seeded: count });
+    const body: JsonResponse<'resetTickets', 200> = { seeded: count };
+    res.json(body);
   }),
 );
 

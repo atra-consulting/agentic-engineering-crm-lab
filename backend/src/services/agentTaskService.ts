@@ -1,22 +1,10 @@
 import { client } from '../config/db.js';
 import { NotFoundError, ConflictError } from '../utils/errors.js';
 import { buildPage, type PageResult, type SortParams } from '../utils/pagination.js';
-import { AGENT_TASK_SOURCE, type AgentTaskSource, type AgentTaskStatus } from '../db/schema/enums.js';
+import { AGENT_TASK_SOURCE, AGENT_TASK_STATUS, type AgentTaskSource, type AgentTaskStatus } from '../db/schema/enums.js';
+import type { Schema } from '../openapi/types.js';
 
-export interface AgentTaskDTO {
-  id: number;
-  source: string;
-  title: string;
-  body: string;
-  status: string;
-  comment: string | null;
-  metadata: string | null;
-  pickedUpAt: string | null;
-  resolvedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-  ticketId: number | null;
-}
+export type AgentTaskDTO = Schema<'AgentTask'>;
 
 interface AgentTaskRow {
   id: number;
@@ -33,15 +21,19 @@ interface AgentTaskRow {
   ticketId?: number | null;
 }
 
-export interface AgentTaskSummaryDTO {
-  source: string;
-  openCount: number;
-  inProgressCount: number;
-  doneCount: number;
-  rejectedCount: number;
+export type AgentTaskSummaryDTO = Schema<'AgentTaskSummary'>;
+
+function isAgentTaskSource(value: string): value is AgentTaskSource {
+  return (AGENT_TASK_SOURCE as readonly string[]).includes(value);
+}
+
+function isAgentTaskStatus(value: string): value is AgentTaskStatus {
+  return (AGENT_TASK_STATUS as readonly string[]).includes(value);
 }
 
 function toDTO(row: AgentTaskRow): AgentTaskDTO {
+  if (!isAgentTaskSource(row.source)) throw new Error(`Unbekannte AgentTask-Quelle: ${row.source}`);
+  if (!isAgentTaskStatus(row.status)) throw new Error(`Unbekannter AgentTask-Status: ${row.status}`);
   return {
     id: row.id,
     source: row.source,
@@ -213,6 +205,7 @@ export const agentTaskService = {
     const rows = result.rows as unknown as SummaryRow[];
     const summaryMap = new Map<string, AgentTaskSummaryDTO>();
     for (const row of rows) {
+      if (!isAgentTaskSource(row.source)) continue;
       summaryMap.set(row.source, {
         source: row.source,
         openCount: Number(row.openCount),

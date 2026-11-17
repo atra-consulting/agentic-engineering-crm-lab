@@ -5,67 +5,26 @@ import {
   TICKET_OWNER,
   TICKET_TYPE,
   TICKET_STATUS,
+  TICKET_SOLUTION,
+  TICKET_COMMENT_AUTHOR,
   type TicketOwner,
   type TicketType,
   type TicketStatus,
   type TicketSolution,
   type TicketCommentAuthor,
 } from '../db/schema/enums.js';
-import type { RequestBody } from '../openapi/types.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 import { seedTickets, TICKET_SEED_COUNT } from '../seed/ticketSeed.js';
 
 // ─── DTOs ─────────────────────────────────────────────────────────────────────
 
-export interface TicketCommentDTO {
-  id: number;
-  ticketId: number;
-  author: string;
-  authorName: string | null;
-  body: string;
-  createdAt: string;
-}
+export type TicketCommentDTO = Schema<'TicketComment'>;
 
-export interface TicketDTO {
-  id: number;
-  owner: string;
-  type: string;
-  title: string;
-  body: string;
-  status: string;
-  solution: string | null;
-  pickedUpAt: string | null;
-  resolvedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-  fullyReady: boolean;
-  agentTaskId: number | null;
-  comments: TicketCommentDTO[];
-}
+export type TicketDTO = Schema<'TicketDetail'>;
 
-export interface TicketListItemDTO {
-  id: number;
-  owner: string;
-  type: string;
-  title: string;
-  body: string;
-  status: string;
-  solution: string | null;
-  pickedUpAt: string | null;
-  resolvedAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-  fullyReady: boolean;
-  agentTaskId: number | null;
-  commentCount: number;
-}
+export type TicketListItemDTO = Schema<'TicketListItem'>;
 
-export interface TicketBoardDTO {
-  DEFINITION: TicketListItemDTO[];
-  TODO: TicketListItemDTO[];
-  IN_PROGRESS: TicketListItemDTO[];
-  ON_HOLD: TicketListItemDTO[];
-  DONE: TicketListItemDTO[];
-}
+export type TicketBoardDTO = Schema<'TicketBoard'>;
 
 /**
  * TicketSummaryDTO shape:
@@ -76,12 +35,7 @@ export interface TicketBoardDTO {
  *   bySolution: { DONE, WONT_DO }   // counts only among resolved tickets
  * }
  */
-export interface TicketSummaryDTO {
-  byStatus: Record<string, number>;
-  byType: Record<string, number>;
-  byOwner: Record<string, number>;
-  bySolution: Record<string, number>;
-}
+export type TicketSummaryDTO = Schema<'TicketSummary'>;
 
 export interface TicketFilters {
   type?: string;
@@ -122,7 +76,40 @@ interface TicketListRow extends TicketRow {
 
 // ─── Mappers ──────────────────────────────────────────────────────────────────
 
+function isTicketOwner(v: string): v is TicketOwner {
+  return (TICKET_OWNER as readonly string[]).includes(v);
+}
+function isTicketType(v: string): v is TicketType {
+  return (TICKET_TYPE as readonly string[]).includes(v);
+}
+function isTicketStatus(v: string): v is TicketStatus {
+  return (TICKET_STATUS as readonly string[]).includes(v);
+}
+function isTicketSolution(v: string): v is TicketSolution {
+  return (TICKET_SOLUTION as readonly string[]).includes(v);
+}
+function isTicketCommentAuthor(v: string): v is TicketCommentAuthor {
+  return (TICKET_COMMENT_AUTHOR as readonly string[]).includes(v);
+}
+
+/** Narrow the enum columns of a ticket row; throws on values outside the contract. */
+function narrowTicketEnums(row: TicketRow): {
+  owner: TicketOwner;
+  type: TicketType;
+  status: TicketStatus;
+  solution: TicketSolution | null;
+} {
+  if (!isTicketOwner(row.owner)) throw new Error(`Unbekannter Ticket-Owner: ${row.owner}`);
+  if (!isTicketType(row.type)) throw new Error(`Unbekannter Ticket-Typ: ${row.type}`);
+  if (!isTicketStatus(row.status)) throw new Error(`Unbekannter Ticket-Status: ${row.status}`);
+  if (row.solution !== null && !isTicketSolution(row.solution)) {
+    throw new Error(`Unbekannte Ticket-Lösung: ${row.solution}`);
+  }
+  return { owner: row.owner, type: row.type, status: row.status, solution: row.solution };
+}
+
 function toCommentDTO(row: TicketCommentRow): TicketCommentDTO {
+  if (!isTicketCommentAuthor(row.author)) throw new Error(`Unbekannter Kommentar-Autor: ${row.author}`);
   return {
     id: row.id,
     ticketId: row.ticketId,
@@ -134,14 +121,15 @@ function toCommentDTO(row: TicketCommentRow): TicketCommentDTO {
 }
 
 function toDTO(row: TicketRow, comments: TicketCommentDTO[]): TicketDTO {
+  const { owner, type, status, solution } = narrowTicketEnums(row);
   return {
     id: row.id,
-    owner: row.owner,
-    type: row.type,
+    owner,
+    type,
     title: row.title,
     body: row.body,
-    status: row.status,
-    solution: row.solution,
+    status,
+    solution,
     pickedUpAt: row.pickedUpAt,
     resolvedAt: row.resolvedAt,
     createdAt: row.createdAt,
@@ -153,14 +141,15 @@ function toDTO(row: TicketRow, comments: TicketCommentDTO[]): TicketDTO {
 }
 
 function toListItemDTO(row: TicketListRow): TicketListItemDTO {
+  const { owner, type, status, solution } = narrowTicketEnums(row);
   return {
     id: row.id,
-    owner: row.owner,
-    type: row.type,
+    owner,
+    type,
     title: row.title,
     body: row.body,
-    status: row.status,
-    solution: row.solution,
+    status,
+    solution,
     pickedUpAt: row.pickedUpAt,
     resolvedAt: row.resolvedAt,
     createdAt: row.createdAt,
@@ -509,7 +498,7 @@ export const ticketService = {
     }
 
     // Initialise with all known enum values at zero
-    const byStatus: Record<string, number> = {
+    const byStatus: TicketSummaryDTO['byStatus'] = {
       DEFINITION: 0,
       TODO: 0,
       IN_PROGRESS: 0,
@@ -517,22 +506,22 @@ export const ticketService = {
       DONE: 0,
     };
     for (const r of statusResult.rows as unknown as CountRow[]) {
-      if (r.status) byStatus[r.status] = Number(r.cnt);
+      if (r.status && isTicketStatus(r.status)) byStatus[r.status] = Number(r.cnt);
     }
 
-    const byType: Record<string, number> = { FEATURE: 0, BUG: 0, CHORE: 0 };
+    const byType: TicketSummaryDTO['byType'] = { FEATURE: 0, BUG: 0, CHORE: 0 };
     for (const r of typeResult.rows as unknown as CountRow[]) {
-      if (r.type) byType[r.type] = Number(r.cnt);
+      if (r.type && isTicketType(r.type)) byType[r.type] = Number(r.cnt);
     }
 
-    const byOwner: Record<string, number> = { AI: 0, HUMAN: 0 };
+    const byOwner: TicketSummaryDTO['byOwner'] = { AI: 0, HUMAN: 0 };
     for (const r of ownerResult.rows as unknown as CountRow[]) {
-      if (r.owner) byOwner[r.owner] = Number(r.cnt);
+      if (r.owner && isTicketOwner(r.owner)) byOwner[r.owner] = Number(r.cnt);
     }
 
-    const bySolution: Record<string, number> = { DONE: 0, WONT_DO: 0 };
+    const bySolution: TicketSummaryDTO['bySolution'] = { DONE: 0, WONT_DO: 0 };
     for (const r of solutionResult.rows as unknown as CountRow[]) {
-      if (r.solution) bySolution[r.solution] = Number(r.cnt);
+      if (r.solution && isTicketSolution(r.solution)) bySolution[r.solution] = Number(r.cnt);
     }
 
     return { byStatus, byType, byOwner, bySolution };

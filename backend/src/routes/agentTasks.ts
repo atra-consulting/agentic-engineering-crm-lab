@@ -4,7 +4,7 @@ import { requireAgentToken, requireAgentTokenOrAdminSession } from '../middlewar
 import { agentTaskService } from '../services/agentTaskService.js';
 import { parsePaginationParams, parseSort } from '../utils/pagination.js';
 import { specValidate } from '../openapi/specValidate.js';
-import type { RequestBody } from '../openapi/types.js';
+import type { JsonResponse, RequestBody } from '../openapi/types.js';
 import { ValidationError } from '../utils/errors.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AGENT_TASK_SOURCE, AGENT_TASK_STATUS } from '../db/schema/enums.js';
@@ -54,7 +54,8 @@ router.post(
   specValidate,
   asyncHandler(async (_req: Request, res: Response) => {
     const count = await agentTaskService.resetAll();
-    res.json({ reset: count });
+    const body: JsonResponse<'resetAgentTasks', 200> = { reset: count };
+    res.json(body);
   }),
 );
 

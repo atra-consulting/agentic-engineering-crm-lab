@@ -1,4 +1,4 @@
-import type { RequestBody } from '../openapi/types.js';
+import type { RequestBody, Schema } from '../openapi/types.js';
 import { client } from '../config/db.js';
 import { NotFoundError } from '../utils/errors.js';
 import { buildPage, parsePaginationParams, parseSort, type PageResult, type SortParams } from '../utils/pagination.js';
@@ -6,18 +6,7 @@ import { CRON_JOBS } from '../config/cronJobs.js';
 
 // ─── DTO ──────────────────────────────────────────────────────────────────────
 
-export interface CronRunDTO {
-  id: number;
-  job: string;
-  status: string;
-  trigger: string;
-  startedAt: string;
-  finishedAt: string | null;
-  durationMs: number | null;
-  result: string | null;
-  githubRunUrl: string | null;
-  error: string | null;
-}
+export type CronRunDTO = Schema<'CronRun'>;
 
 // Internal row type returned by raw SQL queries (field names == column names)
 interface CronRunRow {
@@ -33,7 +22,17 @@ interface CronRunRow {
   error: string | null;
 }
 
+function isCronRunStatus(value: string): value is CronRunDTO['status'] {
+  return value === 'RUNNING' || value === 'SUCCESS' || value === 'FAILED' || value === 'SKIPPED';
+}
+
+function isCronTrigger(value: string): value is CronRunDTO['trigger'] {
+  return value === 'CRON' || value === 'MANUAL';
+}
+
 function toDTO(row: CronRunRow): CronRunDTO {
+  if (!isCronRunStatus(row.status)) throw new Error(`Unbekannter CronRun-Status: ${row.status}`);
+  if (!isCronTrigger(row.trigger)) throw new Error(`Unbekannter CronRun-Trigger: ${row.trigger}`);
   return {
     id: row.id,
     job: row.job,
@@ -237,13 +236,7 @@ export async function listRuns(
 
 // ─── Job-level view ───────────────────────────────────────────────────────────
 
-export interface CronJobWithLastRun {
-  name: string;
-  schedule: string;
-  description: string;
-  dispatchEventType: string;
-  lastRun: CronRunDTO | null;
-}
+export type CronJobWithLastRun = Schema<'CronJob'>;
 
 /**
  * For each entry in CRON_JOBS, fetch the newest cron_run row (or null).
