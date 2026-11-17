@@ -42,6 +42,7 @@ Adding an entity or endpoint:
 ## Contributor rules
 
 - `api:check` fails → run `npm run api:generate`, commit the result.
+- `api:check` also fails while regenerated files are uncommitted (it compares against git). Regenerate, commit, rerun.
 - Merge conflict in a generated file → resolve the conflict in `openapi/`, then run `npm run api:generate`. Never hand-merge generated files.
 - Never edit generated files.
 - Describe today's code, not a redesign. Code and old docs disagree → the code wins. Report the deviation.
@@ -233,6 +234,8 @@ const validatePut = body.compile({
 - Patterns compile with the `u` flag.
 - 5xx answers are not declared per operation; any 5xx body is validated against `ErrorResponse`.
 - Runtime request validation (`specValidate`) runs after each route's auth guard, so 401/403 always come before 400.
+- Contract lookup ignores letter case, like Express routing. `findOperation` and `matchOperation` (`backend/src/openapi/contract.ts`) fold the path to lower case.
+- Unknown enum values read from the database pass through unchanged. `asEnum` (`backend/src/db/schema/enums.ts`) logs one `[enum] …` console warning per distinct value. Summaries count only contract keys.
 
 ## OperationId table (binding, 79 operations, 57 paths)
 

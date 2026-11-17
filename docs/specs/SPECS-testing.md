@@ -108,7 +108,7 @@ await ctx.post('/api/auth/login', { data: { benutzername: 'admin', passwort: 'ad
 
 This endpoint is intended for test speed when the test cares about session state but not about the login flow itself. The standard login endpoint is used when the login flow is under test.
 
-**Note:** No current test uses `POST /api/auth/test-login`. All existing tests authenticate via the password-based `loginCtx()` helper. The endpoint remains available for future tests where password validation is out of scope.
+**Note:** `test-login` exists only in development and test mode. Most tests log in with `loginCtx()`. A few call `test-login` directly: `input-validation.spec.ts`, `contract-smoke.spec.ts`, `behavior-changes.spec.ts`, `runtime-modes.spec.ts`. The `contract-coverage` project needs one 2xx answer from it (`contract-smoke.spec.ts`).
 
 #### Session reuse pattern
 

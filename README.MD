@@ -116,7 +116,8 @@ Das Skript installiert npm-Abhängigkeiten, startet Backend und Frontend und war
 ### Einzeln starten
 
 ```bash
-cd backend  && npx tsx --watch src/index.ts                                      # Port 7070, Hot Reload
+# NODE_ENV=development ist nötig: ohne Modus läuft das Backend als Production (kein test-login, kein /api/docs, kein Response-Check)
+cd backend  && NODE_ENV=development npx tsx --watch src/index.ts                # Port 7070, Hot Reload
 cd frontend && npx ng serve --port 7200 --proxy-config proxy.conf.json           # Port 7200, Hot Reload
 ```
 

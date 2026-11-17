@@ -328,6 +328,9 @@ router.get(
 - Request body must match the operation's schema.
 - Unknown body fields get stripped. The handler sees the cleaned body in `req.body`.
 - Failures go to the error handler as `ValidationError` with `fieldErrors`.
+- Contract lookup ignores letter case, like Express routing. `/api/Firmen/1` finds the same operation as `/api/firmen/1` (`findOperation`, `matchOperation` in `src/openapi/contract.ts`).
+- Unknown enum values read from the database pass through unchanged. The service logs one `[enum] …` console warning per distinct value (`asEnum` in `src/db/schema/enums.ts`). The response check flags them in development and test.
+- Summaries (ticket, agent task) count only values that the contract lists. Unknown values get a warning, not a count.
 
 ```typescript
 router.post(
@@ -382,9 +385,11 @@ Enum values (canonical: contract and [SPECS-database.md](SPECS-database.md)):
 
 Backend changes:
 
-1. Add the paths and schemas to the contract (`openapi/paths/<area>.yaml`). Add `x-error-messages` for field texts. Regenerate the types.
+1. Add the paths and schemas to the contract (`openapi/paths/<area>.yaml`). Add `x-error-messages` for field texts. Regenerate: `cd backend && npm run api:generate`.
 2. Add Drizzle table definition to `src/db/schema/schema.ts`.
 3. Add `CREATE TABLE IF NOT EXISTS` to `src/config/migrate.ts`.
 4. Add service. DTOs are aliases: `Schema<'X'>`.
 5. Add route file: guard(s) → `specValidate` → `asyncHandler`. Type bodies `RequestBody<'opId'>`. Mount the router in `src/app.ts`.
 6. Run the tests. Response check: in test, an answer that breaks the contract becomes a 500. In development, it logs and sets `X-Contract-Violation`; the real answer stays.
+7. Every new operation must answer 2xx once in the suite. The `contract-coverage` project fails otherwise.
+8. Run `cd backend && npm run api:check`. Commit the contract and the generated files together.

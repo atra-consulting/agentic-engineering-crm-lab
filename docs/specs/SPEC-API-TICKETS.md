@@ -39,7 +39,7 @@ Agents only ever claim `TODO`+`AI` tickets, so a `DEFINITION` ticket is never au
 
 - `solution` is `null` until resolved. `DONE` or `WONT_DO` when `status=DONE`.
 - `pickedUpAt` is set when status → `IN_PROGRESS`. `resolvedAt` is set when status → `DONE`.
-- `fullyReady` (default `false`) marks a ticket as complete enough to build without further human input. Set only at creation. Never shown in the admin UI. It is a signal between automated flows, e.g. a headless ticket-writing flow using the machine API token.
+- `fullyReady` (default `false`) marks a ticket as complete enough to build without further human input. Set at creation. Only a comment with `clearFullyReady: true` resets it to `false`. Nothing sets it to `true` later. Never shown in the admin UI. It is a signal between automated flows, e.g. a headless ticket-writing flow using the machine API token.
 - `agentTaskId` links the ticket to the app-feedback item (an `agent_task` row) that spawned it. Write-once: set at creation, never changed or cleared.
 - Single-ticket responses include the `comments` thread. List and board responses include `commentCount` instead.
 

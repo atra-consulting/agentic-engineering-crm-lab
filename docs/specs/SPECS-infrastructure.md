@@ -175,7 +175,9 @@ Flags:
 
 ```bash
 # Backend only (with hot reload)
-cd backend && npx tsx --watch src/index.ts
+# NODE_ENV=development is required. Without a mode the backend runs as production:
+# no test-login, no /api/docs, no response check.
+cd backend && NODE_ENV=development npx tsx --watch src/index.ts
 
 # Frontend only
 cd frontend && npx ng serve --port 7200 --proxy-config proxy.conf.json
