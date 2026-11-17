@@ -108,26 +108,28 @@ test.describe('input validation', () => {
     }
   });
 
-  test('mixed-case paths match like Express: /api/Firmen/1 and /api/FIRMEN/1 -> 200, same body', async () => {
+  test('mixed-case paths match like Express: /api/Firmen/1, /api/FIRMEN/1, /API/Firmen/1, /Api/firmen/1 -> 200, same body', async () => {
     const base = await admin.get('/api/firmen/1');
     expect(base.status()).toBe(200);
     const expected = (await base.json()) as unknown;
-    for (const path of ['/api/Firmen/1', '/api/FIRMEN/1']) {
+    for (const path of ['/api/Firmen/1', '/api/FIRMEN/1', '/API/Firmen/1', '/Api/firmen/1']) {
       const resp = await admin.get(path);
       expect(resp.status(), path).toBe(200);
       expect((await resp.json()) as unknown, path).toEqual(expected);
     }
   });
 
-  test('POST /api/AUTH/logout (mixed case) -> 200', async () => {
-    const ctx = await loginCtx('demo', 'demo1234');
-    try {
-      const resp = await ctx.post('/api/AUTH/logout');
-      expect(resp.status()).toBe(200);
-    } finally {
-      await ctx.dispose();
-    }
-  });
+  for (const path of ['/api/AUTH/logout', '/API/auth/logout']) {
+    test(`POST ${path} (mixed case) -> 200`, async () => {
+      const ctx = await loginCtx('demo', 'demo1234');
+      try {
+        const resp = await ctx.post(path);
+        expect(resp.status()).toBe(200);
+      } finally {
+        await ctx.dispose();
+      }
+    });
+  }
 
   test('login without passwort -> 401 Ungültige Anmeldedaten', async () => {
     const resp = await anon.post('/api/auth/login', { data: { benutzername: 'admin' } });
