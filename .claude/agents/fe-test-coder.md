@@ -14,7 +14,7 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-testing.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-frontend.md`, `docs/specs/SPECS-ui.md`
-- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`, `openapi/common.yaml` (shared `ErrorResponse`, `PageMeta`, parameters, responses, shared `x-error-messages`)
 
 ## Test Framework
 

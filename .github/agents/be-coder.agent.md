@@ -18,14 +18,21 @@ Your spec reading list (paths are relative to the repo root):
 - **Business domain** (read first for domain context): `docs/specs/DOMAIN.md`
 - **Primary** (read first, before starting work): `docs/specs/SPECS-backend.md`
 - **Secondary** (read only when the task needs it): `docs/specs/SPECS-database.md`, `docs/specs/SPECS-testing.md`
-- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`
+- **API contract** (wins over prose specs): `openapi/README.md`, `openapi/paths/`, `openapi/schemas/`, `openapi/common.yaml` (shared `ErrorResponse`, `PageMeta`, parameters, responses, shared `x-error-messages`)
+
+## Contract Rules
+
+- Never edit generated files: `backend/src/generated/openapi.json`, `backend/src/generated/api-types.ts`, `frontend/src/app/core/api/api-types.ts`
+- Merge conflict in a generated file: resolve it in `openapi/`, then run `cd backend && npm run api:generate`. Never hand-merge
+- Commit the contract together with those three generated files
+- Every new operation must answer 2xx at least once in the suite, or the `contract-coverage` Playwright project fails. Add a test call, not an exemption
 
 ## Architecture Rules
 
 - Backend code lives in `backend/src/`
 - Layering: `routes/<entity>.ts` → `services/<entity>Service.ts` → `config/db.ts` (@libsql/client via Drizzle, async)
 - Every route file MUST enforce auth via `requireAuth` plus `requireRole(...)` middleware from `middleware/auth.ts`
-- Request validation comes from the contract: put `specValidate` (`backend/src/openapi/specValidate.ts`) after the guards; German input-error texts live in `x-error-messages` in `openapi/schemas/*.yaml`. The global error handler in `middleware/errorHandler.ts` shapes the response
+- Request validation comes from the contract: put `specValidate` (`backend/src/openapi/specValidate.ts`) after the guards; German input-error texts live in `x-error-messages` in `openapi/schemas/*.yaml` and `openapi/common.yaml`. The global error handler in `middleware/errorHandler.ts` shapes the response
 - Request and answer types come from generated types (`RequestBody<'opId'>`, `Schema<'X'>`, `JsonResponse<'opId', 200>` in `backend/src/openapi/types.ts`). No hand-written DTOs
 
 ## Stack & Versions
