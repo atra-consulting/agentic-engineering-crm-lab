@@ -1,5 +1,75 @@
-# Area: abteilungen. Source: backend/src/routes/abteilungen.ts, backend/src/services/abteilungService.ts.
-# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
-Abteilung: {}
-AbteilungInput: {}
-AbteilungPage: {}
+# Area: abteilungen. Source: backend/src/services/abteilungService.ts (AbteilungDTO, toDTO)
+# and backend/src/utils/validation.ts (AbteilungCreateSchema).
+
+Abteilung:
+  type: object
+  description: A department. `firmaName` comes from a join; `personenCount` is computed.
+  additionalProperties: false
+  required:
+    - id
+    - name
+    - description
+    - firmaId
+    - firmaName
+    - personenCount
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: integer
+    name:
+      type: string
+    description:
+      type: [string, 'null']
+    firmaId:
+      type: integer
+    firmaName:
+      type: [string, 'null']
+    personenCount:
+      type: integer
+      description: Number of contacts in this department (computed, not stored).
+    createdAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+    updatedAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+
+AbteilungPage:
+  type: object
+  description: One page of departments.
+  allOf:
+    - $ref: '../common.yaml#/schemas/PageMeta'
+    - type: object
+      required: [content]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/Abteilung'
+  unevaluatedProperties: false
+
+AbteilungInput:
+  type: object
+  description: |
+    Body for create and full update. Required: `name`, `firmaId`.
+    A left-out `description` is stored as null. Unknown fields are stripped.
+  required: [name, firmaId]
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 255
+      x-error-messages:
+        required: Name ist erforderlich
+        type: Name ist erforderlich
+        minLength: Name ist erforderlich
+    description:
+      type: [string, 'null']
+    firmaId:
+      type: integer
+      minimum: 1
+      x-error-messages:
+        required: Firma ist erforderlich
+        type: Firma ist erforderlich
+        minimum: Firma ist erforderlich

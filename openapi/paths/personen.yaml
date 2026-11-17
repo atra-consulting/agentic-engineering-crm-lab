@@ -1,5 +1,162 @@
 # Area: personen. Source: backend/src/routes/personen.ts, backend/src/services/personService.ts.
-# STUB: path keys only. Fill in the operations (see README.md and paths/firmen.yaml).
-/personen: {}
-/personen/all: {}
-/personen/{id}: {}
+
+/personen:
+  get:
+    operationId: listPersonen
+    summary: List contacts (paged)
+    description: |
+      `search` matches `firstName` or `lastName` (case-insensitive substring).
+      `abteilungId` filters by department. It is lenient: a missing, non-numeric
+      or non-positive value is ignored.
+    tags: [personen]
+    security:
+      - sessionCookie: []
+    x-sort-fields: [firstName, lastName, email, position, createdAt, updatedAt]
+    x-default-sort: lastName,ASC
+    parameters:
+      - $ref: '../common.yaml#/parameters/SearchQuery'
+      - name: abteilungId
+        in: query
+        required: false
+        description: Only contacts of this department. Ignored when missing, non-numeric or not positive.
+        schema:
+          type: integer
+      - $ref: '../common.yaml#/parameters/PageQuery'
+      - $ref: '../common.yaml#/parameters/SizeQuery'
+      - $ref: '../common.yaml#/parameters/SortQuery'
+    responses:
+      '200':
+        description: One page of contacts.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/personen.yaml#/PersonPage'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+  post:
+    operationId: createPerson
+    summary: Create a contact
+    description: Answers the new record as read back from the database.
+    tags: [personen]
+    security:
+      - sessionCookie: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/personen.yaml#/PersonInput'
+    responses:
+      '201':
+        description: Created.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/personen.yaml#/Person'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/personen/all:
+  get:
+    operationId: listAllPersonen
+    summary: List all contacts (not paged)
+    description: |
+      Sorted by `lastName`, then `firstName`, ascending. The optional
+      `abteilungId` filter is lenient: a missing, non-numeric or non-positive
+      value is ignored.
+    tags: [personen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - name: abteilungId
+        in: query
+        required: false
+        description: Only contacts of this department. Ignored when missing, non-numeric or not positive.
+        schema:
+          type: integer
+    responses:
+      '200':
+        description: The all contacts (not paged).
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/personen.yaml#/Person'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+
+/personen/{id}:
+  get:
+    operationId: getPerson
+    summary: Get one contact
+    tags: [personen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '200':
+        description: The contact.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/personen.yaml#/Person'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  put:
+    operationId: updatePerson
+    summary: Update contact (full replace)
+    description: |
+      Overwrites every field. Optional fields left out are stored as null, including `abteilungId`.
+      Answers the record as read back from the database.
+    tags: [personen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/personen.yaml#/PersonInput'
+    responses:
+      '200':
+        description: Updated.
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/personen.yaml#/Person'
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'
+  delete:
+    operationId: deletePerson
+    summary: Delete contact
+    description: Cascades to the contact's addresses and activities. Opportunities that name the contact lose that link (`kontaktPersonId` becomes null).
+    tags: [personen]
+    security:
+      - sessionCookie: []
+    parameters:
+      - $ref: '../common.yaml#/parameters/IdPath'
+    responses:
+      '204':
+        description: Deleted. No body.
+      '400':
+        $ref: '../common.yaml#/responses/BadRequest'
+      '401':
+        $ref: '../common.yaml#/responses/Unauthorized'
+      '404':
+        $ref: '../common.yaml#/responses/NotFound'

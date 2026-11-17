@@ -1,5 +1,121 @@
-# Area: adressen. Source: backend/src/routes/adressen.ts, backend/src/services/adresseService.ts.
-# STUB: schema names only. Fill in the schemas (see README.md and schemas/firmen.yaml).
-Adresse: {}
-AdresseInput: {}
-AdressePage: {}
+# Area: adressen. Source: backend/src/services/adresseService.ts (AdresseDTO, toDTO)
+# and backend/src/utils/validation.ts (AdresseCreateSchema).
+
+Adresse:
+  type: object
+  description: |
+    An address, linked to a company, a person, both or neither.
+    `firmaName` and `personName` come from joins.
+  additionalProperties: false
+  required:
+    - id
+    - street
+    - houseNumber
+    - postalCode
+    - city
+    - country
+    - typ
+    - firmaId
+    - firmaName
+    - personId
+    - personName
+    - latitude
+    - longitude
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: integer
+    street:
+      type: [string, 'null']
+    houseNumber:
+      type: [string, 'null']
+    postalCode:
+      type: [string, 'null']
+    city:
+      type: [string, 'null']
+    country:
+      type: [string, 'null']
+    typ:
+      type: [string, 'null']
+      description: Free text, for example `HAUPTQUARTIER` or `NIEDERLASSUNG`.
+    firmaId:
+      type: [integer, 'null']
+    firmaName:
+      type: [string, 'null']
+    personId:
+      type: [integer, 'null']
+    personName:
+      type: [string, 'null']
+      description: First and last name joined by a space; null when the address has no person.
+    latitude:
+      type: [number, 'null']
+    longitude:
+      type: [number, 'null']
+    createdAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+    updatedAt:
+      type: string
+      description: ISO-8601 text as stored. Seed rows use a space instead of `T`.
+
+AdressePage:
+  type: object
+  description: One page of addresses.
+  allOf:
+    - $ref: '../common.yaml#/schemas/PageMeta'
+    - type: object
+      required: [content]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/Adresse'
+  unevaluatedProperties: false
+
+AdresseInput:
+  type: object
+  description: |
+    Body for create and full update. Every field is optional.
+    On update, a left-out text or id field is stored as null, but a left-out
+    `latitude` or `longitude` keeps its current value (an explicit null clears it).
+    Unknown fields are stripped.
+  properties:
+    street:
+      type: [string, 'null']
+      maxLength: 255
+    houseNumber:
+      type: [string, 'null']
+      maxLength: 20
+    postalCode:
+      type: [string, 'null']
+      maxLength: 20
+    city:
+      type: [string, 'null']
+      maxLength: 100
+    country:
+      type: [string, 'null']
+      maxLength: 100
+    typ:
+      type: [string, 'null']
+      maxLength: 50
+    firmaId:
+      type: [integer, 'null']
+      minimum: 1
+      x-error-messages:
+        type: Ungültige ID
+        minimum: Ungültige ID
+    personId:
+      type: [integer, 'null']
+      minimum: 1
+      x-error-messages:
+        type: Ungültige ID
+        minimum: Ungültige ID
+    latitude:
+      type: [number, 'null']
+      minimum: -90
+      maximum: 90
+    longitude:
+      type: [number, 'null']
+      minimum: -180
+      maximum: 180
