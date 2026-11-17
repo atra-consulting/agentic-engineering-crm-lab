@@ -542,9 +542,12 @@ export function buildContract(bundle: unknown): Contract {
     findOperation(method, expressFullPath) {
       // `req.baseUrl + req.route.path`, e.g. `/api/firmen/:id` → `/firmen/{id}`.
       const path = stripTrailingSlash(expressFullPath).replace(/:([A-Za-z0-9_]+)/g, '{$1}');
-      if (path !== basePath && !path.startsWith(`${basePath}/`)) return undefined;
-      const specPath = path.slice(basePath.length) || '/';
-      return withHeadFallback(method, (m) => byKey.get(`${m} ${specPath.toLowerCase()}`));
+      // Express matches case-insensitively, so fold before comparing/stripping the base path.
+      const folded = path.toLowerCase();
+      const base = basePath.toLowerCase();
+      if (folded !== base && !folded.startsWith(`${base}/`)) return undefined;
+      const specPath = folded.slice(base.length) || '/';
+      return withHeadFallback(method, (m) => byKey.get(`${m} ${specPath}`));
     },
 
     matchOperation(method, originalUrl) {
