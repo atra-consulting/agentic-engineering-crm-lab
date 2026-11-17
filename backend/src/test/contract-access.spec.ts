@@ -218,6 +218,27 @@ test.describe('contract access: non-admin session on ADMIN operations', () => {
   }
 });
 
+test.describe('contract access: header-less loopback call is refused on non-bypass operations', () => {
+  // Catches a guard swapped to an agent-token-or-session variant: those let a
+  // header-less loopback call through. No cookie, no token, no X-Forwarded-For.
+  for (const op of protectedOps.filter((o) => !o.loopbackBypass)) {
+    test(`401 ${op.operationId} (${op.method} ${op.fullPath}) from loopback without headers`, async () => {
+      const resp = await call(anon, op, {});
+      await expectErrorShape(resp, 401);
+    });
+  }
+});
+
+test.describe('contract access: operations that skip request validation are pinned', () => {
+  test('x-skip-request-validation is set on exactly login and testLogin', () => {
+    const skipping = operations
+      .filter((o) => (o.raw as unknown as Record<string, unknown>)['x-skip-request-validation'] === true)
+      .map((o) => o.operationId)
+      .sort();
+    expect(skipping).toEqual(['login', 'testLogin']);
+  });
+});
+
 test.describe('contract access: loopback bypass works without headers', () => {
   test('requireAgentTokenOrSession op: getTicketBoard -> 200 with board columns', async () => {
     const op = getOp('getTicketBoard');

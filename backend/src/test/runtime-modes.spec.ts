@@ -199,6 +199,48 @@ test.describe('responseCheck per mode', () => {
   });
 });
 
+test.describe('CONTRACT_RESPONSE_CHECK switch via createApp', () => {
+  // Tests the install condition in app.ts: responseCheck is mounted for
+  // development, and for test unless CONTRACT_RESPONSE_CHECK=off. No real route
+  // returns a contract-breaking body, so inspect the router stack instead: the
+  // middleware is an anonymous arrow function, so compare layer counts. The
+  // check layer is the only difference between the variants.
+  let saved: string | undefined;
+
+  test.beforeEach(() => {
+    saved = process.env['CONTRACT_RESPONSE_CHECK'];
+  });
+  test.afterEach(() => {
+    if (saved === undefined) delete process.env['CONTRACT_RESPONSE_CHECK'];
+    else process.env['CONTRACT_RESPONSE_CHECK'] = saved;
+  });
+
+  function layerCount(mode: ContractMode, env: string | undefined): number {
+    if (env === undefined) delete process.env['CONTRACT_RESPONSE_CHECK'];
+    else process.env['CONTRACT_RESPONSE_CHECK'] = env;
+    const app = createApp(mode) as unknown as { _router: { stack: unknown[] } };
+    return app._router.stack.length;
+  }
+
+  test('test + off mounts no responseCheck layer; test without off does', () => {
+    const withCheck = layerCount('test', undefined);
+    const off = layerCount('test', 'off');
+    expect(withCheck - off).toBe(1);
+  });
+
+  test('development + off still mounts the responseCheck layer', () => {
+    const devOff = layerCount('development', 'off');
+    const devDefault = layerCount('development', undefined);
+    expect(devOff).toBe(devDefault);
+    // Same layer count as test with the check on (both mount it).
+    expect(devOff).toBe(layerCount('test', undefined));
+  });
+
+  test('production mounts no responseCheck layer', () => {
+    expect(layerCount('production', undefined)).toBeLessThan(layerCount('test', undefined));
+  });
+});
+
 test.describe('coverage file', () => {
   let dir: string;
   let saved: string | undefined;
