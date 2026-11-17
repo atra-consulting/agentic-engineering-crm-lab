@@ -42,8 +42,8 @@ For every new service:
 3. Error responses are surfaced/handled as documented
 
 For every guard:
-1. Returns `true` when permission matches
-2. Redirects when permission missing
+1. Returns `true` when the role matches
+2. Redirects when the role is missing
 
 ## Test File Conventions
 

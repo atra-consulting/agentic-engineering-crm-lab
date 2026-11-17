@@ -25,7 +25,7 @@ Your spec reading list (paths are relative to the repo root):
 - [ ] Every new/changed component has a `.spec.ts` alongside
 - [ ] Every new/changed service has a `.spec.ts` alongside
 - [ ] New guards have tests for allow AND deny paths
-- [ ] Routing changes have a smoke test when `permissionGuard` is involved
+- [ ] Routing changes have a smoke test when `authGuard` or `roleGuard` is involved
 
 ### Assertion Quality
 - [ ] `toBeTruthy()`-only tests are flagged — they prove construction, not behavior

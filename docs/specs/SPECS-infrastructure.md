@@ -12,6 +12,7 @@ coding-with-ai-lab/
 │   ├── scripts/                # api-generate.ts, api-check.ts, bench-api.mjs (contract tooling)
 │   └── src/
 │       ├── generated/          # Generated from openapi/ (do not edit)
+│       ├── openapi/            # Contract runtime: Ajv factory, contract lookup, specValidate, response check, runtime mode, error mapper, type helpers
 │       ├── index.ts            # Entry point — loads env, runs migrations, seeds, starts server
 │       ├── app.ts              # Express app setup
 │       ├── config/
@@ -73,7 +74,8 @@ coding-with-ai-lab/
 │   └── settings.json           # Claude Code hook: re-sync agents after edits
 ├── scripts/sync-agents.mjs     # Generates .github/agents/ from .claude/agents/
 ├── .gitattributes              # Marks generated files (linguist-generated)
-├── start.sh                    # Full-stack launcher
+├── start.sh                    # Full-stack launcher (macOS/Linux)
+├── start.bat                   # Full-stack launcher (Windows)
 ├── AGENTS.md                   # Only points to CLAUDE.md
 ├── CLAUDE.md                   # AI coding instructions (read by Claude Code and Copilot CLI)
 └── README.MD                   # Project overview

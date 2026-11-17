@@ -76,12 +76,16 @@ In `NODE_ENV=test` the backend checks every JSON response against the API contra
 | `format-parity.spec.ts` | `email` and `uri` verdicts against recorded Zod verdicts |
 | `input-validation.spec.ts` | Bad input → 400 with `fieldErrors` |
 | `input-completeness.spec.ts` | Every input field of every write operation gets checked |
+| `contract-smoke.spec.ts` | One minimal 2xx call per operation no other spec calls. Feeds the coverage project. Creates one Firma tree and deletes it again |
+| `docs-page.spec.ts` | `/api/docs`, its assets and `/api/openapi.json` per runtime mode. Runs in-process on ephemeral ports, never 7070 |
 
 Coverage project `contract-coverage`:
 - Runs after the other projects.
 - Reads `backend/data/contract-coverage.7070.test.jsonl`.
 - Fails when any operation never answered 2xx.
 - Filtered runs (`-g`, single file) fail by design. They skip operations. Run the full suite.
+- Exemptions: `contract-coverage-exemptions.ts`. Goal: empty list. Each entry needs a real reason.
+- Shared helpers for the contract specs: `contract-helpers.ts` (bundle loader).
 
 Golden errors:
 - Fixtures: `golden-errors.json` and `golden-corpus.ts`. They hold recorded Zod answers.
@@ -311,6 +315,8 @@ For components using `inject()` that cannot be overridden by a provider, use `Te
 - `core/testing/model-factories.ts` builds typed models for specs. Factories return the contract aliases from `core/models/`.
 - Specs use factories, never hand-written object literals with casts.
 - `ApiClient` has its own specs. Services still verify URLs with `HttpTestingController`.
+- `core/api/api-client.spec.ts` covers URL building, query params, request body, 204 answers and HTTP method.
+- `core/api/api-client.type-check.ts` and `core/api/page.type-check.ts` are compile-time checks (`@ts-expect-error`, type assertions). `ng build` compiles them. Karma never runs them.
 
 ### Key test locations
 
@@ -327,6 +333,7 @@ For components using `inject()` that cannot be overridden by a provider, use `Te
 
 | File (path relative to `frontend/src/app/`) | Covers |
 |---------------------------------------------|--------|
+| `core/api/api-client.spec.ts` | `ApiClient` — URL building with path params, query params, request body, 204 answers, HTTP method |
 | `core/services/layout.service.spec.ts` | `LayoutService` (collapsed signal, localStorage persistence, toggle) |
 | `core/services/agent-task.service.spec.ts` | `AgentTaskService` HTTP methods and URL shapes |
 | `core/services/cron.service.spec.ts` | `CronService` HTTP methods and URL shapes |

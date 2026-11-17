@@ -70,8 +70,9 @@ Your spec reading list (paths are relative to the repo root):
 
 ## Authorization
 
-- Routes guarded with `canActivate: [permissionGuard('PERMISSION')]`
-- Sidebar items need `permission: 'PERMISSION'`
+- Routes use `canActivate: [authGuard]`; admin-only routes add `roleGuard('ROLE_ADMIN')`
+- Admin-only sidebar items set `requiredRole: 'ROLE_ADMIN'`
+- The `permissions` array is not enforced. No permission guard exists
 
 ## Commands
 

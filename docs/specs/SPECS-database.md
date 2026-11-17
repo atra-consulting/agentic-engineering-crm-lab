@@ -242,7 +242,7 @@ Cascade deletes to: Adresse, Aktivitaet.
 
 <!-- canonical source — mirrored in SPECS-backend.md Validation section -->
 
-Stored as plain `text` in SQLite. Validated against the API contract on write. Enum lists must match (`contract-lists` test). Defined in `backend/src/db/schema/enums.ts`.
+Stored as plain `text` in SQLite. Validated against the API contract on write. Reads use `asEnum()`. It passes unknown DB values through unchanged and logs `[enum]` once per value. Enum lists must match the contract: `ENUM_CONTRACT_SYNC` checks this at compile time in both directions, the `contract-lists` test at runtime. Defined in `backend/src/db/schema/enums.ts`.
 
 | Enum | Values |
 |------|--------|
@@ -255,6 +255,8 @@ Stored as plain `text` in SQLite. Validated against the API contract on write. E
 | TicketStatus | DEFINITION, TODO, IN_PROGRESS, ON_HOLD, DONE |
 | TicketSolution | DONE, WONT_DO |
 | TicketCommentAuthor | HUMAN, AGENT |
+| CronRunStatus | RUNNING, SUCCESS, FAILED, SKIPPED |
+| CronTrigger | CRON, MANUAL |
 
 ## Indexes
 

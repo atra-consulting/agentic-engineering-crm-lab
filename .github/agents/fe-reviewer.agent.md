@@ -36,7 +36,7 @@ Your spec reading list (paths are relative to the repo root):
 - [ ] Edit via route param + `patchValue()`
 
 ### Security
-- [ ] Routes guarded with `permissionGuard('PERMISSION')`
+- [ ] Routes use `authGuard`; admin-only routes add `roleGuard('ROLE_ADMIN')`; admin-only sidebar items set `requiredRole`
 - [ ] No XSS vulnerabilities
 - [ ] No secrets in frontend code
 - [ ] Secure API calls

@@ -30,6 +30,9 @@ Full-Stack-CRM-Anwendung. Node.js/TypeScript-Backend mit Angular-Frontend.
 | ORM | Drizzle ORM + @libsql/client (libSQL/Turso) | aktuell |
 | Auth | express-session + bcryptjs | aktuell |
 | Validierung | Ajv (vertragsgetrieben, aus `openapi/`) | aktuell |
+| API-Vertrag (Lint/Bundle) | @redocly/cli | ^2.79 |
+| Typ-Generierung | openapi-typescript (Backend + Frontend, `npm run api:generate`) | ^7.13 |
+| API-Docs | swagger-ui-dist (`/api/docs`, nur development/test) | ^5.35 |
 | TS-Ausführung | tsx (mit Hot Reload) | aktuell |
 | Datenbank | SQLite | single file |
 | Frontend | Angular | 21.2.1 |
