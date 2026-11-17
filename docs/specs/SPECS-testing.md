@@ -43,6 +43,50 @@ The Playwright suite runs against its own database file, `backend/data/crmdb.tes
 4. Polls `GET /api/health` until the backend responds (30 s deadline).
 5. Returns a teardown function that SIGTERM-kills the backend.
 
+Also in `globalSetup`:
+- Sets `GH_DISPATCH_TOKEN=''`. No test makes a GitHub call.
+- Sets `CONTRACT_COVERAGE_FILE` to `backend/data/contract-coverage.7070.test.jsonl`.
+
+Specs that import `app.ts` must use `import type` for type-only names. A value import starts the app inside the test runner.
+
+### Response check (test mode)
+
+In `NODE_ENV=test` the backend checks every JSON response against the API contract.
+
+- Violation → HTTP 500, message `Antwort verletzt API-Vertrag …`.
+- Log line: `[contract] <operationId> <status> <pointer>: <reason>`.
+- Example: `[contract] getFirma 200 /telefon: must be string`.
+- Read it as: operation, status sent, JSON pointer to the bad field, why it failed.
+- Fix the code or the contract. Never mute the check.
+- `CONTRACT_RESPONSE_CHECK=off` works only in test mode. See `SPECS-infrastructure.md`.
+
+### Contract tests
+
+| File | Checks |
+|------|--------|
+| `contract-routes.spec.ts` | Every contract operation has a matching route, and the reverse |
+| `contract-route-chain.spec.ts` | Middleware order per route: guards, then `specValidate` |
+| `contract-access.spec.ts` | Pinned sets: public, admin-only, agent-token bypass. Fallthrough. Bypass blockers |
+| `contract-lists.spec.ts` | Enum lists, sort fields, default sorts, roles, permissions match code and DB |
+| `contract-coverage` (project) | Every operation answers 2xx at least once |
+| `contract-runtime.spec.ts` | Validation runtime behavior |
+| `runtime-modes.spec.ts` | `NODE_ENV` modes: test-login, response check, `/api/docs` |
+| `behavior-changes.spec.ts` | Approved behavior changes versus the old Zod code |
+| `golden-errors.spec.ts` | Error answers against recorded Zod answers |
+| `format-parity.spec.ts` | `email` and `uri` verdicts against recorded Zod verdicts |
+| `input-validation.spec.ts` | Bad input → 400 with `fieldErrors` |
+| `input-completeness.spec.ts` | Every input field of every write operation gets checked |
+
+Coverage project `contract-coverage`:
+- Runs after the other projects.
+- Reads `backend/data/contract-coverage.7070.test.jsonl`.
+- Fails when any operation never answered 2xx.
+- Filtered runs (`-g`, single file) fail by design. They skip operations. Run the full suite.
+
+Golden errors:
+- Fixtures: `golden-errors.json` and `golden-corpus.ts`. They hold recorded Zod answers.
+- Approved German replacements go through `expectGerman`. Add new ones only with approval.
+
 Because the suite never opens `crmdb.sqlite`, running `npm test` no longer wipes tickets or other data a human or agent left in the shared development database.
 
 ### Authentication
@@ -60,7 +104,7 @@ await ctx.post('/api/auth/login', { data: { benutzername: 'admin', passwort: 'ad
 
 #### Passwordless test-login helper
 
-`POST /api/auth/test-login` accepts `{ benutzername }` with no password. It creates a valid session for the named user. Available only when `NODE_ENV !== 'production'`; returns 404 in production.
+`POST /api/auth/test-login` accepts `{ benutzername }` with no password. It creates a valid session for the named user. Available only when `NODE_ENV` is `development` or `test`; returns 404 otherwise (including unset).
 
 This endpoint is intended for test speed when the test cares about session state but not about the login flow itself. The standard login endpoint is used when the login flow is under test.
 
@@ -262,12 +306,20 @@ For components using `inject()` that cannot be overridden by a provider, use `Te
 - Every `@for` block requires a `track` expression
 - Use `fakeAsync` + `tick()` for observables and timers; avoid real delays
 
+### Typed model factories and ApiClient specs
+
+- `core/testing/model-factories.ts` builds typed models for specs. Factories return the contract aliases from `core/models/`.
+- Specs use factories, never hand-written object literals with casts.
+- `ApiClient` has its own specs. Services still verify URLs with `HttpTestingController`.
+
 ### Key test locations
 
 | Concern | Path |
 |---------|------|
 | Feature components | `frontend/src/app/features/<entity>/` |
 | Models | `frontend/src/app/core/models/` |
+| Model factories | `frontend/src/app/core/testing/model-factories.ts` |
+| ApiClient | `frontend/src/app/core/api/` |
 | Services | `frontend/src/app/core/services/` |
 | Guards | `frontend/src/app/core/guards/` |
 

@@ -242,7 +242,7 @@ Cascade deletes to: Adresse, Aktivitaet.
 
 <!-- canonical source — mirrored in SPECS-backend.md Validation section -->
 
-Stored as plain `text` in SQLite. Validated by Zod on write. Defined in `backend/src/db/schema/enums.ts`.
+Stored as plain `text` in SQLite. Validated against the API contract on write. Enum lists must match (`contract-lists` test). Defined in `backend/src/db/schema/enums.ts`.
 
 | Enum | Values |
 |------|--------|

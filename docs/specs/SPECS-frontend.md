@@ -62,31 +62,38 @@ There is no `permissionGuard` and no `hasPermission()` in the codebase.
 
 ## Models (core/models/)
 
-Each entity has a response interface and a `*Create` input interface.
+The API contract (`openapi/`) defines every model. Never hand-write one.
 
-| File | Interfaces |
-|------|-----------|
-| firma.model.ts | Firma, FirmaCreate |
-| person.model.ts | Person, PersonCreate |
-| abteilung.model.ts | Abteilung, AbteilungCreate |
-| adresse.model.ts | Adresse, AdresseCreate |
-| aktivitaet.model.ts | AktivitaetTyp, Aktivitaet, AktivitaetCreate |
-| chance.model.ts | ChancePhase, Chance, ChanceCreate |
-| dashboard.model.ts | DashboardData, RecentChance, RecentAktivitaet (re-exports ChancePhase, AktivitaetTyp) |
-| auth.model.ts | LoginRequest, LoginResponse, BenutzerInfo |
-| page.model.ts | Page\<T\> (content, totalElements, totalPages, size, number, first, last) |
-| agent-task.model.ts | AgentTaskSource, AgentTaskStatus, AgentTask, AgentTaskSummary |
-| cron.model.ts | CronRunStatus, CronTrigger, CronRun, CronJobLastRun, CronJob |
+- `frontend/src/app/core/api/api-types.ts` is generated from the contract.
+- Each `core/models/*.model.ts` file holds thin aliases of `components['schemas'][...]`.
+- Field lists live in the contract, not here.
 
-`auth.model.ts` contains three interfaces. `LoginRequest` has `benutzername` and `passwort`. `LoginResponse` has `benutzername`, `vorname`, `nachname`, `rollen`. `BenutzerInfo` has `id`, `benutzername`, `vorname`, `nachname`, `email`, `rollen`, `permissions`. No `RefreshResponse`.
+Special cases:
 
-`DashboardData` has: `firmenCount`, `personenCount`, `offeneChancenCount`, `gewonneneChancenSumme`, `recentChancen` (array of `RecentChance`), `recentAktivitaeten` (array of `RecentAktivitaet`).
+- **Tickets**: `TicketListItem` for board and list. `TicketDetail` (= `Ticket`) for the detail view.
+- **Szenario**: `szenario.model.ts` also keeps `PROZESS_SZENARIO_FELD`.
+- **Page**: `Page<T>` stays generic. Compile-time check in `core/api/page.type-check.ts`.
 
-`chance.model.ts` does not contain a `BoardSummary` interface.
+Nullability: forms keep `null`. No `!` and no `as` casts to hide it.
+
+### ApiClient (core/api/api-client.ts)
+
+Services call the typed `ApiClient` with literal spec paths:
+
+```ts
+private api = inject(ApiClient);
+getById(id: number) {
+  return this.api.get('/firmen/{id}', { path: { id } });
+}
+```
+
+- The build fails on a renamed path, wrong params, wrong body, or wrong response type.
+- Query keys keep the old order, so URLs stay the same.
+- Compile-time checks: `core/api/api-client.type-check.ts`, `core/api/page.type-check.ts`.
 
 ## Services (core/services/)
 
-All services use `inject(HttpClient)` and wrap REST calls to `/api/<plural>`.
+Services call the typed `ApiClient` (see Models) for REST calls to `/api/<plural>`. Notes below that mention `HttpClient` describe the transport under `ApiClient`.
 
 All entity services provide a `listAll()` method (GET `/api/<plural>/all`) returning an unfiltered array. Standard paginated listing is `getAll(page?, size?, sort?)`, plus `getById(id)`, `create(dto)`, `update(id, dto)`, `delete(id)`.
 

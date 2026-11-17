@@ -20,6 +20,7 @@ Full-Stack-CRM-Anwendung. Node.js/TypeScript-Backend mit Angular-Frontend.
 - **Benutzer**: Hardcodiert in `config/users.ts` — nicht in der Datenbank
 - **Proxy**: Angular Dev Server leitet `/api` an Backend:7070 weiter
 - **Datenbank**: Einzelne SQLite-Datei, Drizzle ORM verwaltet Schema und Migrationen
+- **API-Vertrag**: Handgeschriebener OpenAPI-3.1-Vertrag in `openapi/` ist die einzige Quelle der Wahrheit für die API. Backend validiert dagegen. Frontend leitet Typen daraus ab. Bei Abweichung gewinnt der Vertrag.
 
 ## Tech Stack
 
@@ -28,7 +29,7 @@ Full-Stack-CRM-Anwendung. Node.js/TypeScript-Backend mit Angular-Frontend.
 | Backend | Node.js / TypeScript mit Express | 4.21 (Node.js 20.19+) |
 | ORM | Drizzle ORM + @libsql/client (libSQL/Turso) | aktuell |
 | Auth | express-session + bcryptjs | aktuell |
-| Validierung | Zod | aktuell |
+| Validierung | Ajv (vertragsgetrieben, aus `openapi/`) | aktuell |
 | TS-Ausführung | tsx (mit Hot Reload) | aktuell |
 | Datenbank | SQLite | single file |
 | Frontend | Angular | 21.2.1 |
@@ -69,6 +70,7 @@ Full-Stack-CRM-Anwendung. Node.js/TypeScript-Backend mit Angular-Frontend.
 | Dokument | Inhalt |
 |----------|--------|
 | [DOMAIN.md](DOMAIN.md) | Geschäftsdomäne (Business Domain): Bedeutung der Entities, Beziehungen, Lösch-Verhalten, Verkaufs-Pipeline, Rollen — fachlich, kein Schema |
+| [`openapi/`](../../openapi/README.md) | API-Vertrag (OpenAPI 3.1): Quelle der Wahrheit für Pfade, Parameter, Schemas, Fehler |
 | [SPECS-backend.md](SPECS-backend.md) | CRM-Backend-API: Routen, Services, Auth, Fehlerbehandlung, Pagination, Code-Muster |
 | [SPECS-database.md](SPECS-database.md) | Datenbank: Entities, Schema, Spalten, Enums, Foreign Keys, Migrationen |
 | [SPECS-frontend.md](SPECS-frontend.md) | Angular-Frontend: Architektur, Routing, Auth, Guards, Models, Services, Komponenten |
