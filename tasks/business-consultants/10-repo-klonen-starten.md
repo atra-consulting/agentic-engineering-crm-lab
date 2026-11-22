@@ -67,6 +67,8 @@ Anwendung, stoppt sie. Wer lieber die Maus nimmt: Rechtsklick ins Terminal
    Klonen holt eine Kopie des Projekts auf euren Laptop. In genau diesen
    Dateien arbeitet am Nachmittag der Agent, und in eurer eigenen laufenden
    Anwendung prüft ihr sein Ergebnis.
+   **Hier ist Teil 1 zu Ende:** Lasst die Anwendung laden und schaut nach
+   vorn — während sie startet, erklären die Trainer Git.
 4. Klickt fünf Minuten durch Firmen, Personen, Chancen, Aktivitäten und
    Dashboard und legt eine Chance an — ihr braucht das Bild der Anwendung
    im Lab, wenn der Agent behauptet, etwas sei fertig. Das Chancen-Formular
@@ -115,12 +117,19 @@ Anwendung, stoppt sie. Wer lieber die Maus nimmt: Rechtsklick ins Terminal
 
 ## Folienschritte
 
+Teil 1 (10 min) — während die Anwendung lädt, erklären die Trainer Git:
+
 1. Terminal öffnen, `node --version` und `git --version` prüfen.
 2. Klonen, `cd coding-with-ai-lab`, `./start.sh`.
-3. Anmelden, durchklicken, eine Chance anlegen.
-4. Zweites Fenster: `claude` oder `copilot`.
-5. Prompt aus der Aufgabe: sechs Fragen an den Agenten.
-6. Zwei Antworten im CRM nachprüfen: Phasen und Benutzer.
+3. Laufen lassen und nach vorn schauen — es geht mit Git weiter.
+
+Teil 2 (35 min):
+
+1. Läuft es? Erfolgsbild im ersten Fenster, sonst Hand heben.
+2. Anmelden, durchklicken, eine Chance anlegen.
+3. Zweites Fenster: `claude` oder `copilot`.
+4. Prompt aus der Aufgabe: sechs Fragen an den Agenten.
+5. Zwei Antworten im CRM nachprüfen: Phasen und Benutzer.
 
 ## Prompt
 

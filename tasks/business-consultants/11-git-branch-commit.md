@@ -1,7 +1,7 @@
 # 11 — Branch und Commit mit dem Agenten, nachsehen im Terminal
 
-**Dauer:** 30 min
-**Sozialform:** Paare
+**Dauer:** 35 min
+**Sozialform:** Paare — beide gleichzeitig, jede Person am eigenen Rechner
 **Werkzeug:** Claude Code oder GitHub Copilot CLI, Terminal, Browser
 **Voraussetzung:** Aufgabe 10 erledigt: Lab läuft, euer Agent (`claude` oder `copilot`) hat im Projektordner geantwortet
 **Ziel:** Der Agent legt euren Branch an, schreibt euer PRD als Commit fest und meldet, was er getan hat — ihr prüft seine Meldung in einem eigenen Terminalfenster nach: zwei eigene Commits auf eurem Branch, das PRD unter `docs/prds/`, der geänderte Satz im Vergleich (`git diff`).
@@ -24,10 +24,10 @@ ihr arbeitet, ohne das freigegebene Dokument anzufassen. So kommt sich
 niemand in die Quere, und am Ende von Aufgabe 22 liegen auf eurem Branch
 beide Teile zusammen: euer PRD und der Code, den der Agent dafür schreibt.
 
-Arbeitet zu zweit, aber jede Person an ihrem eigenen Rechner — Branch und PRD
-braucht ihr beide für Aufgabe 22. Erst macht Person A die Schritte 1 bis 4,
-Person B liest die Befehle mit und sagt, was sie beim Nachprüfen erwartet.
-Dann macht B dieselben Schritte an ihrem Rechner, und A liest mit.
+Ihr sitzt zu zweit nebeneinander und arbeitet gleichzeitig, jede Person an
+ihrem eigenen Rechner — Branch und PRD braucht ihr beide für Aufgabe 22.
+Zu zweit heißt: Hängt eine Person, hilft die andere. Am Ende prüft ihr
+gegenseitig nach (Schritt 5).
 
 ## Schritte
 
@@ -78,16 +78,15 @@ Dann macht B dieselben Schritte an ihrem Rechner, und A liest mit.
    **Ohne zweites Fenster (für Neugierige):** Dieselben Befehle gehen auch
    direkt im Agentenfenster mit `!` davor, zum Beispiel `! git diff` — ohne
    `cd`, aber ohne Farben. Das klappt in Claude Code und in Copilot CLI.
-5. **Auf GitHub vergleichen.** Die Trainer haben euch die Commit-Liste auf
-   GitHub gezeigt. Öffnet <https://github.com/atra-consulting/coding-with-ai-lab>
-   und dort den Link rechts über der Dateiliste: Uhr-Symbol und „… Commits“.
+5. **Beim Nachbarn gegenprüfen.** Zeigt euch gegenseitig im Nachprüf-Fenster
+   `git status` und `git log --oneline -3`: Stimmen Branch, Datei und die
+   beiden Commits mit dem, was der Agent gemeldet hat? Wer früher fertig ist,
+   hilft dem Nachbarn.
 
-   ![Der Link „Commits“ rechts über der Dateiliste](bilder/11-github-commits.png)
-
-   Sucht eure beiden Commits. **Ihr findet sie nicht — und genau das ist das
-   Ergebnis:** Eure Commits liegen nur auf eurem Laptop. Ins gemeinsame
-   Projekt auf GitHub kommen sie erst, wenn sie hochgeladen (Push) und per
-   Pull Request freigegeben werden.
+**Warum eure Commits nicht auf GitHub stehen:** Sie liegen nur auf eurem
+Laptop. Ins gemeinsame Projekt auf GitHub kommen sie erst, wenn sie
+hochgeladen (Push) und per Pull Request freigegeben werden. Wie das aussieht,
+zeigen die Trainer am Ende des Labs.
 
 ## Folienschritte
 
@@ -95,7 +94,7 @@ Dann macht B dieselben Schritte an ihrem Rechner, und A liest mit.
 2. Neues Terminalfenster — zuerst `cd coding-with-ai-lab`.
 3. Nachprüfen: `git status`, `open docs/prds`, `git log --oneline -3`.
 4. Satz selbst vorgeben, mit `git diff` ansehen, dann committen lassen.
-5. Auf GitHub: Warum fehlt euer Commit?
+5. Beim Nachbarn gegenprüfen.
 
 ## Prompt
 
@@ -132,6 +131,7 @@ wo die Datei liegt und wie der Commit heißt.
       Commit geändert habt.
 - [ ] Ihr habt die drei Angaben des Agenten im Terminal nachgeprüft und
       könnt sagen, ob sie stimmen.
+- [ ] Ihr habt gegenseitig nachgeprüft: Branch, Datei und zwei Commits stimmen bei beiden.
 - [ ] Ihr könnt sagen, warum euer Commit auf GitHub fehlt.
 - [ ] Ihr erkennt die Befehle wieder, die der Agent benutzt hat:
       `git switch -c`, `git add`, `git commit`, `git status`, `git log`.
