@@ -153,7 +153,7 @@ Erkläre die Änderung nicht, zeig sie nur.
 | Problem | Lösung |
 |---|---|
 | `python3: command not found` (Windows: `python` öffnet den Microsoft Store) | Kein Python installiert. Im Prompt „Python-Skript“ durch „Node.js-Skript ohne zusätzliche Pakete“ ersetzen, ebenso den Dateinamen auf `pipeline_bericht.mjs`. |
-| Das Skript findet die Datenbank nicht | Die Anwendung ist noch nie gelaufen, oder ihr seid nicht im Projektordner. Erst `./start.sh` in Fenster 1, Agent im Ordner `coding-with-ai-lab` starten. |
+| Das Skript findet die Datenbank nicht | Die Anwendung ist noch nie gelaufen, oder ihr seid nicht im Projektordner. Erst `./start.sh` in Fenster 1, Agent im Ordner `agentic-engineering-crm-lab` starten. |
 | Der Agent rechnet die Summen selbst im Chat aus | Stoppen mit `Esc`: „Rechne nicht selbst. Die Zahlen kommen nur aus dem Skript.“ |
 | Die Kontrollsummen gehen nicht auf | Gut bemerkt — genau dafür sind sie da. Zeigt dem Agenten die Zahlen: „Offen + GEWONNEN + VERLOREN ergibt …, alle Chancen sind … Finde den Fehler im Skript.“ |
 | Die neue Chance taucht im Bericht nicht auf | Gespeichert? In der Chancen-Liste im CRM nachsehen. Liegt ihr erwartetes Datum vor dem Stichtag, zählt sie als überfällig. |

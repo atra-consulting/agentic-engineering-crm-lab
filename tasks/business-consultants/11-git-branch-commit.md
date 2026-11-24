@@ -49,7 +49,7 @@ gegenseitig nach (Schritt 5).
    Es zeigt Git-Ausgaben in Farbe und ist besser lesbar als das
    Agentenfenster.
 
-   **Zuerst `cd coding-with-ai-lab`.** Jedes neue Fenster beginnt im
+   **Zuerst `cd agentic-engineering-crm-lab`.** Jedes neue Fenster beginnt im
    Benutzerordner. Vergesst ihr das, meldet Git `not a git repository`.
 3. **Nachprüfen.** Der Agent hat am Ende drei Angaben gemacht: Branch,
    Ablageort, Commit-Nachricht. Prüft jede im neuen Fenster und notiert:
@@ -91,7 +91,7 @@ zeigen die Trainer am Ende des Labs.
 ## Folienschritte
 
 1. Agent: Branch anlegen, PRD ablegen, committen — mitlesen.
-2. Neues Terminalfenster — zuerst `cd coding-with-ai-lab`.
+2. Neues Terminalfenster — zuerst `cd agentic-engineering-crm-lab`.
 3. Nachprüfen: `git status`, `open docs/prds`, `git log --oneline -3`.
 4. Satz selbst vorgeben, mit `git diff` ansehen, dann committen lassen.
 5. Beim Nachbarn gegenprüfen.
@@ -141,7 +141,7 @@ wo die Datei liegt und wie der Commit heißt.
 | Problem | Lösung |
 |---|---|
 | Der Agent meldet `Please tell me who you are` | Git kennt euch auf diesem Rechner noch nicht. Sagt dem Agenten: „Trag für Git meinen Namen ‹Name› und meine E-Mail ‹Adresse› ein und wiederhole den Commit.“ Das Lab bleibt lokal; jede Adresse genügt. |
-| `fatal: not a git repository` | Das Fenster steht im Benutzerordner. `cd coding-with-ai-lab`, dann den Befehl wiederholen. |
+| `fatal: not a git repository` | Das Fenster steht im Benutzerordner. `cd agentic-engineering-crm-lab`, dann den Befehl wiederholen. |
 | Unten steht `:` oder `(END)`, das Fenster nimmt keine Befehle an | Git zeigt eine lange Ausgabe seitenweise. `q` drücken. |
 | `git diff` zeigt nichts | Der Agent hat schon committet. `git show` zeigt den letzten Commit mit rot und grün. |
 | `git status` zeigt `On branch main` | Der Agent hat keinen eigenen Branch angelegt. Handheben — die Trainer helfen, den Commit auf euren Branch zu bringen. |
