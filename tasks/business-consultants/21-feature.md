@@ -38,7 +38,7 @@ wenn ihr anders entscheidet, aber lasst keine Frage offen.
    kaputtgeht. Ein automatischer Test rechnet ihn bei jeder künftigen
    Änderung von selbst nach.
 6. Macht die Rechenprobe im Browser und seht euch den Diff an: Agenten mit
-   `/exit` beenden, mit `cd ~/coding-with-ai-lab` in den Projektordner
+   `/exit` beenden, mit `cd ~/agentic-engineering-crm-lab` in den Projektordner
    wechseln, dann `git diff main --stat`. Steigt die Zahl in der Rechenprobe (Abnahme)
    um 5.000, stimmt die Formel; fällt sie bei GEWONNEN wieder, stimmt die
    Regel für die Phasen. Der Diff zeigt, ob wie bestellt nur die
@@ -95,7 +95,7 @@ für eine Chance ohne Wahrscheinlichkeit.
 | Summe passt nicht zur Handrechnung | Filter aktiv? Die Summe geht über die geladenen Chancen. Sonst zurück an den Agenten mit eurer Rechnung als Beispiel. |
 | Agent will den Server (Backend) ändern | Am Plan-Checkpoint antworten: „Nur Frontend, die Daten sind schon da." |
 | „Gewichtet" bricht in die nächste Zeile | Kosmetik — an den Agenten: „Beide Werte in einer Zeile." |
-| `git diff` meldet `Not a git repository` und zeigt eine lange Hilfe | Ihr seid nicht im Projektordner: erst `cd ~/coding-with-ai-lab`, dann `git diff main --stat` noch einmal. |
+| `git diff` meldet `Not a git repository` und zeigt eine lange Hilfe | Ihr seid nicht im Projektordner: erst `cd ~/agentic-engineering-crm-lab`, dann `git diff main --stat` noch einmal. |
 | Der Agent findet die Reviewer nicht | Sagt: „Prüfe die Änderung selbst wie ein Reviewer und zeig mir die Befunde.“ |
 
 ## Diskussion

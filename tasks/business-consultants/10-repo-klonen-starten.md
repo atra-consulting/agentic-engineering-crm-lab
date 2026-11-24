@@ -59,11 +59,14 @@ Anwendung, stoppt sie. Wer lieber die Maus nimmt: Rechtsklick ins Terminal
    Handheben. Ohne passende Node.js-Version startet das CRM nicht, ohne
    Git könnt ihr nicht klonen — besser jetzt merken als mitten im Start.
 3. Klont und startet das Lab:
-   `git clone https://github.com/atra-consulting/coding-with-ai-lab.git`,
-   `cd coding-with-ai-lab`, `./start.sh`, dann <http://localhost:7200>
+   `git clone https://github.com/atra-consulting/agentic-engineering-crm-lab.git`,
+   `cd agentic-engineering-crm-lab`, `./start.sh`, dann <http://localhost:7200>
    im Browser öffnen und die Kachel `admin` anklicken. **Schon in der Vorbereitung
    geklont?** Dann `git clone` weglassen: `cd coding-with-ai-lab`, mit
-   `git pull` den neuesten Stand holen, dann `./start.sh`.
+   `git pull` den neuesten Stand holen, dann `./start.sh`. Das Projekt hieß
+   bis November `coding-with-ai-lab` — euer Ordner behält diesen Namen.
+   Wo in den Aufgaben `cd agentic-engineering-crm-lab` steht, tippt ihr
+   `cd coding-with-ai-lab`.
    Klonen holt eine Kopie des Projekts auf euren Laptop. In genau diesen
    Dateien arbeitet am Nachmittag der Agent, und in eurer eigenen laufenden
    Anwendung prüft ihr sein Ergebnis.
@@ -79,14 +82,14 @@ Anwendung, stoppt sie. Wer lieber die Maus nimmt: Rechtsklick ins Terminal
    - macOS: im Terminal `Cmd+N` (neues Fenster) oder Menü Shell › Neues Fenster
    - Windows: Git Bash ein zweites Mal aus dem Startmenü öffnen
 
-   Das neue Fenster beginnt im Benutzerordner. Geht mit `cd coding-with-ai-lab`
+   Das neue Fenster beginnt im Benutzerordner. Geht mit `cd agentic-engineering-crm-lab`
    ins Projekt und startet euren Agenten: `claude` für Claude Code, `copilot`
    für GitHub Copilot CLI.
 
    **Beim ersten Start fragen beide Agenten, ob ihr dem Ordner vertraut.**
-   Schaut zuerst auf den Pfad in der Frage: Er muss auf `coding-with-ai-lab`
-   enden. Steht dort nur euer Benutzerordner (etwa `/Users/<name>`), habt ihr
-   `cd coding-with-ai-lab` vergessen — dann „No, exit“ wählen, erst `cd`,
+   Schaut zuerst auf den Pfad in der Frage: Er muss auf `agentic-engineering-crm-lab`
+   enden (in der Vorbereitung geklont: `coding-with-ai-lab`). Steht dort nur euer Benutzerordner (etwa `/Users/<name>`), habt ihr
+   `cd agentic-engineering-crm-lab` vergessen — dann „No, exit“ wählen, erst `cd`,
    dann den Agenten neu starten. Stimmt der Pfad: bei Claude Code „Yes, I
    trust this folder“, bei Copilot „Yes, and remember this folder for future
    sessions“.
@@ -120,7 +123,7 @@ Anwendung, stoppt sie. Wer lieber die Maus nimmt: Rechtsklick ins Terminal
 Teil 1 (10 min) — während die Anwendung lädt, erklären die Trainer Git:
 
 1. Terminal öffnen, `node --version` und `git --version` prüfen.
-2. Klonen, `cd coding-with-ai-lab`, `./start.sh`.
+2. Klonen, `cd agentic-engineering-crm-lab`, `./start.sh`.
 3. Laufen lassen und nach vorn schauen — es geht mit Git weiter.
 
 Teil 2 (35 min):
@@ -171,15 +174,15 @@ oder den Ordner, in dem du sie gefunden hast:
 
 | Problem | Lösung |
 |---|---|
-| `destination path 'coding-with-ai-lab' already exists` | Ihr habt schon in der Vorbereitung geklont — kein Fehler. `cd coding-with-ai-lab`, `git pull`, dann `./start.sh`. |
+| `destination path 'agentic-engineering-crm-lab' already exists` | Ihr habt schon geklont — kein Fehler. `cd agentic-engineering-crm-lab`, `git pull`, dann `./start.sh`. |
 | `port 7070 is already in use` (7070 ist der Server im Hintergrund) | `./end.sh` ausführen, dann `./start.sh` erneut. |
 | `Node.js 20.19 or later is required` | Node.js nach `docs/SETUP.md` aktualisieren — v22 oder neuer —, Terminal neu öffnen. |
 | Klonen bricht ab (Proxy, Zertifikat) | Firmennetz filtert — Hotspot vom Handy für den Klon, danach mit der IT klären. |
-| Klonen klappt gar nicht, auch nicht über den Hotspot | Notlösung ZIP: [main.zip](https://github.com/atra-consulting/agentic-engineering-crm-lab/archive/refs/heads/main.zip) herunterladen (keine Anmeldung nötig), entpacken, den Ordner `agentic-engineering-crm-lab-main` in `coding-with-ai-lab` umbenennen und in euren Benutzerordner legen. Der ZIP fehlt Git — deshalb im Ordner einmal `git init -b main`, `git add .` und `git commit -m "Start"`, sonst klappen Branch, Commit und `git diff main` in den späteren Übungen nicht. Fragt Git dabei nach Name und E-Mail: Handheben. `git pull` geht damit nicht: Bei Änderungen am Trainingstag die ZIP neu holen. |
+| Klonen klappt gar nicht, auch nicht über den Hotspot | Notlösung ZIP: [main.zip](https://github.com/atra-consulting/agentic-engineering-crm-lab/archive/refs/heads/main.zip) herunterladen (keine Anmeldung nötig), entpacken, den Ordner `agentic-engineering-crm-lab-main` in `agentic-engineering-crm-lab` umbenennen und in euren Benutzerordner legen. Der ZIP fehlt Git — deshalb im Ordner einmal `git init -b main`, `git add .` und `git commit -m "Start"`, sonst klappen Branch, Commit und `git diff main` in den späteren Übungen nicht. Fragt Git dabei nach Name und E-Mail: Handheben. `git pull` geht damit nicht: Bei Änderungen am Trainingstag die ZIP neu holen. |
 | `./start.sh: Permission denied` | `bash start.sh` |
 | Windows: `start.sh` nicht gefunden | Ihr seid in PowerShell — Git Bash öffnen. |
 | `claude` oder `copilot` startet nicht oder will sich anmelden und es klappt nicht | Sofort Handheben — bis zum Lab ist Zeit für eine Lösung oder ein Paar. |
-| Windows: `copilot` startet in Git Bash nicht oder verhält sich seltsam | PowerShell 6 oder neuer öffnen (`pwsh`), dort `cd coding-with-ai-lab` und `copilot`. Die Anwendung läuft weiter in Git Bash. |
+| Windows: `copilot` startet in Git Bash nicht oder verhält sich seltsam | PowerShell 6 oder neuer öffnen (`pwsh`), dort `cd agentic-engineering-crm-lab` und `copilot`. Die Anwendung läuft weiter in Git Bash. |
 | Das CRM zeigt etwas anderes, als der Agent sagt | Gut bemerkt — genau dafür prüft ihr nach. Sagt ihm, was ihr seht: „Im CRM stehen bei Phase … Prüfe deine Antwort noch einmal.“ |
 | Der Agent will etwas ändern oder installieren | Ablehnen bzw. mit `Esc` stoppen: „Ändere nichts, lies nur.“ |
 | Copilot meldet, dass ihr keinen Zugang habt | Euer GitHub-Konto braucht ein Copilot-Abo, und eure Firma darf die Copilot CLI nicht gesperrt haben — Handheben. |
