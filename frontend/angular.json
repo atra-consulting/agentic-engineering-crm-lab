@@ -96,7 +96,8 @@
           },
           "defaultConfiguration": "development",
           "options": {
-            "proxyConfig": "proxy.conf.json"
+            "proxyConfig": "proxy.conf.json",
+            "allowedHosts": [".coder.atra.consulting"]
           }
         },
         "extract-i18n": {
