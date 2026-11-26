@@ -205,17 +205,9 @@ cd frontend && npx ng build
 
 ### Proxy
 
-`frontend/proxy.conf.json` forwards all `/api` requests to the backend.
+`frontend/proxy.conf.json` forwards all `/api` requests to `http://localhost:7070`. It sets `Origin: http://localhost:7200` on each proxied request. Reason: remote dev hosts (Coder workspaces) send their own origin, and the backend CORS check would reject it. Keep this value in `CORS_ORIGINS`.
 
-```json
-{
-  "/api": {
-    "target": "http://localhost:7070",
-    "secure": false,
-    "changeOrigin": true
-  }
-}
-```
+`angular.json` sets `allowedHosts: [".coder.atra.consulting"]`. The dev server then accepts every Coder workspace host. Localhost and IPs always pass.
 
 No split routing. All API traffic goes to a single backend.
 
