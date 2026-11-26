@@ -12,8 +12,9 @@ mit dem das Team arbeiten kann: Der Chat-Assistent liest das Bild und schreibt
 eine User Story, ihr prüft sie gegen den Screenshot und legt das Ticket im
 Ticket-Board des Labs an.
 
-Das Ticket-Board kennt keine Anhänge. Deshalb muss alles, was im Bild steckt,
-als Text ins Ticket — genau das ist die Übung.
+Das CRM braucht ihr erst ab Schritt 4. Bis dahin arbeitet ihr nur mit dem
+Screenshot und eurem Chat-Assistenten. Das Ticket-Board kennt keine Anhänge:
+Was im Bild steckt, kommt als Text ins Ticket — genau das ist die Übung.
 
 ## Schritte
 
@@ -22,10 +23,13 @@ als Text ins Ticket — genau das ist die Übung.
    ist. Was könnt ihr nicht eindeutig lesen? Eure Stichpunkte sind der
    Vergleich: So merkt ihr, ob der Assistent etwas übersieht oder
    dazuerfindet.
-2. **Den Assistenten lesen lassen.** Gebt den Screenshot eurem Chat-Assistenten
-   und nutzt den Prompt unten. Der Prompt verlangt erst eine Beschreibung:
-   So seht ihr, ob der Assistent das Bild richtig gelesen hat, bevor er
-   daraus eine Story macht.
+2. **Den Assistenten das Bild lesen lassen.** Öffnet euren Chat-Assistenten —
+   Claude, ChatGPT, Gemini oder Copilot, im Browser oder in der App, **nicht
+   das CRM** — und beginnt einen neuen Chat. Zieht den Screenshot ins
+   Chatfenster (oder hängt ihn über die Büroklammer an), fügt den Prompt
+   unten ein und schickt beides zusammen ab. Der Prompt verlangt erst eine
+   Beschreibung: So seht ihr, ob der Assistent das Bild richtig gelesen hat,
+   bevor er daraus eine Story macht.
 3. **Gegen das Bild prüfen.** Vergleicht die Antwort mit dem Screenshot und mit
    euren Notizen: Steht jede handschriftliche Änderung in der Story? Hat der
    Assistent etwas dazuerfunden? Sind seine offenen Fragen berechtigt?
