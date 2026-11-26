@@ -1,4 +1,4 @@
-# 30 — Dashboard aus einer Excel-Liste (optional)
+# 26 — Dashboard aus einer Excel-Liste
 
 **Dauer:** 30–45 min
 **Sozialform:** einzeln oder Paare
@@ -6,10 +6,10 @@
 **Voraussetzung:** Excel-Datei [`material/chancen-export.xlsx`](material/chancen-export.xlsx)
 **Ziel:** Aus einer Excel-Liste wird ein kleines Dashboard. Ihr stellt eigene Fragen an die Daten und prüft mindestens eine Zahl selbst nach.
 
-Die Datei enthält 250 Verkaufschancen aus dem Schulungs-CRM: Firma,
-Branche, Kontaktperson, Phase, Wert, Wahrscheinlichkeit und Datum. Alle
-Daten sind erfunden. Das Blatt „Info“ erklärt jede Spalte. Stichtag ist der
-20.11.2026.
+Die Datei enthält die 40 Verkaufschancen aus dem Schulungs-CRM — dieselben
+wie in Aufgabe 25: Firma, Branche, Kontaktperson, Phase, Wert,
+Wahrscheinlichkeit und Datum. Alle Daten sind erfunden. Das Blatt „Info“
+erklärt jede Spalte. Stichtag ist der 30.11.2026.
 
 Ein Dashboard sieht schnell überzeugend aus. Ob die Zahlen stimmen, sieht
 man ihm nicht an. Darum gehört das Nachprüfen zur Übung.
@@ -49,7 +49,7 @@ Prompt 1:
 
 ```
 Die angehängte Excel-Datei enthält Verkaufschancen aus einem CRM (Blatt
-"Chancen", Spaltenbeschreibung im Blatt "Info"). Stichtag ist der 20.11.2026.
+"Chancen", Spaltenbeschreibung im Blatt "Info"). Stichtag ist der 30.11.2026.
 Offen sind alle Chancen außer GEWONNEN und VERLOREN.
 
 Baue daraus ein Dashboard für einen Vertriebsleiter:
@@ -111,11 +111,14 @@ Vergleichswerte ohne Filter:
 
 | Kennzahl | Wert |
 |---|---|
-| Offene Chancen | 107 |
-| Offene Pipeline | 40.245.718 € |
-| Gewichtete Pipeline | 20.795.569 € |
-| Gewinnquote | 53,8 % (77 gewonnen, 66 verloren) |
-| Davon überfällig | 31 Chancen, 12.321.618 € |
+| Offene Chancen | 26 |
+| Offene Pipeline | 10.316.596 € |
+| Gewichtete Pipeline | 5.080.323 € |
+| Gewinnquote | 71,4 % (10 gewonnen, 4 verloren) |
+| Davon überfällig | 21 Chancen, 8.037.126 € |
+
+Offene Chancen, offene und gewichtete Pipeline und die überfälligen
+Chancen sind dieselben Zahlen wie im Pipeline-Bericht aus Aufgabe 25.
 
 ## Werkzeuge
 
